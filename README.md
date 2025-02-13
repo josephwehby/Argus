@@ -4,3 +4,6 @@
 - Uses ImGui to draw eveything to the screen with a glfw and OpenGL backend
 - Use Boost Beast websockets to connect to the Kraken exchange
 - Argus is a dog in Greek Mythology with 100 eyes (cause you're watching all the crypto prices. very creative)
+
+![Main Screen](./images/Argus.png)
+- None of these widgets have connected to the exchange and are just displaying dummy data right now
