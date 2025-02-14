@@ -1,7 +1,7 @@
 #include "OrderBook.hpp"
 
 OrderBook::OrderBook() {
-  window_name = "Order Book " + std::to_string(window_id);
+  window_name = "Order Book ##" + std::to_string(window_id);
 }
 
 OrderBook::~OrderBook() {}

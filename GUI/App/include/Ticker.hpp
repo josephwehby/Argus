@@ -1,4 +1,8 @@
+#pragma once
+
 #include "Widget.hpp"
+#include "Level1.hpp"
+#include "Utils.hpp"
 
 class Ticker : public Widget {
   public:
@@ -6,5 +10,9 @@ class Ticker : public Widget {
     void draw() override; 
   private:
     const std::string channel = "ticker";
-    double price = 98.79;
+    const float bar_length = 400;
+    const float bar_height = 20;
+    const float x_start = 5;
+    const float y_start = 40;
+    Level1Data level1;
 };
