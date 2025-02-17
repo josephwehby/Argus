@@ -15,13 +15,28 @@ Ticker::Ticker() {
 }
 
 void Ticker::draw() {
-  ImGui::SetNextWindowSize(ImVec2(410, 150), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(410, 100), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
   ImVec2 pos = ImGui::GetWindowPos();
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
-  // add last price
-  // add bid ask text
+  draw_list->AddText({x_start + pos.x, y_start + pos.y}, IM_COL32(255,255,255,255), "BID");
+  
+  // draw last price sale took place at
+  float mid_point = pos.x + x_start + bar_length/2;
+  std::string last_price = Utils::formatPrice(level1.last_price);
+  ImVec2 last_price_size = ImGui::CalcTextSize(last_price.c_str());
+
+  mid_point -= (last_price_size.x / 2);
+  
+  if (level1.price_change >= 0) {
+    draw_list->AddText({mid_point, pos.y + y_start}, IM_COL32(0, 255, 0, 255), last_price.c_str());
+  } else {
+    draw_list->AddText({mid_point, pos.y + y_start}, IM_COL32(255, 0, 0, 255), last_price.c_str());
+  }
+
+  ImVec2 text_size_ask = ImGui::CalcTextSize("ASK");
+  draw_list->AddText({pos.x + x_start + bar_length - text_size_ask.x, y_start + pos.y}, IM_COL32(255,255,255,255), "ASK");
 
   float x1, x2, y1, y2;
   int total_size = level1.best_bid_size + level1.best_ask_size;
@@ -39,7 +54,6 @@ void Ticker::draw() {
   x2 = pos.x + x_start + bar_length;
   draw_list->AddRectFilled(ImVec2(x1,y1), ImVec2(x2, y2), IM_COL32(230, 0, 0, 180));
   
-
   // draw the price, size and bars
   x1 = pos.x + x_start;
   y1 = pos.y + y_bars_start + bar_height - 7;
@@ -51,7 +65,6 @@ void Ticker::draw() {
   x1 = x2;
   x2 = pos.x + x_start + bar_length;
   draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), IM_COL32(230, 0, 0, 100));
-
   
   float y_pos = pos.y + y_bars_start + bar_height - 7 + (bar_height)/2 - 10;
   
