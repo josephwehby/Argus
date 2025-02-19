@@ -1,4 +1,5 @@
 #include "Chart.hpp"
+#include "Utils.hpp"
 
 Chart::Chart() {
   window_name = "Chart ##" + std::to_string(getWindowID()); 
@@ -22,12 +23,11 @@ Chart::~Chart() {}
 
 void Chart::draw() {
   ImGui::Begin(window_name.c_str());
-  ImPlot::BeginPlot("Candlestick Chart");
 
-  ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-
-
+  for (int i = 0; i < candles.size(); i++) {
+    auto unix_time = Utils::UTCToUnix(candles[i].begin);
+    std::cout << candles[i].begin << " " << unix_time << std::endl;
+  }
   
-  ImPlot::EndPlot();
   ImGui::End();
 }

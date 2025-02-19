@@ -1,5 +1,6 @@
 #pragma once
 
+#include "implot.h"
 #include "Widget.hpp"
 #include "Candle.hpp"
 #include <vector>

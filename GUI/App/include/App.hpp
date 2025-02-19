@@ -9,6 +9,7 @@
 #include "Ticker.hpp"
 #include "OrderBook.hpp"
 #include "Trades.hpp"
+#include "Chart.hpp"
 
 class App {
   public:

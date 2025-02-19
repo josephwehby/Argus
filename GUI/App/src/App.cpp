@@ -97,7 +97,7 @@ void App::drawMenuBar() {
     }
     ImGui::SameLine();
     if (ImGui::Button("Chart")) {
-
+      widgets.push_back(std::make_unique<Chart>());
     }
     ImGui::SameLine();
     if (ImGui::Button("Trades")) {

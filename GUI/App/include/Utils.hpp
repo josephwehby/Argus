@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -38,4 +39,34 @@ namespace Utils {
     
     return time;
   }
+
+  inline long long UTCToUnix(std::string utc_time) {
+    std::tm tm{};
+
+    auto pos = utc_time.find('.');
+
+    if (pos != std::string::npos) {
+      utc_time = utc_time.substr(0, pos);
+    }
+    
+    std::istringstream ss(utc_time);
+    ss >> std::get_time(&tm, "%Y-%m-%dT%H:%M:%S");
+
+    if (ss.fail()) {
+      std::cerr << "Error parsing time" << std::endl;
+      return -1; 
+    }
+
+    std::time_t tt = timegm(&tm);
+
+    if (tt == -1) {
+      std::cerr << "mktime failed" << std::endl;
+      return -1;
+    }
+    std::chrono::sys_time<std::chrono::seconds> tp{std::chrono::seconds(tt)};
+    long long unix_time = std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
+
+    return unix_time;
+  }
+
 };
