@@ -23,6 +23,7 @@ App::App() {
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  ImPlot::CreateContext();
   io = &ImGui::GetIO(); 
 
   io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
@@ -39,7 +40,8 @@ App::~App() {
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
-
+  ImPlot::DestroyContext();
+  
   glfwDestroyWindow(window);
   glfwTerminate();
 }
