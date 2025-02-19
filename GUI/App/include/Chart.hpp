@@ -5,6 +5,7 @@
 #include "Candle.hpp"
 #include "Utils.hpp"
 
+#include <algorithm>
 #include <vector>
 
 class Chart : public Widget {
@@ -15,6 +16,6 @@ class Chart : public Widget {
   private:
     const std::string channel = "ohlc"; 
     ImU32 green = IM_COL32(0, 255, 0, 255);
-    ImU32 red   = IM_COL32(255, 0, 0, 255);
+    ImU32 red = IM_COL32(255, 0, 0, 255);
     std::vector<Candle> candles;
 };

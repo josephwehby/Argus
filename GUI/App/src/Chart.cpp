@@ -22,29 +22,16 @@ Chart::~Chart() {}
 
 void Chart::draw() {
   ImGui::Begin(window_name.c_str(), &show);
-  ImPlot::BeginPlot("Graph");
-  
-  ImDrawList* draw_list = ImPlot::GetPlotDrawList();
 
-  double width_percent = .25;
+  if(ImPlot::BeginPlot("Graph")) {
+    int x[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int y[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
 
-  double half_width = candles.size() > 1 ? (Utils::UTCToUnix(candles[1].begin) - Utils::UTCToUnix(candles[0].begin)) * width_percent : width_percent;
-  
-  
-  for (int i = 0; i < candles.size(); i++) {
-    auto unix_time = Utils::UTCToUnix(candles[i].begin);
+    ImPlot::PlotBars("Graph", y, 10);
 
-    ImVec2 open_pos = ImPlot::PlotToPixels(unix_time - half_width, candles[i].open);
-    ImVec2 close_pos = ImPlot::PlotToPixels(unix_time + half_width, candles[i].close);
-    ImVec2 low_pos = ImPlot::PlotToPixels(unix_time, candles[i].low);
-    ImVec2 high_pos = ImPlot::PlotToPixels(unix_time, candles[i].high);
-    ImU32 color = ImGui::GetColorU32(candles[i].open > candles[i].close ? green : red);
-    draw_list->AddLine(low_pos, high_pos, color);
-    draw_list->AddRectFilled(open_pos, close_pos, color);
+    ImPlot::EndPlot();
   }
 
-
-  ImPlot::EndPlot();
   
   ImGui::End();
 }
