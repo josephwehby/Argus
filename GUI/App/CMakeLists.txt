@@ -7,6 +7,7 @@ project(app)
 set(CMAKE_TOOLCHAIN_FILE "/opt/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 set(CMAKE_PREFIX_PATH "/opt/vcpkg/installed/x64-linux" CACHE STRING "")
 set(IMGUI_DIR "../imgui")
+set(IMPLOT_DIR "../implot")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 find_package(glfw3 REQUIRED)
@@ -20,7 +21,11 @@ file(GLOB IMGUI_SOURCES
     "${IMGUI_DIR}/imgui_draw.cpp"
     "${IMGUI_DIR}/imgui_widgets.cpp"
     "${IMGUI_DIR}/imgui_tables.cpp"
-    "${IMGUI_DIR}/imgui_demo.cpp"  # Optional
+)
+
+file(GLOB IMPLOT_SOURCES
+  "${IMPLOT_DIR}/implot.cpp"
+  "${IMPLOT_DIR}/implot_items.cpp"
 )
 
 # Add the ImGui backends for GLFW + OpenGL
@@ -29,8 +34,8 @@ file(GLOB IMGUI_BACKEND_SOURCES
     "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp"
 )
 
-add_executable(App ${APP_SOURCES} ${IMGUI_SOURCES} ${IMGUI_BACKEND_SOURCES})
+add_executable(App ${APP_SOURCES} ${IMGUI_SOURCES} ${IMGUI_BACKEND_SOURCES} ${IMPLOT_SOURCES})
 
 target_link_libraries(App PRIVATE glfw OpenGL::GL)
 
-target_include_directories(App PRIVATE ${IMGUI_DIR} ${IMGUI_DIR}/backends "./include")
+target_include_directories(App PRIVATE ${IMGUI_DIR} ${IMGUI_DIR}/backends ${IMPLOT_DIR} "./include")
