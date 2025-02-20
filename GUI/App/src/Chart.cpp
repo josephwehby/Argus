@@ -1,5 +1,5 @@
 #include "Chart.hpp"
-
+#include <ctime>
 Chart::Chart() {
   window_name = "Chart ##" + std::to_string(getWindowID()); 
   
@@ -20,18 +20,56 @@ Chart::Chart() {
 
 Chart::~Chart() {}
 
+int xAxisFormatter(double value, char* buffer, int size, void*) {
+  std::time_t t = static_cast<std::time_t>(value);
+  std::tm* time_info = gmtime(&t);
+  std::strftime(buffer, size, "%H:%M", time_info);
+  return 0;
+}
+
 void Chart::draw() {
+  ImGui::SetNextWindowSize(ImVec2(800, 500), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
+  const double half_width = .25;
 
-  if(ImPlot::BeginPlot("Graph")) {
-    int x[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    int y[] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+  if(ImPlot::BeginPlot("Graph", ImVec2(-1,-1), ImPlotFlags_NoLegend)) {
 
-    ImPlot::PlotBars("Graph", y, 10);
+    ImDrawList* draw_list = ImPlot::GetPlotDrawList();
+    ImPlot::SetupAxes(0,0,0,ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
+    ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+    ImPlot::SetupAxisLimits(ImAxis_X1, Utils::UTCToUnix(candles[0].begin), Utils::UTCToUnix(candles.back().begin));
+    ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.0f");
 
+    ImPlot::SetupAxisFormat(ImAxis_X1, xAxisFormatter);
+    
+    std::string name = "Stocks ##" + window_name;
+
+    if (ImPlot::BeginItem(name.c_str())) {
+      if (ImPlot::FitThisFrame()) {
+        for (int i = 0; i < candles.size(); ++i) {
+            ImPlot::FitPoint(ImPlotPoint(Utils::UTCToUnix(candles[i].begin), candles[i].low - 1));
+            ImPlot::FitPoint(ImPlotPoint(Utils::UTCToUnix(candles[i].begin), candles[i].high + 1));
+        }
+      }
+      for (int i = 0; i < candles.size(); i++) {
+
+        double unix_time = static_cast<double>(Utils::UTCToUnix(candles[i].begin));
+        ImU32 color = (candles[i].open < candles[i].close) ? red : green;
+        ImVec2 open_pos = ImPlot::PlotToPixels(unix_time - half_width, candles[i].open);
+        ImVec2 close_pos = ImPlot::PlotToPixels(unix_time + half_width, candles[i].close);
+
+        draw_list->AddRectFilled(open_pos, close_pos, color);
+
+        ImVec2 low_pos = ImPlot::PlotToPixels(unix_time, candles[i].low);
+        ImVec2 high_pos = ImPlot::PlotToPixels(unix_time, candles[i].high);
+        draw_list->AddLine(low_pos, high_pos, color, 0.25f); 
+      }
+      
+      ImPlot::EndItem();
+    }
+    
     ImPlot::EndPlot();
   }
 
-  
   ImGui::End();
 }

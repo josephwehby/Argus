@@ -1,6 +1,7 @@
 #pragma once
 
 #include "implot.h"
+#include "implot_internal.h"
 #include "Widget.hpp"
 #include "Candle.hpp"
 #include "Utils.hpp"
