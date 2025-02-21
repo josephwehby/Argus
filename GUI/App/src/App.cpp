@@ -50,8 +50,14 @@ App::~App() {
 void App::update() {
 
   drawMenuBar();
-  for (auto& widget : widgets) {
-    widget->draw();
+  for (auto it = widgets.begin(); it != widgets.end();) {
+
+    if (!(*it)->isOpen()) {
+      it = widgets.erase(it); 
+    } else {
+      (*it)->draw();
+      it++;
+    }
   }
 }
 

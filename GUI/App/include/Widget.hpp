@@ -14,9 +14,11 @@ class Widget {
     }
 
     int getWindowID() const { return window_id; }
+    bool isOpen() { return show; }
 
     virtual ~Widget() = default;
     virtual void draw() = 0;
+
   protected:
     int window_id;
     bool show = true;
