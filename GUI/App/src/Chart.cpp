@@ -5,43 +5,34 @@ Chart::Chart() {
   
   candles = {
     {97.5, 99.2, 97.1, 98.7, 1200.5, 1, "2025-02-19T09:00:00"},
-    {98.7, 99.5, 98.2, 99.1, 1500.8, 1, "2025-02-19T09:00:01"},
-    {99.1, 100.0, 98.9, 99.6, 1800.3, 1, "2025-02-19T09:00:02"},
-    {99.6, 99.9, 98.8, 99.0, 1600.7, 1, "2025-02-19T09:00:03"},
-    {99.0, 99.3, 97.9, 98.5, 1400.2, 1, "2025-02-19T09:00:04"},
-    {98.5, 98.9, 97.7, 98.0, 1300.6, 1, "2025-02-19T09:00:05"},
-    {98.0, 98.6, 97.5, 97.9, 1100.9, 1, "2025-02-19T09:00:06"},
-    {97.9, 98.4, 97.6, 98.2, 1050.4, 1, "2025-02-19T09:00:07"},
-    {98.2, 99.0, 98.0, 98.8, 1700.1, 1, "2025-02-19T09:00:08"},
-    {98.8, 99.7, 98.4, 99.5, 1900.5, 1, "2025-02-19T09:00:09"}
+    {98.7, 99.5, 98.2, 99.1, 1500.8, 1, "2025-02-19T09:01:00"}, 
+    {99.1, 100.0, 98.9, 99.6, 1800.3, 1, "2025-02-19T09:02:00"},
+    {99.6, 99.9, 98.8, 99.0, 1600.7, 1, "2025-02-19T09:03:00"},
+    {99.0, 99.3, 97.9, 98.5, 1400.2, 1, "2025-02-19T09:04:00"},
+    {98.5, 98.9, 97.7, 98.0, 1300.6, 1, "2025-02-19T09:05:00"},
+    {98.0, 98.6, 97.5, 97.9, 1100.9, 1, "2025-02-19T09:06:00"},
+    {97.9, 98.4, 97.6, 98.2, 1050.4, 1, "2025-02-19T09:07:00"},
+    {98.2, 99.0, 98.0, 98.8, 1700.1, 1, "2025-02-19T09:08.00"},
+    {98.8, 99.7, 98.4, 99.5, 1900.5, 1, "2025-02-19T09:09:00"}
   };
 
 }
 
 Chart::~Chart() {}
 
-int xAxisFormatter(double value, char* buffer, int size, void*) {
-  std::time_t t = static_cast<std::time_t>(value);
-  std::tm* time_info = gmtime(&t);
-  std::strftime(buffer, size, "%H:%M", time_info);
-  return 0;
-}
-
 void Chart::draw() {
   ImGui::SetNextWindowSize(ImVec2(800, 500), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
-  const double half_width = .25;
+  const double half_width = 10;
 
-  if(ImPlot::BeginPlot("Graph", ImVec2(-1,-1), ImPlotFlags_NoLegend)) {
+  if(ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoLegend | ImPlotFlags_NoFrame)) {
 
     ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-    ImPlot::SetupAxes(0,0,0,ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
+    ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
     ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
-    ImPlot::SetupAxisLimits(ImAxis_X1, Utils::UTCToUnix(candles[0].begin), Utils::UTCToUnix(candles.back().begin));
+    ImPlot::SetupAxisLimits(ImAxis_X1, Utils::UTCToUnix(candles[0].begin), Utils::UTCToUnix(candles.back().begin) + 5);
     ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.0f");
 
-    ImPlot::SetupAxisFormat(ImAxis_X1, xAxisFormatter);
-    
     std::string name = "Stocks ##" + window_name;
 
     if (ImPlot::BeginItem(name.c_str())) {

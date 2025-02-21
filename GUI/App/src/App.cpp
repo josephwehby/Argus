@@ -28,6 +28,7 @@ App::App() {
 
   io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
   io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+  io->ConfigWindowsMoveFromTitleBarOnly;
 
   io->Fonts->AddFontFromFileTTF("../fonts/JetBrainsMono-Regular.ttf", 18);
   ImGui::StyleColorsDark();
