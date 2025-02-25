@@ -100,8 +100,8 @@ void App::styleApp() {
 
   style.WindowRounding = 5.3f;
   style.FrameRounding = 5.3f;
-  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.14f, 0.17f, 1.00f); 
-  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.00f, 0.00f, 0.87f);
+  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
+  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(.14f, 0.26f, 0.45f, 1.0f);
   style.Colors[ImGuiCol_Tab] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 }
 
