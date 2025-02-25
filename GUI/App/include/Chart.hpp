@@ -16,6 +16,7 @@ class Chart : public Widget {
     void draw() override;
   private:
     const std::string channel = "ohlc"; 
+    float ratios[2] = {3, 1};
     ImU32 green = IM_COL32(0, 255, 0, 255);
     ImU32 red = IM_COL32(255, 0, 0, 255);
     std::vector<Candle> candles;
