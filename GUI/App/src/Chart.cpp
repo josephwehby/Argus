@@ -1,7 +1,9 @@
 #include "Chart.hpp"
 #include <ctime>
-Chart::Chart() {
-  window_name = "Chart ##" + std::to_string(getWindowID()); 
+
+Chart::Chart(std::string token) {
+  symbol = token;
+  window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
   
   candles = {
     {97.5, 99.2, 97.1, 98.7, 1200.5, 1, "2025-02-19T09:00:00"},

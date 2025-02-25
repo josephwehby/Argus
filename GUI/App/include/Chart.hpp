@@ -11,7 +11,7 @@
 
 class Chart : public Widget {
   public:
-    Chart();
+    Chart(std::string);
     ~Chart();
     void draw() override;
   private:

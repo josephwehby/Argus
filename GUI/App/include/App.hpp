@@ -22,6 +22,7 @@ class App {
   private:
     void render();
     void drawMenuBar();
+    void styleApp();
     const char* glsl_version;
     ImGuiIO* io;
     GLFWwindow* window;

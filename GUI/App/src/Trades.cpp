@@ -1,7 +1,8 @@
 #include "Trades.hpp"
 
-Trades::Trades() {
-  window_name = "Trades ##" + std::to_string(window_id);
+Trades::Trades(std::string token) {
+  symbol = token;
+  window_name = "Trades: " + symbol + " ##" + std::to_string(window_id);
 }
 
 Trades::~Trades() {

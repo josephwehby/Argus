@@ -7,7 +7,7 @@
 
 class OrderBook : public Widget {
   public:
-    OrderBook();
+    OrderBook(std::string);
     ~OrderBook();
     void readData();
     void draw() override; 

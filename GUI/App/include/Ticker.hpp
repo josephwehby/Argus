@@ -6,7 +6,7 @@
 
 class Ticker : public Widget {
   public:
-    Ticker();
+    Ticker(std::string);
     void draw() override; 
   private:
     const std::string channel = "ticker";

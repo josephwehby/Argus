@@ -31,7 +31,8 @@ App::App() {
   io->ConfigWindowsMoveFromTitleBarOnly;
 
   io->Fonts->AddFontFromFileTTF("../fonts/JetBrainsMono-Regular.ttf", 18);
-  ImGui::StyleColorsDark();
+  
+  styleApp();
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
@@ -40,8 +41,8 @@ App::App() {
 App::~App() {
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
   ImPlot::DestroyContext();
+  ImGui::DestroyContext();
   
   glfwDestroyWindow(window);
   glfwTerminate();
@@ -94,25 +95,46 @@ void App::render() {
     
 }
 
+void App::styleApp() {
+  ImGuiStyle& style = ImGui::GetStyle();
+
+  style.WindowRounding = 5.3f;
+  style.FrameRounding = 5.3f;
+  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.14f, 0.17f, 1.00f); 
+  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(1.0f, 0.00f, 0.00f, 0.87f);
+  style.Colors[ImGuiCol_Tab] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+}
+
 // potentially make these a dropdown menu with cryptos they can choose from instead of having input box. this will reduce error checking as everything will be preprogrammed in
 void App::drawMenuBar() {
   if (ImGui::BeginMainMenuBar()) {
-    if (ImGui::Button("Price")) {
-      widgets.push_back(std::make_unique<Ticker>());
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("OrderBook")) {
-      widgets.push_back(std::make_unique<OrderBook>());
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Chart")) {
-      widgets.push_back(std::make_unique<Chart>());
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Trades")) {
-      widgets.push_back(std::make_unique<Trades>());
+    if (ImGui::BeginMenu("Price")) {
+      if (ImGui::MenuItem("BTC")) {
+        widgets.push_back(std::make_unique<Ticker>("BTC"));
+      }
+      ImGui::EndMenu();
     }
 
+    if (ImGui::BeginMenu("OrderBook")) {
+      if (ImGui::MenuItem("BTC")) {
+        widgets.push_back(std::make_unique<OrderBook>("BTC"));
+      }
+      ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Chart")) {
+      if (ImGui::MenuItem("BTC")) {
+        widgets.push_back(std::make_unique<Chart>("BTC"));
+      }
+      ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Trades")) {
+      if (ImGui::MenuItem("BTC")) {
+        widgets.push_back(std::make_unique<Trades>("BTC"));
+      }
+      ImGui::EndMenu();
+    }
     ImGui::EndMainMenuBar();
   }
 }

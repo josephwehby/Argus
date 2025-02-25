@@ -9,7 +9,7 @@
 
 class Trades : public Widget {
   public:
-    Trades();
+    Trades(std::string);
     ~Trades();
     void draw() override;
   private:

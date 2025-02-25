@@ -1,7 +1,8 @@
 #include "Ticker.hpp"
 
-Ticker::Ticker() {
-  window_name = "Ticker ##" + std::to_string(getWindowID());
+Ticker::Ticker(std::string token) {
+  symbol = token;
+  window_name = "Ticker: " + symbol + "  ##" + std::to_string(getWindowID());
 
   level1 = {
     99.75,
