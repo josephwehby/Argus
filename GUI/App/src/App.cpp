@@ -101,11 +101,13 @@ void App::styleApp() {
   style.WindowRounding = 5.3f;
   style.FrameRounding = 5.3f;
   style.Colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
-  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(.14f, 0.26f, 0.45f, 1.0f);
+  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.14f, 0.26f, 0.45f, 1.0f);
   style.Colors[ImGuiCol_Tab] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+  style.Colors[ImGuiCol_FrameBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
+  style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
+  style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
 }
 
-// potentially make these a dropdown menu with cryptos they can choose from instead of having input box. this will reduce error checking as everything will be preprogrammed in
 void App::drawMenuBar() {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {

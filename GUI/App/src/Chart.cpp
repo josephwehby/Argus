@@ -26,19 +26,21 @@ Chart::~Chart() {}
 void Chart::draw() {
   ImGui::SetNextWindowSize(ImVec2(820, 560), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
-  const double half_width = 10;
+  const double half_width = 8;
 
   std::vector<double> volume_x(candles.size());
   std::vector<double> volume_y(candles.size());
 
-  if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1), ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
+  if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
+
+
     ImPlotStyle& style = ImPlot::GetStyle();
     style.Colors[ImPlotCol_PlotBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
     style.Colors[ImPlotCol_FrameBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
-    style.Colors[ImPlotCol_PlotBorder] = ImVec4(0, 0, 0, 0);
+    style.Colors[ImPlotCol_FrameBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
 
     style.PlotPadding = ImVec2(0, 0);
-    style.LabelPadding = ImVec2(0, 0);
+    style.LabelPadding = ImVec2(10, 10);
     style.LegendPadding = ImVec2(0, 0);
     style.LegendInnerPadding = ImVec2(0, 0);
     style.MousePosPadding = ImVec2(0, 0);
@@ -50,8 +52,9 @@ void Chart::draw() {
       ImDrawList* draw_list = ImPlot::GetPlotDrawList();
       ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
       ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
-      ImPlot::SetupAxisLimits(ImAxis_X1, Utils::UTCToUnix(candles[0].begin), Utils::UTCToUnix(candles.back().begin) + 5);
-      ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.0f");
+
+      ImPlot::SetupAxisLimits(ImAxis_X1, Utils::UTCToUnix(candles[0].begin), Utils::UTCToUnix(candles.back().begin));
+      ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
 
       if (ImPlot::BeginItem("##Price Chart")) {
         if (ImPlot::FitThisFrame()) {
