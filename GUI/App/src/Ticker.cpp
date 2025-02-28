@@ -16,7 +16,7 @@ Ticker::Ticker(std::string token) {
 }
 
 void Ticker::draw() {
-  ImGui::SetNextWindowSize(ImVec2(410, 100), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(435, 100), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
   ImVec2 pos = ImGui::GetWindowPos();
   ImDrawList* draw_list = ImGui::GetWindowDrawList();

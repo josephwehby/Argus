@@ -10,7 +10,7 @@ OrderBook::~OrderBook() {}
 void OrderBook::readData() {}
 
 void OrderBook::draw() {
-  ImGui::SetNextWindowSize(ImVec2(435,150), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(435,255), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
 
   ImVec2 pos = ImGui::GetWindowPos();

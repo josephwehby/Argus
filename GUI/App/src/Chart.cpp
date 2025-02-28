@@ -43,7 +43,7 @@ Chart::~Chart() {}
 
 // we should generate the unix time when reading the data in rather than making all these extra utctounix calls each frame
 void Chart::draw() {
-  ImGui::SetNextWindowSize(ImVec2(820, 560), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(800, 690), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
 
   double width = .25;
