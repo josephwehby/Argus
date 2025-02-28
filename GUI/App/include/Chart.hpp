@@ -7,6 +7,7 @@
 #include "Utils.hpp"
 
 #include <algorithm>
+#include <ctime>
 #include <vector>
 
 class Chart : public Widget {
