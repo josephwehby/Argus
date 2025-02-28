@@ -26,8 +26,7 @@ App::App() {
   ImPlot::CreateContext();
   io = &ImGui::GetIO(); 
 
-  io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  io->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+  io->ConfigFlags |= ImGuiConfigFlags_None;
   io->ConfigWindowsMoveFromTitleBarOnly;
 
   io->Fonts->AddFontFromFileTTF("../fonts/JetBrainsMono-Regular.ttf", 18);
@@ -49,8 +48,9 @@ App::~App() {
 }
 
 void App::update() {
-
+  
   drawMenuBar();
+  ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
   for (auto it = widgets.begin(); it != widgets.end();) {
 
     if (!(*it)->isOpen()) {
