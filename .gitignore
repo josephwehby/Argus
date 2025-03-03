@@ -11,7 +11,4 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
-imgui/
-implot/
-GLFW/
 build/
