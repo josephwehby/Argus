@@ -13,4 +13,5 @@ CMakeUserPresets.json
 
 imgui/
 implot/
+GLFW/
 build/

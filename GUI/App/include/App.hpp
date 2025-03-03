@@ -4,7 +4,7 @@
 #include "implot.h"
 
 #include <stdio.h>
-#include <GLFW/glfw3.h>
+#include <glfw3.h>
 #include <vector>
 #include <memory>
 

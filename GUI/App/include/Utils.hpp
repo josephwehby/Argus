@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <time.h>
+#include <stdlib.h>
 
 namespace Utils {
 
@@ -57,7 +59,7 @@ namespace Utils {
       return -1; 
     }
 
-    std::time_t tt = timegm(&tm);
+    std::time_t tt = _mkgmtime(&tm);
 
     if (tt == -1) {
       std::cerr << "mktime failed" << std::endl;
