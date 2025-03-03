@@ -6,7 +6,7 @@ project(app)
 
 find_package(OpenGL REQUIRED)
 
-set(LIBS_DIR "../libs")
+set(LIBS_DIR "./libs")
 set(GLFW_DIR "${LIBS_DIR}/GLFW")
 set(IMGUI_DIR "${LIBS_DIR}/imgui")
 set(IMPLOT_DIR "${LIBS_DIR}/implot")
