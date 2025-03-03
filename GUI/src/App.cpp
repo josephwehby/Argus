@@ -29,7 +29,7 @@ App::App() {
   io->ConfigFlags |= ImGuiConfigFlags_None;
   io->ConfigWindowsMoveFromTitleBarOnly;
 
-  io->Fonts->AddFontFromFileTTF("../../fonts/JetBrainsMono-Regular.ttf", 18);
+  io->Fonts->AddFontFromFileTTF("JetBrainsMono-Regular.ttf", 18);
   
   styleApp();
 

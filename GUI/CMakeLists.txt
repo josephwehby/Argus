@@ -4,13 +4,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(app)
 
-find_package(OpenGL REQUIRED)
-
 set(LIBS_DIR "./libs")
 set(GLFW_DIR "${LIBS_DIR}/GLFW")
 set(IMGUI_DIR "${LIBS_DIR}/imgui")
 set(IMPLOT_DIR "${LIBS_DIR}/implot")
-set(GLFW_LIB_PATH "${LIBS_DIR}/GLFW/glfw3")
+set(GLFW_LIB "../libs/GLFW/GLFW/glfw3")
+
+find_package(OpenGL REQUIRED)
 
 if (MSVC)
   add_compile_options(/std:c++20)
@@ -47,8 +47,19 @@ target_include_directories(App PRIVATE
   "./include"
 )
 
-# Ignore conflicts with default libraries (MSVCRT)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT")
+target_link_libraries(App PRIVATE "${GLFW_LIB}" OpenGL::GL user32.lib gdi32.lib)
 
-#target_link_libraries(App PRIVATE ${GLFW_LIB_PATH} OpenGL::GL user32.lib gdi32.lib)
-target_link_libraries(App PRIVATE "D:/Code/C++/Argus/GUI/libs/GLFW/glfw3.lib" OpenGL::GL user32.lib gdi32.lib)
+add_custom_command(
+  TARGET App
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "../libs/GLFW/GLFW/glfw3.dll" "${CMAKE_BINARY_DIR}/Debug/"
+  COMMENT "Copying glfw3.dll to output directory"
+)
+
+add_custom_command(
+  TARGET App
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "../fonts/JetBrainsMono-Regular.ttf" "${CMAKE_BINARY_DIR}/Debug/"
+  COMMENT "Copying jet brains font to output directory"
+)
