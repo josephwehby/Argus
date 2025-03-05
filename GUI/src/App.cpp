@@ -14,7 +14,7 @@ App::App() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-  window = glfwCreateWindow(1280, 720, "Argus", nullptr, nullptr);
+  window = glfwCreateWindow(1530, 720, "Argus", nullptr, nullptr);
   
   if (window == nullptr) return;
 
