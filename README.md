@@ -8,3 +8,8 @@
 
 ![Main Screen](images/argus.png)
 - None of these widgets have connected to the exchange yet and are just displaying dummy data right now
+
+# Compiling
+- This program is designed to run on windows
+- ImGui and ImPlot are submodules so you need to clone recursively
+- To download run `git clone --recursive git@github.com:josephwehby/Argus.git`
