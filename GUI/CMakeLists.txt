@@ -4,11 +4,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(app)
 
-set(LIBS_DIR "./libs")
+set(LIBS_DIR "${CMAKE_SOURCE_DIR}/libs")
 set(GLFW_DIR "${LIBS_DIR}/GLFW")
 set(IMGUI_DIR "${LIBS_DIR}/imgui")
 set(IMPLOT_DIR "${LIBS_DIR}/implot")
-set(GLFW_LIB "../libs/GLFW/GLFW/glfw3")
+set(GLFW_LIB "${LIBS_DIR}/GLFW/GLFW/glfw3_mt.lib")
 
 find_package(OpenGL REQUIRED)
 
@@ -17,6 +17,7 @@ if (MSVC)
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 endif()
+
 file(GLOB APP_SOURCES "src/*.cpp")
 
 # Add ImGui source files
@@ -49,13 +50,6 @@ target_include_directories(App PRIVATE
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT")
 target_link_libraries(App PRIVATE "${GLFW_LIB}" OpenGL::GL user32.lib gdi32.lib)
-
-add_custom_command(
-  TARGET App
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different "../libs/GLFW/GLFW/glfw3.dll" "${CMAKE_BINARY_DIR}/Debug/"
-  COMMENT "Copying glfw3.dll to output directory"
-)
 
 add_custom_command(
   TARGET App
