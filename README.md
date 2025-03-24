@@ -11,5 +11,5 @@
 
 # Compiling
 - This program is designed to run on windows
-- ImGui and ImPlot are submodules so you need to clone recursively
+- ImGui, ImPlot, and GLFW are submodules so you need to clone recursively
 - To download run `git clone --recursive git@github.com:josephwehby/Argus.git`
