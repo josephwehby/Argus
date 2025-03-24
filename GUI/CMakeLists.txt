@@ -5,10 +5,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(app)
 
 set(LIBS_DIR "${CMAKE_SOURCE_DIR}/libs")
-set(GLFW_DIR "${LIBS_DIR}/GLFW")
+set(GLFW_DIR "${LIBS_DIR}/glfw/include")
 set(IMGUI_DIR "${LIBS_DIR}/imgui")
 set(IMPLOT_DIR "${LIBS_DIR}/implot")
-set(GLFW_LIB "${LIBS_DIR}/GLFW/GLFW/glfw3_mt.lib")
+set(GLFW_LIB "${LIBS_DIR}/GLFWBUILD/src/Debug/glfw3.lib")
 
 find_package(OpenGL REQUIRED)
 
@@ -48,7 +48,7 @@ target_include_directories(App PRIVATE
   "./include"
 )
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT")
 target_link_libraries(App PRIVATE "${GLFW_LIB}" OpenGL::GL user32.lib gdi32.lib)
 
 add_custom_command(
