@@ -4,12 +4,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(app)
 
+set(CMAKE_TOOLCHAIN_FILE "D:/VCPKG/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+set(CMAKE_PREFIX_PATH "D:/VCPKG/vcpkg/installed/x64-windows" CACHE STRING "")
+
 set(LIBS_DIR "${CMAKE_SOURCE_DIR}/libs")
-set(GLFW_DIR "${LIBS_DIR}/glfw/include")
 set(IMGUI_DIR "${LIBS_DIR}/imgui")
 set(IMPLOT_DIR "${LIBS_DIR}/implot")
-set(GLFW_LIB "${LIBS_DIR}/GLFWBUILD/src/Debug/glfw3.lib")
 
+find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 
 if (MSVC)
@@ -41,15 +43,13 @@ file(GLOB IMPLOT_SOURCES
 add_executable(App ${APP_SOURCES} ${IMGUI_SOURCES} ${IMGUI_BACKEND_SOURCES} ${IMPLOT_SOURCES})
 
 target_include_directories(App PRIVATE
-  ${GLFW_DIR}
   ${IMGUI_DIR}
   ${IMGUI_DIR}/backends
   ${IMPLOT_DIR}
   "./include"
 )
 
-#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT")
-target_link_libraries(App PRIVATE "${GLFW_LIB}" OpenGL::GL user32.lib gdi32.lib)
+target_link_libraries(App PRIVATE glfw  OpenGL::GL user32.lib gdi32.lib)
 
 add_custom_command(
   TARGET App
