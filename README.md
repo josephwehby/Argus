@@ -11,5 +11,7 @@
 
 # Compiling
 - This program is designed to run on windows
-- ImGui, ImPlot, and GLFW are submodules so you need to clone recursively
+- ImGui and ImPlot are submodules so you need to clone recursively
+- The remaining 3rd party libraries are boost-beast, opsenssl, and nlohmann-json
+  - These packages can be installed with vcpkg like so `vcpkg install package-name`
 - To download run `git clone --recursive git@github.com:josephwehby/Argus.git`
