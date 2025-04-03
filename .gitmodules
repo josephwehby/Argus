@@ -4,6 +4,3 @@
 [submodule "GUI/libs/implot"]
 	path = GUI/libs/implot
 	url = git@github.com:epezent/implot.git
-[submodule "GUI/libs/glfw"]
-	path = GUI/libs/glfw
-	url = https://github.com/glfw/glfw
