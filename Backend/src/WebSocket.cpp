@@ -16,35 +16,19 @@ void WebSocket::connect() {
   m_resolver.async_resolve(m_host, m_port, beast::bind_front_handler(&WebSocket::onResolve, shared_from_this()));
 }
 
-void WebSocket::subscribe(std::string symbol, std::string channel) {
+void WebSocket::subscribe(const json& subscribe_message) {
   if (!m_ws.is_open()) {
     std::cout << "[!] Websocket is not open. Unable to unsubscribe." << std::endl;
     return;
   }
   
-  json subscribe_msg = {
-    {"method", "subscribe"},
-    {"params", {
-      {"channel", channel},
-      {"symbol", {symbol}}
-    }}
-  };
-
   send(subscribe_msg);
 }
 
-void WebSocket::unsubscribe(std::string symbol, std::string channel) {
+void WebSocket::unsubscribe(const json& unsubscribe_msg) {
   if (!m_ws.is_open()) {
     return;
   }
-
-  json unsubscribe_msg = {
-    {"method", "unsubscribe"},
-    {"params", {
-      {"channel", channel},
-      {"symbol", {symbol}}
-    }}
-  };
 
   send(unsubscribe_msg);  
 }
@@ -57,7 +41,7 @@ void WebSocket::close() {
       );
 }
 
-bool WebSocket::isOpen() {
+bool WebSocket::isOpen() const {
   return m_ws.is_open();
 }
 

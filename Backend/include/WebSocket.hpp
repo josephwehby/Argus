@@ -27,10 +27,10 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
   public:
     explicit WebSocket(net::io_context&, ssl::context&);
     void connect();
-    void subscribe(std::string, std::string);
-    void unsubscribe(std::string, std::string);
+    void subscribe(const json&);
+    void unsubscribe(const json&);
     void close();
-    bool isOpen();
+    bool isOpen() const;
   private:
     void onResolve(beast::error_code, tcp::resolver::results_type);
     void onConnect(beast::error_code, tcp::resolver::results_type::endpoint_type);
