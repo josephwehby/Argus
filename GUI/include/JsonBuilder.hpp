@@ -34,7 +34,7 @@ namespace JsonBuilder {
       }}
     };
 
-    if (interval != -1) {
+    if (interval != -1 && channel == "ohlc") {
       msg["params"]["interval"] = interval;
     }
 
