@@ -47,6 +47,7 @@ target_include_directories(App PRIVATE
   ${IMGUI_DIR}/backends
   ${IMPLOT_DIR}
   "./include"
+  "../common/include/"
 )
 
 target_link_libraries(App PRIVATE glfw  OpenGL::GL user32.lib gdi32.lib)

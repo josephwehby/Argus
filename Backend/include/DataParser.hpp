@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include "SafeQueue.hpp"
+#include "Level1.hpp"
 
 using json = nlohmann::json;
 
