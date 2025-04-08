@@ -11,6 +11,6 @@ class DataStore {
     void setTicker(const std::string&, std::shared_ptr<Level1>);
 
   private:
-    mutable std::mutex m;
+    std::mutex m;
     std::unordered_map<std::string, std::shared_ptr<Level1>> ticker_data;
 };

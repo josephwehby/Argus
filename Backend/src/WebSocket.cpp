@@ -16,7 +16,7 @@ void WebSocket::connect() {
   m_resolver.async_resolve(m_host, m_port, beast::bind_front_handler(&WebSocket::onResolve, shared_from_this()));
 }
 
-void WebSocket::subscribe(const json& subscribe_message) {
+void WebSocket::subscribe(json& subscribe_msg) {
   if (!m_ws.is_open()) {
     std::cout << "[!] Websocket is not open. Unable to unsubscribe." << std::endl;
     return;
@@ -25,7 +25,7 @@ void WebSocket::subscribe(const json& subscribe_message) {
   send(subscribe_msg);
 }
 
-void WebSocket::unsubscribe(const json& unsubscribe_msg) {
+void WebSocket::unsubscribe(json& unsubscribe_msg) {
   if (!m_ws.is_open()) {
     return;
   }

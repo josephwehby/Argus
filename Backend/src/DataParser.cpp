@@ -82,7 +82,7 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
   std::cout << "price change " << price_change << std::endl;
   std::cout << "percent change " << percent_change << std::endl;
   
-  std::shared_ptr<Level1Data> ld = std::make_shared<Level1Data>(best_bid, best_ask, best_bid_size, best_ask_size, 
+  std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
       price_change, percent_change, last_price);
   
   // need to push this onto someting

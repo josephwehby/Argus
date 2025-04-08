@@ -27,8 +27,8 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
   public:
     explicit WebSocket(net::io_context&, ssl::context&);
     void connect();
-    void subscribe(const json&);
-    void unsubscribe(const json&);
+    void subscribe(json&);
+    void unsubscribe(json&);
     void close();
     bool isOpen() const;
   private:

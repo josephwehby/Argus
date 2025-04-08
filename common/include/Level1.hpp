@@ -1,10 +1,10 @@
 #pragma once
 
-struct Level1Data {
+struct Level1 {
   
-  Level1Data() {}
+  Level1() {}
 
-  Level1Data(double bb, double ba, double bbs, double bas, double price_c, double per_c, double lp) : 
+  Level1(double bb, double ba, double bbs, double bas, double price_c, double per_c, double lp) : 
     best_bid(bb), best_ask(ba), best_bid_size(bbs), best_ask_size(bas), price_change(price_c), percent_change(per_c), last_price(lp) {}
 
   double best_bid;

@@ -15,5 +15,5 @@ class Ticker : public Widget {
     const float x_start = 17.5;
     const float y_start = 30;
     const float y_bars_start = 50;
-    Level1Data level1;
+    Level1 level1;
 };

@@ -9,6 +9,7 @@
 
 #include "SafeQueue.hpp"
 #include "Level1.hpp"
+#include "DataStore.hpp"
 
 using json = nlohmann::json;
 
@@ -21,7 +22,7 @@ class DataParser {
   private:
     std::thread t; 
     SafeQueue<json> data;
-    
+    DataStore ds; 
     void processLoop();
     void parseData(std::shared_ptr<json>);
     void parseTicker(std::shared_ptr<json>);

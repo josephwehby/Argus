@@ -20,10 +20,9 @@ int main() {
     std::thread io_thread([&ioc]() {
         ioc.run();
     });
-
-    //client->connect("ticker", "BTC/USD");
-    client->connect("ticker", "XMR/USD");
-
+    
+    client->connect();
+    
     std::cout << "Press Enter to stop the WebSocket connection..." << std::endl;
     std::cin.get();
 
