@@ -17,17 +17,11 @@ class DataParser {
     DataParser();
     ~DataParser();
     void pushData(json); 
+    
   private:
     std::thread t; 
     SafeQueue<json> data;
     
-    /*
-    unordered_map<std::string, SafeQueue> ticker;   
-    unordered_map<std::string, SafeQueue> book;   
-    unordered_map<std::string, SafeQueue> ohlc;   
-    unordered_map<std::string, SafeQueue> trade;   
-    */
-
     void processLoop();
     void parseData(std::shared_ptr<json>);
     void parseTicker(std::shared_ptr<json>);
