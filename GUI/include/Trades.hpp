@@ -6,10 +6,11 @@
 #include "Trade.hpp"
 #include "Widget.hpp"
 #include "Utils.hpp"
+#include "DataStore.hpp"
 
 class Trades : public Widget {
   public:
-    Trades(std::string);
+    Trades(DataStore&, std::string);
     ~Trades();
     void draw() override;
   private:
@@ -45,4 +46,6 @@ class Trades : public Widget {
       {TradeType::Sell, 101750.0,  4500, "2025-02-19T09:32:20.456Z"},
       {TradeType::Buy, 101050.0,  3900, "2025-02-19T09:32:25.789Z"}
         };
+
+    DataStore& datastore;
 };

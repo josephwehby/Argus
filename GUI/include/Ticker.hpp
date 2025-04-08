@@ -4,9 +4,11 @@
 #include "Level1.hpp"
 #include "Utils.hpp"
 
+#include "DataStore.hpp"
+
 class Ticker : public Widget {
   public:
-    Ticker(std::string);
+    Ticker(DataStore&, std::string);
     void draw() override; 
   private:
     const std::string channel = "ticker";
@@ -16,4 +18,6 @@ class Ticker : public Widget {
     const float y_start = 30;
     const float y_bars_start = 50;
     Level1 level1;
+
+    DataStore& datastore;
 };

@@ -112,28 +112,28 @@ void App::drawMenuBar() {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Ticker>("BTC"));
+        widgets.push_back(std::make_unique<Ticker>(datastore, "BTC"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("OrderBook")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<OrderBook>("BTC"));
+        widgets.push_back(std::make_unique<OrderBook>(datastore, "BTC"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Chart")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Chart>("BTC"));
+        widgets.push_back(std::make_unique<Chart>(datastore, "BTC"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Trades")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Trades>("BTC"));
+        widgets.push_back(std::make_unique<Trades>(datastore, "BTC"));
       }
       ImGui::EndMenu();
     }

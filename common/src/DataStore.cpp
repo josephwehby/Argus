@@ -1,6 +1,6 @@
 #include "DataStore.hpp"
 
-DataStore::DataStore() {}
+DataStore::DataStore() { }
 
 void DataStore::setTicker(const std::string& symbol, std::shared_ptr<Level1> ld) {
   std::lock_guard<std::mutex> lock(m);

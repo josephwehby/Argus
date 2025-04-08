@@ -1,6 +1,6 @@
 #include "OrderBook.hpp"
 
-OrderBook::OrderBook(std::string token) {
+OrderBook::OrderBook(DataStore& ds, std::string token) : datastore(ds) {
   symbol = token;
   window_name = "OrderBook: " + symbol + " ##" + std::to_string(window_id);
 }

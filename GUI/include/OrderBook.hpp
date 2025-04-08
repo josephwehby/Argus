@@ -1,13 +1,15 @@
 #pragma once
 
-#include "Widget.hpp"
-#include "Utils.hpp"
 #include <map>
 #include <iostream>
 
+#include "Widget.hpp"
+#include "Utils.hpp"
+#include "DataStore.hpp"
+
 class OrderBook : public Widget {
   public:
-    OrderBook(std::string);
+    OrderBook(DataStore&, std::string);
     ~OrderBook();
     void readData();
     void draw() override; 
@@ -23,4 +25,6 @@ class OrderBook : public Widget {
     const float bar_height = 20;
     const float x_start = 15;
     const float max_width = 200;
+    
+    DataStore& datastore;
 };

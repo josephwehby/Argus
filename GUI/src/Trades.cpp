@@ -1,6 +1,6 @@
 #include "Trades.hpp"
 
-Trades::Trades(std::string token) {
+Trades::Trades(DataStore& ds, std::string token) : datastore(ds) {
   symbol = token;
   window_name = "Trades: " + symbol + " ##" + std::to_string(window_id);
 }

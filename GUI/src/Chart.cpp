@@ -1,6 +1,6 @@
 #include "Chart.hpp"
 
-Chart::Chart(std::string token) {
+Chart::Chart(DataStore& ds, std::string token) : datastore(ds) {
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
   

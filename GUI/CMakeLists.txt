@@ -40,7 +40,11 @@ file(GLOB IMPLOT_SOURCES
   "${IMPLOT_DIR}/implot_items.cpp"
 )
 
-add_executable(App ${APP_SOURCES} ${IMGUI_SOURCES} ${IMGUI_BACKEND_SOURCES} ${IMPLOT_SOURCES})
+file(GLOB COMMON_SOURCES
+  "../common/src/*.cpp"
+)
+
+add_executable(App ${APP_SOURCES} ${IMGUI_SOURCES} ${IMGUI_BACKEND_SOURCES} ${IMPLOT_SOURCES} ${COMMON_SOURCES})
 
 target_include_directories(App PRIVATE
   ${IMGUI_DIR}

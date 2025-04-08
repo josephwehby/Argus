@@ -1,9 +1,10 @@
 #pragma once
 
-#include "imgui.h"
 #include <string>
 #include <random>
 #include <chrono>
+
+#include "imgui.h"
 
 class Widget {
   public:

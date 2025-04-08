@@ -1,6 +1,6 @@
 #include "Ticker.hpp"
 
-Ticker::Ticker(std::string token) {
+Ticker::Ticker(DataStore& ds, std::string token) : datastore(ds) {
   symbol = token;
   window_name = "Ticker: " + symbol + "  ##" + std::to_string(getWindowID());
 
