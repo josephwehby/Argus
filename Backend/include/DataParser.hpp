@@ -4,7 +4,6 @@
 #include <thread>
 #include <unordered_map>
 #include <nlohmann/json.hpp>
-
 #include <fstream>
 
 #include "SafeQueue.hpp"

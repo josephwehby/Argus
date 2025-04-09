@@ -5,10 +5,12 @@
 #include "Utils.hpp"
 
 #include "DataStore.hpp"
+#include "WebSocket.hpp"
+#include "JsonBuilder.hpp"
 
 class Ticker : public Widget {
   public:
-    Ticker(DataStore&, std::string);
+    Ticker(DataStore&, std::shared_ptr<WebSocket>, std::string);
     void draw() override; 
   private:
     const std::string channel = "ticker";
@@ -17,7 +19,8 @@ class Ticker : public Widget {
     const float x_start = 17.5;
     const float y_start = 30;
     const float y_bars_start = 50;
-    Level1 level1;
+    std::shared_ptr<Level1> level1;
 
     DataStore& datastore;
+    std::shared_ptr<WebSocket> ws;
 };

@@ -11,7 +11,7 @@ namespace JsonBuilder {
     json msg = {
       {"method", "subscribe"},
       {"params", {
-        {"channel", "ticker"},
+        {"channel", channel},
         {"symbol", {symbol}}
       }}
     };

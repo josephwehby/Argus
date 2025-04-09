@@ -35,9 +35,21 @@ App::App() {
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
+
+  // start up the websocket stuff
+  bool v = initWebSocket();
+
+  if (v) connected = true;
 }
 
 App::~App() {
+  ws->close(); 
+  ioc.stop();
+
+  if (io_thread.joinable()) {
+    io_thread.join();
+  }
+
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImPlot::DestroyContext();
@@ -45,6 +57,25 @@ App::~App() {
   
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+bool App::initWebSocket() {
+  load_root_certificates(this->ctx, this->ec);
+
+  if (ec) {
+    std::cout << "Error " << ec << std::endl;
+    return false;
+  }
+
+  ws = std::make_shared<WebSocket>(this->ioc, this->ctx);
+
+  io_thread = std::thread([this](){
+    ioc.run();     
+  });
+
+  ws->connect();
+
+  return true;
 }
 
 void App::update() {
@@ -112,7 +143,7 @@ void App::drawMenuBar() {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Ticker>(datastore, "BTC"));
+        widgets.push_back(std::make_unique<Ticker>(datastore, ws, "BTC"));
       }
       ImGui::EndMenu();
     }
