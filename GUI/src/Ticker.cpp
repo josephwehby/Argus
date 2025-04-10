@@ -5,8 +5,13 @@ Ticker::Ticker(DataStore& ds, std::shared_ptr<WebSocket> _ws, std::string token)
   symbol = token;
   window_name = "Ticker: " + symbol + "  ##" + std::to_string(getWindowID());
   
-  json sub_msg = JsonBuilder::generateSubscribe("BTC/USD", "ticker"); 
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel); 
   ws->subscribe(sub_msg);
+}
+
+Ticker::~Ticker() {
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel);
+  ws->unsubscribe(unsub_msg);
 }
 
 // probably need to redo this at some point
@@ -16,6 +21,7 @@ void Ticker::draw() {
   auto update = datastore.getTicker(symbol);  
 
   if (update != nullptr) level1 = update;
+
   if (level1 == nullptr) {
     std::cout << "level1 null" << std::endl;
     return;

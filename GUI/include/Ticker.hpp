@@ -10,6 +10,7 @@
 class Ticker : public Widget {
   public:
     Ticker(DataStore&, std::shared_ptr<WebSocket>, std::string);
+    ~Ticker();
     void draw() override; 
   private:
     const std::string channel = "ticker";
