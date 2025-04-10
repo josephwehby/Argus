@@ -6,7 +6,7 @@ Ticker::Ticker(DataStore& ds, std::shared_ptr<WebSocket> _ws, std::string token)
   window_name = "Ticker: " + symbol + "  ##" + std::to_string(getWindowID());
   
   json sub_msg = JsonBuilder::generateSubscribe("BTC/USD", "ticker"); 
-  ws.subscribe(sub_msg);
+  ws->subscribe(sub_msg);
 }
 
 // probably need to redo this at some point
@@ -16,7 +16,10 @@ void Ticker::draw() {
   auto update = datastore.getTicker(symbol);  
 
   if (update != nullptr) level1 = update;
-  if (level1 == nullptr) return;
+  if (level1 == nullptr) {
+    std::cout << "level1 null" << std::endl;
+    return;
+  } 
   
   ImGui::SetNextWindowSize(ImVec2(435, 100), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);

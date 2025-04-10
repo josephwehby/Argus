@@ -1,23 +1,13 @@
 #include "DataParser.hpp"
 
-DataParser::DataParser() {
-
-  // for now we are just going to read json from a file for testing purposes. 
-  // eventually it will receive data from the websocket
-
-  std::ifstream f{"../input.txt"}; 
-    
-  if (!f) {
-    std::cout << "error " << std::endl;
-  }
-
-  std::shared_ptr<json> j = std::make_shared<json>(json::parse(f));
-  parseData(j);
+DataParser::DataParser(DataStore& ds) : datastore(ds) {
+  process_thread = std::thread(&DataParser::processLoop, this); 
 }
 
 DataParser::~DataParser() {
-  if (t.joinable()) {
-    t.join();
+  data.push(nullptr);
+  if (process_thread.joinable()) {
+    process_thread.join();
   }
 }
 
@@ -28,10 +18,9 @@ void DataParser::pushData(json new_data) {
 
 void DataParser::processLoop() {
   while (true) {
-    if (!data.empty()) {
-      auto next_item = data.pop();
-      parseData(next_item);
-    }
+    auto next_item = data.wait_and_pop();
+    if (next_item == nullptr) break;
+    parseData(next_item);
   }
 }
 
@@ -76,14 +65,10 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
 
   double last_price = item->at("data")[0]["last"];
   
-  std::cout << "last price " << last_price << std::endl;
-  std::cout << "bid " << best_bid << " " << best_bid_size << std::endl;
-  std::cout << "ask " << best_ask << " " << best_ask_size << std::endl;
-  std::cout << "price change " << price_change << std::endl;
-  std::cout << "percent change " << percent_change << std::endl;
+  std::cout << "[!] " << symbol << " " << last_price << " " << best_bid << " " << best_ask << std::endl;
   
   std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
       price_change, percent_change, last_price);
   
-  // need to push this onto someting
+  datastore.setTicker(symbol, ld);
 }

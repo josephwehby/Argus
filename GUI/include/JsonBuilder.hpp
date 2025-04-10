@@ -1,44 +1,10 @@
 #pragma once
 
-#include <nlohmann/json>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
 namespace JsonBuilder {
-
-  json generateSubscribe(const std::string& symbol, const std::string& channel, int opt = -1) {
-    
-    json msg = {
-      {"method", "subscribe"},
-      {"params", {
-        {"channel", channel},
-        {"symbol", {symbol}}
-      }}
-    };
-
-    if (opt != -1) {
-      if (channel == "ohlc") msg["params"]["interval"] = opt;
-      if (channel == "book") msg["params"]["depth"] = opt;
-    }
-    
-    return msg;
-  }
-
-  json generateUnsubscribe(const std::string& symbol, const std::string& channel, int interval = -1) {
-    
-    json msg = {
-      {"method", "unsubscribe"},
-      {"params", {
-        {"channel", channel},
-        {"symbol", {symbol}},
-      }}
-    };
-
-    if (interval != -1 && channel == "ohlc") {
-      msg["params"]["interval"] = interval;
-    }
-
-    return msg;
-  }
-
+  json generateSubscribe(const std::string&, const std::string&, int opt = -1);
+  json generateUnsubscribe(const std::string&, const std::string&, int interval = -1); 
 };

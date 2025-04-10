@@ -5,9 +5,10 @@ void fail(beast::error_code ec, char const* what)
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx) 
+WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, DataStore& ds) 
   : m_resolver(net::make_strand(ioc)),
-    m_ws(net::make_strand(ioc), m_ssl_ctx) {
+    m_ws(net::make_strand(ioc), m_ssl_ctx), 
+    data_parser(ds) {
 
       m_ssl_ctx = std::move(ctx);
 }
@@ -117,7 +118,14 @@ void WebSocket::onRead(beast::error_code ec, std::size_t bytes_transferred) {
   if (ec) {
     return fail(ec, "on read");
   }
-  std::cout << beast::make_printable(m_buffer.data()) << std::endl;
+  
+  std::string data = beast::buffers_to_string(m_buffer.data());
+  json jsonData = json::parse(data);
+  data_parser.pushData(jsonData);
+  
+  std::cout << "pushed data" << std::endl;
+
+  //std::cout << beast::make_printable(m_buffer.data()) << std::endl;
   m_buffer.consume(m_buffer.size());
 
   doRead();

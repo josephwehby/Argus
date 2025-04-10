@@ -67,7 +67,7 @@ bool App::initWebSocket() {
     return false;
   }
 
-  ws = std::make_shared<WebSocket>(this->ioc, this->ctx);
+  ws = std::make_shared<WebSocket>(this->ioc, this->ctx, this->datastore);
 
   io_thread = std::thread([this](){
     ioc.run();     
@@ -143,28 +143,28 @@ void App::drawMenuBar() {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Ticker>(datastore, ws, "BTC"));
+        widgets.push_back(std::make_unique<Ticker>(datastore, ws, "BTC/USD"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("OrderBook")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<OrderBook>(datastore, "BTC"));
+        widgets.push_back(std::make_unique<OrderBook>(datastore, "BTC/USD"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Chart")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Chart>(datastore, "BTC"));
+        widgets.push_back(std::make_unique<Chart>(datastore, "BTC/USD"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Trades")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Trades>(datastore, "BTC"));
+        widgets.push_back(std::make_unique<Trades>(datastore, "BTC/USD"));
       }
       ImGui::EndMenu();
     }

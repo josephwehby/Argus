@@ -14,14 +14,15 @@ using json = nlohmann::json;
 
 class DataParser {
   public:
-    DataParser();
+    DataParser(DataStore&);
     ~DataParser();
     void pushData(json); 
     
   private:
-    std::thread t; 
+    std::thread process_thread; 
     SafeQueue<json> data;
-    DataStore ds; 
+    DataStore& datastore; 
+
     void processLoop();
     void parseData(std::shared_ptr<json>);
     void parseTicker(std::shared_ptr<json>);

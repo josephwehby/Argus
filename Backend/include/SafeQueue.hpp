@@ -4,6 +4,7 @@ This will handle all the incoming messages from the websocket
 
 #include <mutex>
 #include <stack>
+#include <condition_variable>
 #include <stdexcept>
 
 template <typename T>
@@ -26,6 +27,7 @@ class SafeQueue {
     void push(T value) {
       std::lock_guard<std::mutex> lock(m);
       data.push(std::move(value));
+      data_cond.notify_one();
     }
 
     std::shared_ptr<T> pop() {
@@ -40,7 +42,19 @@ class SafeQueue {
       return res;
     }
 
+    std::shared_ptr<T> wait_and_pop() {
+
+      std::unique_lock<std::mutex> lock(m);
+      data_cond.wait(lock, [this]{ return !data.empty(); });
+      
+      std::shared_ptr<T> const res = std::make_shared<T>(data.top());
+      data.pop();
+      return res;
+
+    }
+
   private:
     std::stack<T> data;
     mutable std::mutex m;
+    std::condition_variable data_cond; 
 };
