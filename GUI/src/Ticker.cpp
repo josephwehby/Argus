@@ -22,10 +22,7 @@ void Ticker::draw() {
 
   if (update != nullptr) level1 = update;
 
-  if (level1 == nullptr) {
-    std::cout << "level1 null" << std::endl;
-    return;
-  } 
+  if (level1 == nullptr) return;
   
   ImGui::SetNextWindowSize(ImVec2(435, 100), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
@@ -51,7 +48,7 @@ void Ticker::draw() {
   draw_list->AddText({pos.x + x_start + bar_length - text_size_ask.x, y_start + pos.y}, IM_COL32(255,255,255,255), "ASK");
 
   float x1, x2, y1, y2;
-  int total_size = level1->best_bid_size + level1->best_ask_size;
+  float total_size = level1->best_bid_size + level1->best_ask_size;
 
   // draw the bar the shows the order size
   x1 = pos.x + x_start;
@@ -82,7 +79,7 @@ void Ticker::draw() {
   
   // best bid size
   ImVec2 bid_size_pos(pos.x + x_start + 3, y_pos);
-  std::string bid_size_text = std::to_string(static_cast<int>(level1->best_bid_size));
+  std::string bid_size_text = std::to_string(level1->best_bid_size);
   draw_list->AddText(bid_size_pos, IM_COL32(255, 255, 255, 255), bid_size_text.c_str()); 
   
   // best bid price
@@ -97,7 +94,7 @@ void Ticker::draw() {
   draw_list->AddText(ask_price_pos, IM_COL32(255, 0, 0, 255), ask_price_text.c_str()); 
 
   // best ask size
-  std::string ask_size_text = std::to_string(static_cast<int>(level1->best_ask_size));
+  std::string ask_size_text = std::to_string(level1->best_ask_size);
   ImVec2 ask_size_size = ImGui::CalcTextSize(ask_size_text.c_str());
   ImVec2 ask_size_pos(pos.x + x_start + bar_length - ask_size_size.x - 3, y_pos);
   draw_list->AddText(ask_size_pos, IM_COL32(255, 255, 255, 255), ask_size_text.c_str()); 

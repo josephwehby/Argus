@@ -32,6 +32,7 @@ class App {
     ImGuiIO* io;
     GLFWwindow* window;
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
+    
     std::vector<std::unique_ptr<Widget>> widgets;
     bool connected = false;
 

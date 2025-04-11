@@ -43,6 +43,7 @@ App::App() {
 }
 
 App::~App() {
+  widgets.clear();
   ws->close(); 
   ioc.stop();
 

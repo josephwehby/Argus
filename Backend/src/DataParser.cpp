@@ -65,7 +65,7 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
 
   double last_price = item->at("data")[0]["last"];
   
-  std::cout << "[!] " << symbol << " " << last_price << " " << best_bid << " " << best_ask << std::endl;
+  std::cout << "[!] " << symbol << " "<< " " << best_bid << " " << best_ask << " " << best_bid_size << " " << best_ask_size << std::endl;
   
   std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
       price_change, percent_change, last_price);
