@@ -5,10 +5,14 @@ DataParser::DataParser(DataStore& ds) : datastore(ds) {
 }
 
 DataParser::~DataParser() {
+  std::cout << "Desctrucotr called" << std::endl;
   data.push(nullptr);
   if (process_thread.joinable()) {
+    std::cout << "joined" << std::endl;
     process_thread.join();
   }
+
+  std::cout << "ds ran" << std::endl;
 }
 
 // may need to use move semantics later on to reduce the copies but ill try this for now
@@ -19,7 +23,10 @@ void DataParser::pushData(json new_data) {
 void DataParser::processLoop() {
   while (true) {
     auto next_item = data.wait_and_pop();
-    if (next_item == nullptr) break;
+    if (next_item == nullptr) {
+      std::cout << "nullptr. time to exit" << std::endl;
+      break;
+    }
     parseData(next_item);
   }
 }
@@ -44,7 +51,7 @@ void DataParser::parseData(std::shared_ptr<json> item) {
   } else if (channel == "ohlc") {
 
   } else if (channel == "trade") {
-
+    parseTrade(item);
   } else {
     return;
   }
@@ -65,10 +72,19 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
 
   double last_price = item->at("data")[0]["last"];
   
-  std::cout << "[!] " << symbol << " "<< " " << best_bid << " " << best_ask << " " << best_bid_size << " " << best_ask_size << std::endl;
-  
   std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
       price_change, percent_change, last_price);
   
   datastore.setTicker(symbol, ld);
+}
+
+void DataParser::parseTrade(std::shared_ptr<json> item) {
+  std::string symbol = item->at("data")[0]["symbol"];
+  
+  std::vector<Trade> trades;
+  for (const auto trade : item->at("data")) {
+    trades.emplace_back(trade["ord_type"], trade["side"], trade["price"], trade["qty"], Utils::formatTime(trade["timestamp"])); 
+  }
+
+  datastore.setTrades(symbol, trades);
 }

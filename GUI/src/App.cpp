@@ -48,6 +48,7 @@ App::~App() {
   ioc.stop();
 
   if (io_thread.joinable()) {
+    std::cout << "io thread joined" << std::endl;
     io_thread.join();
   }
 
@@ -58,6 +59,8 @@ App::~App() {
   
   glfwDestroyWindow(window);
   glfwTerminate();
+
+  std::cout << "app ds ran" << std::endl;
 }
 
 bool App::initWebSocket() {
@@ -165,7 +168,7 @@ void App::drawMenuBar() {
 
     if (ImGui::BeginMenu("Trades")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Trades>(datastore, "BTC/USD"));
+        widgets.push_back(std::make_unique<Trades>(datastore, ws, "BTC/USD"));
       }
       ImGui::EndMenu();
     }

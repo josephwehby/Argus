@@ -12,7 +12,9 @@ WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, DataStore& ds)
 
       m_ssl_ctx = std::move(ctx);
 }
-
+WebSocket::~WebSocket() {
+  std::cout << "ws destrcutor" << std::endl;
+}
 void WebSocket::connect() {
   m_resolver.async_resolve(m_host, m_port, beast::bind_front_handler(&WebSocket::onResolve, shared_from_this()));
 }

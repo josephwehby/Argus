@@ -2,11 +2,18 @@
 
 #include <string>
 
-enum class TradeType { Buy, Sell };
+enum class TradeType { Limit, Market };
+enum class TradeSide { Buy, Sell };
 
 struct Trade {
+  Trade() {}
+
+  Trade(TradeType tradetype, TradeSide tradeside, double p, double s, std::string t) :
+    type(tradetype), side(tradeside), price(p), size(s), time(t) {}
+
   TradeType type;
+  TradeSide side;
   double price;
-  int size;
+  double size;
   std::string time;
 };

@@ -28,6 +28,7 @@ using json = nlohmann::json;
 class WebSocket : public std::enable_shared_from_this<WebSocket> {
   public:
     explicit WebSocket(net::io_context&, ssl::context&, DataStore&);
+    ~WebSocket();
     void connect();
     void subscribe(json&);
     void unsubscribe(json&);

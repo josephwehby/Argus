@@ -4,11 +4,13 @@
 #include <thread>
 #include <unordered_map>
 #include <nlohmann/json.hpp>
-#include <fstream>
+#include <vector>
 
 #include "SafeQueue.hpp"
 #include "Level1.hpp"
+#include "Trade.hpp"
 #include "DataStore.hpp"
+#include "Utils.hpp"
 
 using json = nlohmann::json;
 
