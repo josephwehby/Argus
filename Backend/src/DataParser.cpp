@@ -83,7 +83,12 @@ void DataParser::parseTrade(std::shared_ptr<json> item) {
   
   std::vector<Trade> trades;
   for (const auto trade : item->at("data")) {
-    trades.emplace_back(trade["ord_type"], trade["side"], trade["price"], trade["qty"], Utils::formatTime(trade["timestamp"])); 
+    std::cout << trade["price"] << std::endl;
+    TradeType type = (trade["ord_type"] == "limit") ? TradeType::Limit : TradeType::Market;
+    TradeSide side = (trade["side"] == "buy") ? TradeSide::Buy : TradeSide::Sell;
+    float qty = trade["qty"];
+
+    trades.emplace_back(type, side, Utils::formatPrice(trade["price"]), std::to_string(qty), Utils::formatTime(trade["timestamp"])); 
   }
 
   datastore.setTrades(symbol, trades);

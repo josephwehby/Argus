@@ -125,9 +125,6 @@ void WebSocket::onRead(beast::error_code ec, std::size_t bytes_transferred) {
   json jsonData = json::parse(data);
   data_parser.pushData(jsonData);
   
-  std::cout << "pushed data" << std::endl;
-
-  //std::cout << beast::make_printable(m_buffer.data()) << std::endl;
   m_buffer.consume(m_buffer.size());
 
   doRead();

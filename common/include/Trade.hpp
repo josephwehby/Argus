@@ -8,12 +8,12 @@ enum class TradeSide { Buy, Sell };
 struct Trade {
   Trade() {}
 
-  Trade(TradeType tradetype, TradeSide tradeside, double p, double s, std::string t) :
+  Trade(TradeType tradetype, TradeSide tradeside, std::string p, std::string s, std::string t) :
     type(tradetype), side(tradeside), price(p), size(s), time(t) {}
 
   TradeType type;
   TradeSide side;
-  double price;
-  double size;
+  std::string price;
+  std::string size;
   std::string time;
 };
