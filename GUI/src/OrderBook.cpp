@@ -13,9 +13,41 @@ OrderBook::~OrderBook() {
   ws->unsubscribe(unsub_msg);
 }
 
-void OrderBook::readData() {}
+void OrderBook::updateBook() {
+  auto updates = datastore.getBook(symbol);
+
+  for (auto bid : updates.bids) {
+    if (bid.size == 0) {
+      bids.erase(bid.price); 
+    } else {
+      bids[bid.price] = bid.size; 
+    }
+  }
+
+  for (auto ask : updates.asks) {
+    if (ask.size == 0) {
+      asks.erase(ask.price); 
+    } else {
+      asks[ask.price] = ask.size; 
+    }
+  }
+
+  while (bids.size() > depth) {
+    auto it = std::prev(bids.end());
+    bids.erase(it);
+  }
+
+  while (asks.size() > depth) {
+    auto it = std::prev(asks.end());
+    asks.erase(it);
+  }
+
+}
 
 void OrderBook::draw() {
+
+  updateBook();
+
   ImGui::SetNextWindowSize(ImVec2(435,255), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
 
@@ -47,7 +79,7 @@ void OrderBook::draw() {
 
     draw_list->AddText(bid_price_pos, IM_COL32(0, 255, 0, 255), bid_price.c_str());
     
-    std::string bid_size = std::to_string(static_cast<int>(level.second));
+    std::string bid_size = std::to_string(level.second);
     ImVec2 bid_size_pos(pos.x + x_start + 5, y_offset + (bar_height/2) - 10); 
 
     draw_list->AddText(bid_size_pos, IM_COL32(255,255,255,255), bid_size.c_str());
@@ -71,7 +103,7 @@ void OrderBook::draw() {
     std::string ask_price = Utils::formatPrice(level.first); 
     draw_list->AddText(ask_price_pos, IM_COL32(255, 0, 0, 255), ask_price.c_str());
 
-    std::string ask_size = std::to_string(static_cast<int>(level.second));
+    std::string ask_size = std::to_string(level.second);
     ImVec2 ask_size_size = ImGui::CalcTextSize(ask_size.c_str());
     ImVec2 ask_size_pos(x_offset + max_width - ask_size_size.x - 5, y_offset + (bar_height/2) - 10); 
 

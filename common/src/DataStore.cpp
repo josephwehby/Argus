@@ -38,6 +38,7 @@ std::vector<Trade> DataStore::getTrades(const std::string& symbol) {
 void DataStore::setBook(const std::string& symbol, const BookUpdate& book_update) {
   std::lock_guard<std::mutex> lock(m);
   book_data[symbol].bids.insert(book_data[symbol].bids.end(), book_update.bids.begin(), book_update.bids.end());
+  book_data[symbol].asks.insert(book_data[symbol].asks.end(), book_update.asks.begin(), book_update.asks.end());
 }
 
 BookUpdate DataStore::getBook(const std::string& symbol) {
