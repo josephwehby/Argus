@@ -11,6 +11,7 @@
 #include "Trade.hpp"
 #include "DataStore.hpp"
 #include "Utils.hpp"
+#include "BookUpdate.hpp"
 
 using json = nlohmann::json;
 

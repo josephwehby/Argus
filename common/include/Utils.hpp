@@ -17,6 +17,14 @@ namespace Utils {
     return oss.str();
   }
   
+  inline std::string formatSize(double size) {
+    std::ostringstream oss;
+
+    oss << std::fixed << std::setprecision(6) << size;
+
+    return oss.str();
+  }
+
   // converts it to central time. will adjust for other time zones later
   inline std::string formatTime(const std::string datetime) {
     int pos = datetime.find("T");

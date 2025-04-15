@@ -1,11 +1,17 @@
 #include "OrderBook.hpp"
 
-OrderBook::OrderBook(DataStore& ds, std::string token) : datastore(ds) {
+OrderBook::OrderBook(DataStore& ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
   symbol = token;
   window_name = "OrderBook: " + symbol + " ##" + std::to_string(window_id);
+
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel);
+  ws->subscribe(sub_msg);
 }
 
-OrderBook::~OrderBook() {}
+OrderBook::~OrderBook() {
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel);
+  ws->unsubscribe(unsub_msg);
+}
 
 void OrderBook::readData() {}
 

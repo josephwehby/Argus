@@ -154,7 +154,7 @@ void App::drawMenuBar() {
 
     if (ImGui::BeginMenu("OrderBook")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<OrderBook>(datastore, "BTC/USD"));
+        widgets.push_back(std::make_unique<OrderBook>(datastore, ws, "BTC/USD"));
       }
       ImGui::EndMenu();
     }

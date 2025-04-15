@@ -47,7 +47,7 @@ void DataParser::parseData(std::shared_ptr<json> item) {
   if (channel == "ticker") {
     parseTicker(item);    
   } else if (channel == "book") {
-
+    parseBook(item);
   } else if (channel == "ohlc") {
 
   } else if (channel == "trade") {
@@ -78,17 +78,30 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
   datastore.setTicker(symbol, ld);
 }
 
+void DataParser::parseBook(std::shared_ptr<json> item) {
+  std::string symbol = item->at("data")[0]["symbol"];
+  
+  BookUpdate book_update;
+
+  for (const auto& bid : (*item)["data"][0]["bids"]) {
+    book_update.bids.emplace_back(bid["price"], bid["qty"]); 
+  }
+  
+  for (const auto& ask: (*item)["data"][0]["asks"]) {
+    book_update.asks.emplace_back(ask["price"], ask["qty"]); 
+  }
+
+  datastore.setBook(symbol, book_update);
+}
+
 void DataParser::parseTrade(std::shared_ptr<json> item) {
   std::string symbol = item->at("data")[0]["symbol"];
   
   std::vector<Trade> trades;
   for (const auto trade : item->at("data")) {
-    std::cout << trade["price"] << std::endl;
     TradeType type = (trade["ord_type"] == "limit") ? TradeType::Limit : TradeType::Market;
     TradeSide side = (trade["side"] == "buy") ? TradeSide::Buy : TradeSide::Sell;
-    float qty = trade["qty"];
-
-    trades.emplace_back(type, side, Utils::formatPrice(trade["price"]), std::to_string(qty), Utils::formatTime(trade["timestamp"])); 
+    trades.emplace_back(type, side, Utils::formatPrice(trade["price"]), Utils::formatSize(trade["qty"]), Utils::formatTime(trade["timestamp"])); 
   }
 
   datastore.setTrades(symbol, trades);

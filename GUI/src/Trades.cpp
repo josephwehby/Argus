@@ -31,12 +31,12 @@ void Trades::draw() {
     
     if (trade.type == TradeType::Limit) {
       if (trade.side == TradeSide::Buy) {
-        ImGui::TextColored({0.f, 200/255.f, 5/255.f, 1.f}, "%-8s %-12s %-9s", trade.size.c_str(), trade.price.c_str(), trade.time.c_str());  
+        ImGui::TextColored({0.f, 200/255.f, 5/255.f, 1.f}, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str());  
       } else {
-        ImGui::TextColored({230/255.f, 0.f, 0.f, 1.f}, "%-8s %-12s %-9s", trade.size.c_str(), trade.price.c_str(), trade.time.c_str()); 
+        ImGui::TextColored({230/255.f, 0.f, 0.f, 1.f}, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str()); 
       }
     } else {
-      ImGui::TextColored({0.f, 1.f, 1.f, 1.f}, "%-8s %-12s %-9s", trade.size.c_str(), trade.price.c_str(), trade.time.c_str());  
+      ImGui::TextColored({1.f, 1.f, 1.f, 1.f}, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str());  
     }
 
   }

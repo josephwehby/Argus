@@ -23,10 +23,29 @@ void DataStore::setTrades(const std::string& symbol, const std::vector<Trade>& t
   trade_data[symbol].insert(trade_data[symbol].end(), trades.begin(), trades.end());
 }
 
-std::vector<Trade> DataStore::getTrades(const std::string& symbol) const {
+std::vector<Trade> DataStore::getTrades(const std::string& symbol) {
   std::lock_guard<std::mutex> lock(m);
 
   if (!trade_data.contains(symbol)) return {};
   
-  return trade_data.at(symbol);
+  auto trades = std::move(trade_data[symbol]);   
+  trade_data[symbol].clear();
+
+  return trades;
+}
+
+/* Book access methods */
+void DataStore::setBook(const std::string& symbol, const BookUpdate& book_update) {
+  std::lock_guard<std::mutex> lock(m);
+  book_data[symbol].bids.insert(book_data[symbol].bids.end(), book_update.bids.begin(), book_update.bids.end());
+}
+
+BookUpdate DataStore::getBook(const std::string& symbol) {
+  std::lock_guard<std::mutex> lock(m);
+  if (!book_data.contains(symbol)) return BookUpdate{};
+
+  auto book = std::move(book_data[symbol]);
+  book_data.erase(symbol);
+
+  return book;
 }

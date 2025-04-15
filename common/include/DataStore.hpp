@@ -7,6 +7,7 @@
 
 #include "Level1.hpp"
 #include "Trade.hpp"
+#include "BookUpdate.hpp"
 
 class DataStore {
   public:
@@ -18,11 +19,14 @@ class DataStore {
     std::shared_ptr<Level1> getTicker(const std::string&) const;
     
     void setTrades(const std::string&, const std::vector<Trade>&);
-    std::vector<Trade> getTrades(const std::string&) const;
+    std::vector<Trade> getTrades(const std::string&);
+
+    void setBook(const std::string&, const BookUpdate&);
+    BookUpdate getBook(const std::string&);
 
   private:
     mutable std::mutex m;
     std::unordered_map<std::string, std::shared_ptr<Level1>> ticker_data;
-
     std::unordered_map<std::string, std::vector<Trade>> trade_data;
+    std::unordered_map<std::string, BookUpdate> book_data;
 };
