@@ -28,18 +28,16 @@ void Trades::draw() {
   ImGui::Begin(window_name.c_str(), &show);
   
   for (const auto& trade : trades) {
-    
-    if (trade.type == TradeType::Limit) {
-      if (trade.side == TradeSide::Buy) {
-        ImGui::TextColored({0.f, 200/255.f, 5/255.f, 1.f}, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str());  
-      } else {
-        ImGui::TextColored({230/255.f, 0.f, 0.f, 1.f}, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str()); 
-      }
+    ImVec4 color;
+    if (trade.side == TradeSide::Buy) {
+      color = (trade.type == TradeType::Limit) ? limitBuyColor : marketBuyColor;
     } else {
-      ImGui::TextColored({1.f, 1.f, 1.f, 1.f}, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str());  
+      color = (trade.type == TradeType::Limit) ? limitSellColor : marketSellColor;
     }
 
+    ImGui::TextColored(color, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str());
   }
+
 
   ImGui::End();
 }
