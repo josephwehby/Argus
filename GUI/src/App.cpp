@@ -37,16 +37,14 @@ App::App() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // start up the websocket stuff
-  bool v = initWebSocket();
-
-  if (v) connected = true;
+  connected = initWebSocket();
 }
 
 App::~App() {
   widgets.clear();
+  std::cout << "ws use count: " << ws.use_count() << std::endl;
   ws->close(); 
   ioc.stop();
-
   if (io_thread.joinable()) {
     std::cout << "io thread joined" << std::endl;
     io_thread.join();

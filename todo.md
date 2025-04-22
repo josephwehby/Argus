@@ -1,0 +1,3 @@
+- implement ping request for kraken server so connection does not disconnect
+- implement checksum for orderbook so it stays consistent with the exchange
+- connect candlestick chart to the exchange

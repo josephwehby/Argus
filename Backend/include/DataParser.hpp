@@ -20,12 +20,13 @@ class DataParser {
     DataParser(DataStore&);
     ~DataParser();
     void pushData(json); 
-    
+    void shutdown();
+
   private:
     std::thread process_thread; 
     SafeQueue<json> data;
     DataStore& datastore; 
-
+    
     void processLoop();
     void parseData(std::shared_ptr<json>);
     void parseTicker(std::shared_ptr<json>);

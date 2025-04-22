@@ -5,17 +5,13 @@ DataParser::DataParser(DataStore& ds) : datastore(ds) {
 }
 
 DataParser::~DataParser() {
+  std::cout << "Desctrucotr called" << std::endl;
   if (process_thread.joinable()) {
     std::cout << "joined" << std::endl;
     process_thread.join();
   }
 
-  std::cout << "Desctrucotr called" << std::endl;
   std::cout << "ds ran" << std::endl;
-}
-
-void DataParser::shutdown() {
-  data.push(nullptr);
 }
 
 // may need to use move semantics later on to reduce the copies but ill try this for now

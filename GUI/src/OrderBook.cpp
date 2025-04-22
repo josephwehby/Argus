@@ -47,7 +47,7 @@ void OrderBook::updateBook() {
 void OrderBook::draw() {
 
   updateBook();
-
+  
   ImGui::SetNextWindowSize(ImVec2(435,475), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
 

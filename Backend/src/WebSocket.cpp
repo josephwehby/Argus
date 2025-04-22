@@ -12,7 +12,9 @@ WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, DataStore& ds)
 
       m_ssl_ctx = std::move(ctx);
 }
+
 WebSocket::~WebSocket() {
+  data_parser.shutdown();
   std::cout << "ws destrcutor" << std::endl;
 }
 void WebSocket::connect() {
