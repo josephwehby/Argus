@@ -103,14 +103,12 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
   std::vector<Candle> candles;
 
   for (const auto candle : item->at("data")) {
+    std::cout << candle["open"] << " " << candle["interval_begin"] << std::endl;
     candles.emplace_back(candle["open"], candle["high"], candle["low"], candle["close"], candle["volume"], 
         candle["interval"], candle["interval_begin"], Utils::UTCToUnix(candle["interval_begin"]));
   }
-  for (const auto c : candles) {
-    std::cout << candle.open << " " << candle.close << std::endl;
-  } 
-  std::cout << "-------" << std::endl;
-  //datastore.setCandles(symbol, candles);
+  
+  datastore.setCandles(symbol, candles);
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {

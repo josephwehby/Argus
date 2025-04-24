@@ -13,8 +13,20 @@ Chart::~Chart() {
   ws->unsubscribe(unsub_msg);
 }
 
-// we should generate the unix time when reading the data in rather than making all these extra utctounix calls each frame
+void Chart::updateCandles() {
+  auto updates = datastore.getCandles(symbol);
+  
+  for (auto update : updates) {
+    candles[update.unix_time] = update;
+  }
+}
+
 void Chart::draw() {
+
+  updateCandles(); 
+  
+  if (candles.size() == 0) return;
+
   ImGui::SetNextWindowSize(ImVec2(800, 690), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
 
@@ -26,7 +38,7 @@ void Chart::draw() {
 
   if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
 
-    half_width = (candles.size() > 1) ? ((Utils::UTCToUnix(candles[0].begin) - Utils::UTCToUnix(candles[1].begin)) * width) : width;
+    half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
 
     ImPlotStyle& style = ImPlot::GetStyle();
     style.Colors[ImPlotCol_PlotBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
@@ -46,33 +58,34 @@ void Chart::draw() {
       ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
       ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
 
-      ImPlot::SetupAxisLimits(ImAxis_X1, Utils::UTCToUnix(candles[0].begin), Utils::UTCToUnix(candles.back().begin));
+      ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first);
       ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
 
       if (ImPlot::BeginItem("##Price Chart")) {
         if (ImPlot::FitThisFrame()) {
-          for (int i = 0; i < candles.size(); ++i) {
-              ImPlot::FitPoint(ImPlotPoint(Utils::UTCToUnix(candles[i].begin), candles[i].low - 1));
-              ImPlot::FitPoint(ImPlotPoint(Utils::UTCToUnix(candles[i].begin), candles[i].high + 1));
+
+          for (const auto& [time, candle] : candles) {
+              ImPlot::FitPoint(ImPlotPoint(time, candle.low - 1));
+              ImPlot::FitPoint(ImPlotPoint(time, candle.high + 1));
           }
         }
+        
+        int index = 0;
+        for (const auto& [time, candle] : candles) {
 
-        for (int i = 0; i < candles.size(); i++) {
+          volume_x[index] = time;
+          volume_y[index] = candle.volume;
 
-          double unix_time = static_cast<double>(Utils::UTCToUnix(candles[i].begin));
-          
-          volume_x[i] = unix_time;
-          volume_y[i] = candles[i].volume;
-
-          ImU32 color = (candles[i].open <= candles[i].close) ? green : red;
-          ImVec2 open_pos = ImPlot::PlotToPixels(unix_time - half_width, candles[i].open);
-          ImVec2 close_pos = ImPlot::PlotToPixels(unix_time + half_width, candles[i].close);
+          ImU32 color = (candle.open <= candle.close) ? green : red;
+          ImVec2 open_pos = ImPlot::PlotToPixels(time - half_width, candle.open);
+          ImVec2 close_pos = ImPlot::PlotToPixels(time + half_width, candle.close);
 
           draw_list->AddRectFilled(open_pos, close_pos, color);
 
-          ImVec2 low_pos = ImPlot::PlotToPixels(unix_time, candles[i].low);
-          ImVec2 high_pos = ImPlot::PlotToPixels(unix_time, candles[i].high);
+          ImVec2 low_pos = ImPlot::PlotToPixels(time, candle.low);
+          ImVec2 high_pos = ImPlot::PlotToPixels(time, candle.high);
           draw_list->AddLine(low_pos, high_pos, color, 0.25f); 
+          index++;
         }
 
         ImPlot::EndItem();
@@ -84,7 +97,7 @@ void Chart::draw() {
     if (ImPlot::BeginPlot("##Volume Plot")) {
       ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines,ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
       ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
-      ImPlot::SetupAxisLimits(ImAxis_X1, Utils::UTCToUnix(candles[0].begin), Utils::UTCToUnix(candles.back().begin) + 5);
+      ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
       ImPlot::SetNextFillStyle(ImVec4(1.f,0.75f,0.25f,1));
       ImPlot::PlotBars("##", volume_x.data(), volume_y.data(), volume_x.size(), half_width);
       ImPlot::EndPlot();
