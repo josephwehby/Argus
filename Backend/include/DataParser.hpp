@@ -10,6 +10,7 @@
 #include "Level1.hpp"
 #include "Trade.hpp"
 #include "DataStore.hpp"
+#include "Candle.hpp"
 #include "Utils.hpp"
 #include "BookUpdate.hpp"
 

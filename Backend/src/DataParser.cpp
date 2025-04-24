@@ -52,7 +52,7 @@ void DataParser::parseData(std::shared_ptr<json> item) {
   } else if (channel == "book") {
     parseBook(item);
   } else if (channel == "ohlc") {
-
+    parseOHLC(item);
   } else if (channel == "trade") {
     parseTrade(item);
   } else {
@@ -95,6 +95,22 @@ void DataParser::parseBook(std::shared_ptr<json> item) {
   }
 
   datastore.setBook(symbol, book_update);
+}
+
+void DataParser::parseOHLC(std::shared_ptr<json> item) {
+  std::string symbol = item->at("data")[0]["symbol"];
+  
+  std::vector<Candle> candles;
+
+  for (const auto candle : item->at("data")) {
+    candles.emplace_back(candle["open"], candle["high"], candle["low"], candle["close"], candle["volume"], 
+        candle["interval"], candle["interval_begin"], Utils::UTCToUnix(candle["interval_begin"]));
+  }
+  for (const auto c : candles) {
+    std::cout << candle.open << " " << candle.close << std::endl;
+  } 
+  std::cout << "-------" << std::endl;
+  //datastore.setCandles(symbol, candles);
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {

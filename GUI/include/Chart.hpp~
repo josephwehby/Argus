@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <ctime>
 #include <vector>
-#include <memory>
 
 #include "implot.h"
 #include "implot_internal.h"

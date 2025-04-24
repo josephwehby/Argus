@@ -159,7 +159,7 @@ void App::drawMenuBar() {
 
     if (ImGui::BeginMenu("Chart")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Chart>(datastore, "BTC/USD"));
+        widgets.push_back(std::make_unique<Chart>(datastore, ws, "BTC/USD"));
       }
       ImGui::EndMenu();
     }
