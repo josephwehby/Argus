@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <nlohmann/json.hpp>
 #include <vector>
+#include <memory>
 
 #include "SafeQueue.hpp"
 #include "Level1.hpp"
@@ -18,7 +19,7 @@ using json = nlohmann::json;
 
 class DataParser {
   public:
-    DataParser(DataStore&);
+    DataParser(std::shared_ptr<DataStore>);
     ~DataParser();
     void pushData(json); 
     void shutdown();
@@ -26,7 +27,7 @@ class DataParser {
   private:
     std::thread process_thread; 
     SafeQueue<json> data;
-    DataStore& datastore; 
+    std::shared_ptr<DataStore> datastore; 
     
     void processLoop();
     void parseData(std::shared_ptr<json>);

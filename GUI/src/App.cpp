@@ -37,6 +37,7 @@ App::App() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // start up the websocket stuff
+  datastore = std::make_shared<DataStore>();
   connected = initWebSocket();
 }
 
@@ -44,7 +45,7 @@ App::~App() {
   widgets.clear();
   std::cout << "ws use count: " << ws.use_count() << std::endl;
   ws->close(); 
-  ioc.stop();
+  //ioc.stop();
   if (io_thread.joinable()) {
     std::cout << "io thread joined" << std::endl;
     io_thread.join();

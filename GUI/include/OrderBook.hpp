@@ -12,7 +12,7 @@
 
 class OrderBook : public Widget {
   public:
-    OrderBook(DataStore&, std::shared_ptr<WebSocket>, std::string);
+    OrderBook(std::shared_ptr<DataStore>, std::shared_ptr<WebSocket>, std::string);
     ~OrderBook();
     void updateBook();
     void draw() override; 
@@ -28,6 +28,6 @@ class OrderBook : public Widget {
     std::map<double, double, std::greater<double>> bids;
     std::map<double, double, std::greater<double>> asks;
     
-    DataStore& datastore;
+    std::shared_ptr<DataStore> datastore;
     std::shared_ptr<WebSocket> ws;
 };

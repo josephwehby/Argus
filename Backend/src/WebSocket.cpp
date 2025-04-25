@@ -1,11 +1,10 @@
 #include "WebSocket.hpp"
 
-void fail(beast::error_code ec, char const* what)
-{
+void fail(beast::error_code ec, char const* what) {
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, DataStore& ds) 
+WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, std::shared_ptr<DataStore> ds) 
   : m_resolver(net::make_strand(ioc)),
     m_ws(net::make_strand(ioc), m_ssl_ctx), 
     data_parser(ds) {
@@ -17,6 +16,7 @@ WebSocket::~WebSocket() {
   data_parser.shutdown();
   std::cout << "ws destrcutor" << std::endl;
 }
+
 void WebSocket::connect() {
   m_resolver.async_resolve(m_host, m_port, beast::bind_front_handler(&WebSocket::onResolve, shared_from_this()));
 }
@@ -153,5 +153,7 @@ void WebSocket::onClose(beast::error_code ec) {
   if (ec) {
     return fail(ec, "close");
   }
+
+  std::cout << "websocket closed" << std::endl;
 }
 

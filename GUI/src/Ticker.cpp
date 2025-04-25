@@ -1,6 +1,6 @@
 #include "Ticker.hpp"
 
-Ticker::Ticker(DataStore& ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds) {
+Ticker::Ticker(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds) {
   ws = _ws;
   symbol = token;
   window_name = "Ticker: " + symbol + "  ##" + std::to_string(getWindowID());
@@ -18,7 +18,7 @@ Ticker::~Ticker() {
 void Ticker::draw() {
   
   // get updates from datastore if there are any
-  auto update = datastore.getTicker(symbol);  
+  auto update = datastore->getTicker(symbol);  
 
   if (update != nullptr) level1 = update;
 

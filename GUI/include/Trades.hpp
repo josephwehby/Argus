@@ -12,7 +12,7 @@
 
 class Trades : public Widget {
   public:
-    Trades(DataStore&, std::shared_ptr<WebSocket>, std::string);
+    Trades(std::shared_ptr<DataStore>, std::shared_ptr<WebSocket>, std::string);
     ~Trades();
     void draw() override;
   private:
@@ -27,5 +27,5 @@ class Trades : public Widget {
 
     std::shared_ptr<WebSocket> ws;
     std::deque<Trade> trades;
-    DataStore& datastore;
+    std::shared_ptr<DataStore> datastore;
 };

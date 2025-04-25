@@ -17,7 +17,7 @@
 
 class Chart : public Widget {
   public:
-    Chart(DataStore&, std::shared_ptr<WebSocket>, std::string);
+    Chart(std::shared_ptr<DataStore>, std::shared_ptr<WebSocket>, std::string);
     ~Chart();
     void draw() override;
   private:
@@ -30,6 +30,6 @@ class Chart : public Widget {
     ImU32 red = IM_COL32(255, 0, 0, 255);
     
     std::map<long long, Candle> candles;
-    DataStore& datastore;
+    std::shared_ptr<DataStore> datastore;
     std::shared_ptr<WebSocket> ws;
 };

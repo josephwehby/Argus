@@ -9,7 +9,7 @@
 
 class Ticker : public Widget {
   public:
-    Ticker(DataStore&, std::shared_ptr<WebSocket>, std::string);
+    Ticker(std::shared_ptr<DataStore>, std::shared_ptr<WebSocket>, std::string);
     ~Ticker();
     void draw() override; 
   private:
@@ -21,6 +21,6 @@ class Ticker : public Widget {
     const float y_bars_start = 50;
     
     std::shared_ptr<Level1> level1;
-    DataStore& datastore;
+    std::shared_ptr<DataStore> datastore;
     std::shared_ptr<WebSocket> ws;
 };

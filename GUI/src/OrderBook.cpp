@@ -1,6 +1,6 @@
 #include "OrderBook.hpp"
 
-OrderBook::OrderBook(DataStore& ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
+OrderBook::OrderBook(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
   symbol = token;
   window_name = "OrderBook: " + symbol + " ##" + std::to_string(window_id);
 
@@ -14,7 +14,7 @@ OrderBook::~OrderBook() {
 }
 
 void OrderBook::updateBook() {
-  auto updates = datastore.getBook(symbol);
+  auto updates = datastore->getBook(symbol);
 
   for (auto bid : updates.bids) {
     if (bid.size == 0) {

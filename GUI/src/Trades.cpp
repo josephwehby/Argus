@@ -1,6 +1,6 @@
 #include "Trades.hpp"
 
-Trades::Trades(DataStore& ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
+Trades::Trades(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
   symbol = token;
   window_name = "Trades: " + symbol + " ##" + std::to_string(window_id);
 
@@ -15,7 +15,7 @@ Trades::~Trades() {
 
 void Trades::draw() {
   
-  auto update = datastore.getTrades(symbol);
+  auto update = datastore->getTrades(symbol);
 
   if (update.size() > 0) {
     for (auto& t : update) {

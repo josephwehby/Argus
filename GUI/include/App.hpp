@@ -36,7 +36,7 @@ class App {
     std::vector<std::unique_ptr<Widget>> widgets;
     bool connected = false;
 
-    DataStore datastore;
+    std::shared_ptr<DataStore> datastore;
     
     std::shared_ptr<WebSocket> ws;
     net::io_context ioc;

@@ -14,7 +14,7 @@ Chart::~Chart() {
 }
 
 void Chart::updateCandles() {
-  auto updates = datastore->getCandles(symbol);
+  auto updates = datastore.getCandles(symbol);
   
   for (auto update : updates) {
     candles[update.unix_time] = update;

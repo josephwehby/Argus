@@ -1,16 +1,16 @@
 #include "DataParser.hpp"
 
-DataParser::DataParser(DataStore& ds) : datastore(ds) {
+DataParser::DataParser(std::shared_ptr<DataStore> ds) : datastore(ds) {
   process_thread = std::thread(&DataParser::processLoop, this); 
 }
 
 DataParser::~DataParser() {
+  std::cout << "in the dp desturctor" << std::endl;
   if (process_thread.joinable()) {
     std::cout << "joined" << std::endl;
     process_thread.join();
   }
 
-  std::cout << "Desctrucotr called" << std::endl;
   std::cout << "ds ran" << std::endl;
 }
 
@@ -28,7 +28,7 @@ void DataParser::processLoop() {
     auto next_item = data.wait_and_pop();
     if (next_item->is_null()) {
       std::cout << "nullptr. time to exit" << std::endl;
-      return;
+      break;
     }
     parseData(next_item);
   }
@@ -78,7 +78,7 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
   std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
       price_change, percent_change, last_price);
   
-  datastore.setTicker(symbol, ld);
+  datastore->setTicker(symbol, ld);
 }
 
 void DataParser::parseBook(std::shared_ptr<json> item) {
@@ -94,7 +94,7 @@ void DataParser::parseBook(std::shared_ptr<json> item) {
     book_update.asks.emplace_back(ask["price"], ask["qty"]); 
   }
 
-  datastore.setBook(symbol, book_update);
+  datastore->setBook(symbol, book_update);
 }
 
 void DataParser::parseOHLC(std::shared_ptr<json> item) {
@@ -103,12 +103,12 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
   std::vector<Candle> candles;
 
   for (const auto candle : item->at("data")) {
-    std::cout << candle["open"] << " " << candle["interval_begin"] << std::endl;
+    std::cout << candle["close"] << " " << candle["volume"] << " " << candle["interval_begin"] << std::endl;
     candles.emplace_back(candle["open"], candle["high"], candle["low"], candle["close"], candle["volume"], 
         candle["interval"], candle["interval_begin"], Utils::UTCToUnix(candle["interval_begin"]));
   }
   
-  datastore.setCandles(symbol, candles);
+  datastore->setCandles(symbol, candles);
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {
@@ -121,5 +121,5 @@ void DataParser::parseTrade(std::shared_ptr<json> item) {
     trades.emplace_back(type, side, Utils::formatPrice(trade["price"]), Utils::formatSize(trade["qty"]), Utils::formatTime(trade["timestamp"])); 
   }
 
-  datastore.setTrades(symbol, trades);
+  datastore->setTrades(symbol, trades);
 }
