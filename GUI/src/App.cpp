@@ -43,11 +43,15 @@ App::App() {
 
 App::~App() {
   widgets.clear();
-  std::cout << "ws use count: " << ws.use_count() << std::endl;
   ws->close(); 
-  //ioc.stop();
+
+  // I know this is not a good way to fix the hanging but it will have to do for now
+  // not sure why this works. maybe there is some extra reference to ws somewhere i am not aware of
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  ws.reset();
+  ioc.stop();
+
   if (io_thread.joinable()) {
-    std::cout << "io thread joined" << std::endl;
     io_thread.join();
   }
 
@@ -58,8 +62,6 @@ App::~App() {
   
   glfwDestroyWindow(window);
   glfwTerminate();
-
-  std::cout << "app ds ran" << std::endl;
 }
 
 bool App::initWebSocket() {
@@ -70,7 +72,7 @@ bool App::initWebSocket() {
     return false;
   }
 
-  ws = std::make_shared<WebSocket>(this->ioc, this->ctx, this->datastore);
+  ws = std::make_shared<WebSocket>(ioc, ctx, datastore);
 
   io_thread = std::thread([this](){
     ioc.run();     

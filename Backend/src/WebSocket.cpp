@@ -6,15 +6,14 @@ void fail(beast::error_code ec, char const* what) {
 
 WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, std::shared_ptr<DataStore> ds) 
   : m_resolver(net::make_strand(ioc)),
-    m_ws(net::make_strand(ioc), m_ssl_ctx), 
+    m_ws(net::make_strand(ioc), m_ssl_ctx),
     data_parser(ds) {
-
+      
       m_ssl_ctx = std::move(ctx);
 }
 
 WebSocket::~WebSocket() {
   data_parser.shutdown();
-  std::cout << "ws destrcutor" << std::endl;
 }
 
 void WebSocket::connect() {

@@ -6,6 +6,7 @@ This will handle all the incoming messages from the websocket
 #include <stack>
 #include <condition_variable>
 #include <stdexcept>
+#include <iostream>
 
 template <typename T>
 class SafeQueue {

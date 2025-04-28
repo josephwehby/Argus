@@ -2,6 +2,8 @@
 
 DataStore::DataStore() { }
 
+DataStore::~DataStore() {}
+
 /* Ticker access methods */
 void DataStore::setTicker(const std::string& symbol, std::shared_ptr<Level1> ld) {
   std::lock_guard<std::mutex> lock(m);

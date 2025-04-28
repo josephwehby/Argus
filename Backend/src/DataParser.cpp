@@ -5,13 +5,11 @@ DataParser::DataParser(std::shared_ptr<DataStore> ds) : datastore(ds) {
 }
 
 DataParser::~DataParser() {
-  std::cout << "in the dp desturctor" << std::endl;
   if (process_thread.joinable()) {
-    std::cout << "joined" << std::endl;
     process_thread.join();
   }
 
-  std::cout << "ds ran" << std::endl;
+  datastore.reset();
 }
 
 void DataParser::shutdown() {
@@ -27,7 +25,6 @@ void DataParser::processLoop() {
   while (true) {
     auto next_item = data.wait_and_pop();
     if (next_item->is_null()) {
-      std::cout << "nullptr. time to exit" << std::endl;
       break;
     }
     parseData(next_item);

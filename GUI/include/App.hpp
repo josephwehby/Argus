@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <chrono>
 
 #include "Ticker.hpp"
 #include "OrderBook.hpp"

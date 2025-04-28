@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 #include "Level1.hpp"
 #include "Trade.hpp"
@@ -13,9 +14,10 @@
 class DataStore {
   public:
     DataStore();
+    ~DataStore();
     DataStore(const DataStore&) = delete;
     DataStore& operator=(const DataStore&) = delete;
-    
+        
     void setTicker(const std::string&, std::shared_ptr<Level1>);
     std::shared_ptr<Level1> getTicker(const std::string&) const;
     
