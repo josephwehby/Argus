@@ -19,7 +19,7 @@ namespace JsonBuilder {
     return msg;
   }
 
-  json generateUnsubscribe(const std::string& symbol, const std::string& channel, int interval) {
+  json generateUnsubscribe(const std::string& symbol, const std::string& channel, int opt) {
     
     json msg = {
       {"method", "unsubscribe"},
@@ -29,8 +29,9 @@ namespace JsonBuilder {
       }}
     };
 
-    if (interval != -1 && channel == "ohlc") {
-      msg["params"]["interval"] = interval;
+    if (opt != -1) {
+      if (channel == "ohlc") msg["params"]["interval"] = opt;
+      if (channel == "book") msg["params"]["depth"] = opt;
     }
 
     return msg;

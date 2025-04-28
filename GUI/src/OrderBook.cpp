@@ -4,12 +4,12 @@ OrderBook::OrderBook(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _
   symbol = token;
   window_name = "OrderBook: " + symbol + " ##" + std::to_string(window_id);
 
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel);
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, depth);
   ws->subscribe(sub_msg);
 }
 
 OrderBook::~OrderBook() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel);
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, depth);
   ws->unsubscribe(unsub_msg);
 }
 
@@ -48,7 +48,7 @@ void OrderBook::draw() {
 
   updateBook();
   
-  ImGui::SetNextWindowSize(ImVec2(435,475), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(435,1070), ImGuiCond_Always);
   ImGui::Begin(window_name.c_str(), &show);
 
   ImVec2 pos = ImGui::GetWindowPos();
@@ -61,15 +61,22 @@ void OrderBook::draw() {
   for (const auto& level : asks) max_ask_size = std::max(level.second, max_ask_size);
   
   int row = 0;
+  int levels = 0;
+  
+  levels = asks.size() - depth_view;
 
   // draw ask side of orderbook
   for (const auto& level : asks) {
-    
+    if (levels > 0) {
+      levels--;
+      continue;
+    }
+
     float bar_length = static_cast<float>(level.second / max_ask_size) * max_width;
     bar_length = std::max(min_width, bar_length);
 
     float x1 = pos.x + x_start + (max_width - bar_length);
-    float y1 = pos.y + y_start + ((bar_height+2) * row);
+    float y1 = pos.y + y_start + ((bar_height) * row);
 
     float x2 = pos.x + x_start + max_width;
     float y2 = y1 + bar_height;
@@ -90,13 +97,16 @@ void OrderBook::draw() {
   }
 
   // draw the bid side of the order book
+  levels = 0; 
   for (const auto& level : bids) {
-    
+
+    if (levels == depth_view) break;
+
     float bar_length = static_cast<float>(level.second / max_bid_size) * max_width;
     bar_length = std::max(min_width, bar_length);
 
     float x1 = pos.x + x_start + (max_width - bar_length);
-    float y1 = pos.y + y_start + ((bar_height+2) * row);
+    float y1 = pos.y + y_start + ((bar_height) * row);
 
     float x2 = pos.x + x_start + max_width;
     float y2 = y1 + bar_height;
@@ -114,6 +124,7 @@ void OrderBook::draw() {
     draw_list->AddText(bid_size_pos, IM_COL32(255,255,255,255), bid_size.c_str());
 
     row++;
+    levels++;
   }
 
   ImGui::End();
