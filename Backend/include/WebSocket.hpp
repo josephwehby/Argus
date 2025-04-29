@@ -11,6 +11,9 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <future>
+#include <stdexcept>
+#include <exception>
 
 #include "root_certificates.hpp"
 #include "DataParser.hpp"
@@ -33,6 +36,7 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     void subscribe(json&);
     void unsubscribe(json&);
     void close();
+    void waitClose();
     bool isOpen() const;
   private:
     void onResolve(beast::error_code, tcp::resolver::results_type);
@@ -55,4 +59,6 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     websocket::stream<ssl::stream<beast::tcp_stream>> m_ws;
     beast::flat_buffer m_buffer;
     
+    std::promise<void> close_promise;
+    std::future<void> close_future;
 };

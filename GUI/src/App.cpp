@@ -44,10 +44,8 @@ App::App() {
 App::~App() {
   widgets.clear();
   ws->close(); 
+  ws->waitClose();
 
-  // I know this is not a good way to fix the hanging but it will have to do for now
-  // not sure why this works. maybe there is some extra reference to ws somewhere i am not aware of
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   ws.reset();
   ioc.stop();
 

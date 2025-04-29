@@ -39,10 +39,19 @@ void WebSocket::unsubscribe(json& unsubscribe_msg) {
 
 void WebSocket::close() {
   if (!m_ws.is_open()) return;
+  
+  close_promise = std::promise<void>();
+  close_future = close_promise.get_future();
 
   m_ws.async_close(beast::websocket::close_code::normal,
       beast::bind_front_handler(&WebSocket::onClose, shared_from_this())
       );
+}
+
+void WebSocket::waitClose() {
+  if (close_future.valid()) {
+    close_future.wait();
+  }
 }
 
 bool WebSocket::isOpen() const {
@@ -123,6 +132,7 @@ void WebSocket::onRead(beast::error_code ec, std::size_t bytes_transferred) {
   }
   
   std::string data = beast::buffers_to_string(m_buffer.data());
+  std::cout << data << std::endl;
   json jsonData = json::parse(data);
   data_parser.pushData(jsonData);
   
@@ -150,9 +160,10 @@ void WebSocket::send(json& msg) {
 
 void WebSocket::onClose(beast::error_code ec) {
   if (ec) {
+    close_promise.set_exception(std::make_exception_ptr(std::runtime_error("Error closing")));
     return fail(ec, "close");
   }
-
   std::cout << "websocket closed" << std::endl;
+  close_promise.set_value();
 }
 
