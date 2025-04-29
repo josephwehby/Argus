@@ -30,9 +30,9 @@ void Trades::draw() {
   for (const auto& trade : trades) {
     ImVec4 color;
     if (trade.side == TradeSide::Buy) {
-      color = (trade.type == TradeType::Limit) ? limitBuyColor : marketBuyColor;
+      color = (trade.type == TradeType::Limit) ? limit_buy_color: market_buy_color;
     } else {
-      color = (trade.type == TradeType::Limit) ? limitSellColor : marketSellColor;
+      color = (trade.type == TradeType::Limit) ? limit_sell_color : market_sell_color;
     }
 
     ImGui::TextColored(color, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str());
