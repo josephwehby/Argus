@@ -88,10 +88,8 @@ void DataParser::parseBook(std::shared_ptr<json> item) {
   }
   
   for (const auto& ask: (*item)["data"][0]["asks"]) {
-    std::cout << ask["price"] << ask["qty"] << " "; 
     book_update.asks.emplace_back(ask["price"], ask["qty"]); 
   }
-  std::cout << std::endl;
 
   datastore->setBook(symbol, book_update);
 }

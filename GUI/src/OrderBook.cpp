@@ -36,12 +36,20 @@ void OrderBook::updateBook() {
     auto it = std::prev(bids.end());
     bids.erase(it);
   }
-
-  while (asks.size() > depth) {
-    auto it = std::prev(asks.end());
-    asks.erase(it);
+  
+  // think this is correct?
+  if (bids.size() > depth) {
+    auto it = bids.rbegin();
+    std::advance(it, bids.size() - depth);
+    bids.erase(it.base(), bids.end());
   }
-
+  
+  if (asks.size() > depth) {
+    auto it = asks.begin();
+    std::advance(it, asks.size() - depth);
+    asks.erase(asks.begin(), it);
+  }
+  
 }
 
 void OrderBook::draw() {
