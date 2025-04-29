@@ -40,7 +40,7 @@ void DataParser::parseData(std::shared_ptr<json> item) {
 
   std::string channel = item->at("channel");
   if (channel == "heartbeat" || channel == "status") {
-    std::cout << "[!] heartbeat or status channel: ignoring" << std::endl; 
+    //std::cout << "[!] heartbeat or status channel: ignoring" << std::endl; 
     return;
   }
   
@@ -88,8 +88,10 @@ void DataParser::parseBook(std::shared_ptr<json> item) {
   }
   
   for (const auto& ask: (*item)["data"][0]["asks"]) {
+    std::cout << ask["price"] << ask["qty"] << " "; 
     book_update.asks.emplace_back(ask["price"], ask["qty"]); 
   }
+  std::cout << std::endl;
 
   datastore->setBook(symbol, book_update);
 }
@@ -100,7 +102,7 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
   std::vector<Candle> candles;
 
   for (const auto candle : item->at("data")) {
-    std::cout << candle["close"] << " " << candle["volume"] << " " << candle["interval_begin"] << std::endl;
+    //std::cout << candle["close"] << " " << candle["volume"] << " " << candle["interval_begin"] << std::endl;
     candles.emplace_back(candle["open"], candle["high"], candle["low"], candle["close"], candle["volume"], 
         candle["interval"], candle["interval_begin"], Utils::UTCToUnix(candle["interval_begin"]));
   }
