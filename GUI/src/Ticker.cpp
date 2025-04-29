@@ -39,9 +39,9 @@ void Ticker::draw() {
   mid_point -= (last_price_size.x / 2);
   
   if (level1->price_change >= 0) {
-    draw_list->AddText({mid_point, pos.y + y_start}, IM_COL32(0, 255, 0, 255), last_price.c_str());
+    draw_list->AddText({mid_point, pos.y + y_start}, bid_text_color, last_price.c_str());
   } else {
-    draw_list->AddText({mid_point, pos.y + y_start}, IM_COL32(255, 0, 0, 255), last_price.c_str());
+    draw_list->AddText({mid_point, pos.y + y_start}, ask_text_color, last_price.c_str());
   }
 
   ImVec2 text_size_ask = ImGui::CalcTextSize("ASK");
@@ -57,11 +57,11 @@ void Ticker::draw() {
   x2 = x1 + (level1->best_bid_size / total_size * bar_length);
   y2 = y1 + bar_height - 7;
 
-  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), IM_COL32(0, 200, 5, 180));
+  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), bid_bar_color);
   
   x1 = x2;
   x2 = pos.x + x_start + bar_length;
-  draw_list->AddRectFilled(ImVec2(x1,y1), ImVec2(x2, y2), IM_COL32(230, 0, 0, 180));
+  draw_list->AddRectFilled(ImVec2(x1,y1), ImVec2(x2, y2), ask_bar_color);
   
   // draw the price, size and bars
   x1 = pos.x + x_start;
@@ -69,11 +69,11 @@ void Ticker::draw() {
   x2 = x1 + bar_length/2;
   y2 = y1 + bar_height;
 
-  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), IM_COL32(0, 200, 5, 100));
+  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), bid_bar_color_light);
 
   x1 = x2;
   x2 = pos.x + x_start + bar_length;
-  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), IM_COL32(230, 0, 0, 100));
+  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), ask_bar_color_light);
   
   float y_pos = pos.y + y_bars_start + bar_height - 7 + (bar_height)/2 - 10;
   
@@ -86,12 +86,12 @@ void Ticker::draw() {
   std::string bid_price_text = Utils::formatPrice(level1->best_bid);
   ImVec2 bid_price_size = ImGui::CalcTextSize(bid_price_text.c_str());
   ImVec2 bid_price_pos(pos.x + x_start + bar_length/2 - bid_price_size.x - 5, y_pos);
-  draw_list->AddText(bid_price_pos, IM_COL32(0, 255, 0, 255), bid_price_text.c_str()); 
+  draw_list->AddText(bid_price_pos, bid_text_color, bid_price_text.c_str()); 
   
   // best ask price
   std::string ask_price_text = Utils::formatPrice(level1->best_ask);
   ImVec2 ask_price_pos(pos.x + x_start + bar_length/2 + 5, y_pos);
-  draw_list->AddText(ask_price_pos, IM_COL32(255, 0, 0, 255), ask_price_text.c_str()); 
+  draw_list->AddText(ask_price_pos, ask_text_color, ask_price_text.c_str()); 
 
   // best ask size
   std::string ask_size_text = std::to_string(level1->best_ask_size);

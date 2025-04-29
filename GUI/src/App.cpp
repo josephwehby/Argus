@@ -132,14 +132,13 @@ void App::render() {
 void App::styleApp() {
   ImGuiStyle& style = ImGui::GetStyle();
 
-  style.WindowRounding = 5.3f;
-  style.FrameRounding = 5.3f;
-  style.Colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
-  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.14f, 0.26f, 0.45f, 1.0f);
-  style.Colors[ImGuiCol_Tab] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-  style.Colors[ImGuiCol_FrameBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
-  style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
-  style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
+  style.WindowRounding = 5.f;
+  style.FrameRounding = 5.f;
+  style.Colors[ImGuiCol_WindowBg] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
+  style.Colors[ImGuiCol_Border] = ImVec4(55/255.f, 57/255.f, 69/255.f, 1.0f);
+  style.Colors[ImGuiCol_TitleBg] = ImVec4(45/255.f, 47/255.f, 59/255.f, 1.0f);
+  style.Colors[ImGuiCol_TitleBgActive] = ImVec4(60/255.f, 62/255.f, 74/255.f, 1.0f);
+  style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(45/255.f, 47/255.f, 59/255.f, 0.8f);
 }
 
 void App::drawMenuBar() {

@@ -22,6 +22,11 @@ class OrderBook : public Widget {
     const float max_width = 400.0f;
     const float y_start = 30.0f;
     const float min_width = 3.0f;
+    
+    const ImU32 ask_bar_color = IM_COL32(255, 64, 64, 153);
+    const ImU32 ask_text_color = IM_COL32(255, 102, 102, 255);
+    const ImU32 bid_bar_color = IM_COL32(51, 204, 102, 153);
+    const ImU32 bid_text_color = IM_COL32(102, 255, 153, 255);
 
     const unsigned int depth = 25;
     const unsigned int depth_view = 20;
