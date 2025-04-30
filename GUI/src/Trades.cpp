@@ -24,20 +24,43 @@ void Trades::draw() {
     }
   }
 
-  ImGui::SetNextWindowSize(ImVec2(280, 690), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(340, 690), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show);
-  
-  for (const auto& trade : trades) {
-    ImVec4 color;
-    if (trade.side == TradeSide::Buy) {
-      color = (trade.type == TradeType::Limit) ? limit_buy_color: market_buy_color;
-    } else {
-      color = (trade.type == TradeType::Limit) ? limit_sell_color : market_sell_color;
+
+  if (ImGui::BeginTable("trades_table", 4, ImGuiTableFlags_SizingStretchSame)) {
+    ImGui::TableSetupColumn("Price");
+    ImGui::TableSetupColumn("Qty");
+    ImGui::TableSetupColumn("Type");
+    ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
+
+    for (const auto& trade : trades) {
+      ImGui::TableNextRow();
+      
+      ImVec4 color;
+      
+      if (trade.side == TradeSide::Buy) {
+        color = bid_text_color; 
+      } else {
+        color = ask_text_color;
+      }
+    
+      std::string order_type = (trade.type == TradeType::Limit) ? "LMT" : "MKT";
+
+      ImGui::TableNextColumn();
+      ImGui::TextColored(color, "%s", trade.price.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", trade.size.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", order_type.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", trade.time.c_str());
     }
 
-    ImGui::TextColored(color, "%-10s %-10s %-6s", trade.price.c_str(), trade.size.c_str(), trade.time.c_str());
-  }
+    ImGui::EndTable();
+  } 
 
+       
 
   ImGui::End();
 }
