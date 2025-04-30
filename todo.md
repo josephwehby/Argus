@@ -1,2 +1,3 @@
 - use binance instead of kraken
 - implement ping request for kraken server so connection does not disconnect
+- fix times on chart and trades widgets

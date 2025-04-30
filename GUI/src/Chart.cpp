@@ -98,7 +98,7 @@ void Chart::draw() {
       ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines,ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
       ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
-      ImPlot::SetNextFillStyle(ImVec4(1.f,0.75f,0.25f,1));
+      ImPlot::SetNextFillStyle(ImVec4(0.7f, 0.6f, 0.8f, 0.7f));
       ImPlot::PlotBars("##", volume_x.data(), volume_y.data(), volume_x.size(), half_width);
       ImPlot::EndPlot();
     }

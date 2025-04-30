@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <map>
 #include <iostream>
 #include <memory>
@@ -17,8 +18,6 @@ class OrderBook : public Widget {
     void updateBook();
     void draw() override; 
   private:
-    const float bar_height = 26.0f;
-    
     const ImU32 ask_bar_color = IM_COL32(255, 64, 64, 153);
     const ImU32 ask_text_color = IM_COL32(255, 102, 102, 255);
     const ImU32 bid_bar_color = IM_COL32(51, 204, 102, 153);
@@ -26,6 +25,7 @@ class OrderBook : public Widget {
 
     const unsigned int depth = 25;
     const unsigned int depth_view = 20;
+    const float min_bar_height = 20.0f;
 
     const std::string channel = "book";
     std::map<double, double, std::greater<double>> bids;

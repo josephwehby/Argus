@@ -63,10 +63,12 @@ void OrderBook::draw() {
   ImVec2 win_size = ImGui::GetContentRegionAvail();
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
-  float max_width = win_size.x * .95;
-  float min_width = win_size.x * .05;
-  float x_start = win_size.x *.025;
+  float max_width = win_size.x * .98;
+  float min_width = max_width * .05;
+  float x_start = win_size.x *.01;
   float y_start = win_size.y * .03;
+
+  float bar_height = std::max((win_size.y - y_start) / 40.0f, min_bar_height);
 
   double max_bid_size = 0;
   double max_ask_size = 0;
@@ -90,7 +92,7 @@ void OrderBook::draw() {
     bar_length = std::max(min_width, bar_length);
 
     float x1 = pos.x + x_start + (max_width - bar_length);
-    float y1 = pos.y + y_start + ((bar_height) * row);
+    float y1 = pos.y + y_start + (bar_height * row);
 
     float x2 = pos.x + x_start + max_width;
     float y2 = y1 + bar_height;
@@ -120,7 +122,7 @@ void OrderBook::draw() {
     bar_length = std::max(min_width, bar_length);
 
     float x1 = pos.x + x_start + (max_width - bar_length);
-    float y1 = pos.y + y_start + ((bar_height) * row);
+    float y1 = pos.y + y_start + (bar_height * row);
 
     float x2 = pos.x + x_start + max_width;
     float y2 = y1 + bar_height;
