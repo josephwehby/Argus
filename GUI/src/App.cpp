@@ -1,5 +1,4 @@
 #include "App.hpp"
-#include <iostream>
 
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -139,6 +138,9 @@ void App::styleApp() {
   style.Colors[ImGuiCol_TitleBg] = ImVec4(45/255.f, 47/255.f, 59/255.f, 1.0f);
   style.Colors[ImGuiCol_TitleBgActive] = ImVec4(60/255.f, 62/255.f, 74/255.f, 1.0f);
   style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(45/255.f, 47/255.f, 59/255.f, 0.8f);
+  style.Colors[ImGuiCol_FrameBg] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
+  style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
+  style.Colors[ImGuiCol_FrameBgActive] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
 }
 
 void App::drawMenuBar() {

@@ -27,7 +27,7 @@ void Chart::draw() {
   
   if (candles.size() == 0) return;
 
-  ImGui::SetNextWindowSize(ImVec2(800, 690), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(800, 690), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show);
 
   double width = .25;
@@ -41,7 +41,7 @@ void Chart::draw() {
     half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
 
     ImPlotStyle& style = ImPlot::GetStyle();
-    style.Colors[ImPlotCol_PlotBg] = ImVec4(0.08f, 0.098f, 0.11f, 1.0f);
+    style.Colors[ImPlotCol_PlotBg] = background_color;
     style.Colors[ImPlotCol_Crosshairs] = ImVec4(1,1,1,0.5f);
 
     style.PlotPadding = ImVec2(5, 5);
@@ -84,7 +84,7 @@ void Chart::draw() {
 
           ImVec2 low_pos = ImPlot::PlotToPixels(time, candle.low);
           ImVec2 high_pos = ImPlot::PlotToPixels(time, candle.high);
-          draw_list->AddLine(low_pos, high_pos, color, 0.25f); 
+          draw_list->AddLine(low_pos, high_pos, color, half_width/4); 
           index++;
         }
 

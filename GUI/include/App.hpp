@@ -9,6 +9,7 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 #include "Ticker.hpp"
 #include "OrderBook.hpp"

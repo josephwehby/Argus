@@ -26,9 +26,11 @@ class Chart : public Widget {
     std::string symbol;
     const std::string channel = "ohlc"; 
     float ratios[2] = {2.5, 1};
-    ImU32 green = IM_COL32(0, 255, 0, 255);
-    ImU32 red = IM_COL32(255, 0, 0, 255);
-    
+
+    const ImU32 green = IM_COL32(102, 255, 153, 255);
+    const ImU32 red = IM_COL32(255, 102, 102, 255);
+    const ImVec4 background_color = ImVec4{40/255.f, 42/255.f, 54/255.f, 1.0f};
+
     std::map<long long, Candle> candles;
     std::shared_ptr<DataStore> datastore;
     std::shared_ptr<WebSocket> ws;
