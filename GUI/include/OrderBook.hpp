@@ -18,10 +18,6 @@ class OrderBook : public Widget {
     void draw() override; 
   private:
     const float bar_height = 26.0f;
-    const float x_start = 15.0f;
-    const float max_width = 400.0f;
-    const float y_start = 30.0f;
-    const float min_width = 3.0f;
     
     const ImU32 ask_bar_color = IM_COL32(255, 64, 64, 153);
     const ImU32 ask_text_color = IM_COL32(255, 102, 102, 255);
@@ -30,6 +26,7 @@ class OrderBook : public Widget {
 
     const unsigned int depth = 25;
     const unsigned int depth_view = 20;
+
     const std::string channel = "book";
     std::map<double, double, std::greater<double>> bids;
     std::map<double, double, std::greater<double>> asks;

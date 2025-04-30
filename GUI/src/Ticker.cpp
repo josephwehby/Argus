@@ -21,12 +21,15 @@ void Ticker::draw() {
   auto update = datastore->getTicker(symbol);  
 
   if (update != nullptr) level1 = update;
-
   if (level1 == nullptr) return;
   
-  ImGui::SetNextWindowSize(ImVec2(435, 100), ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(435, 100), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show);
+  
   ImVec2 pos = ImGui::GetWindowPos();
+  ImVec2 win_size = ImGui::GetContentRegionAvail();
+  float bar_length = win_size.x * .95;
+
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
   draw_list->AddText({x_start + pos.x, y_start + pos.y}, IM_COL32(255,255,255,255), "BID");
