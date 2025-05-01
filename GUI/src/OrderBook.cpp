@@ -57,19 +57,19 @@ void OrderBook::draw() {
   updateBook();
   
   ImGui::SetNextWindowSize(ImVec2(435,1070), ImGuiCond_FirstUseEver);
-  ImGui::Begin(window_name.c_str(), &show);
+  ImGui::Begin(window_name.c_str(), &show, ImGuiWindowFlags_NoScrollbar);
 
   ImVec2 pos = ImGui::GetWindowPos();
   ImVec2 win_size = ImGui::GetContentRegionAvail();
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
-  float max_width = win_size.x * .98;
+  float max_width = win_size.x;
   float min_width = max_width * .05;
   float x_start = win_size.x *.01;
   float y_start = win_size.y * .03;
 
-  float bar_height = std::max((win_size.y - y_start) / 40.0f, min_bar_height);
-
+  float bar_height = std::max((win_size.y) / 40.0f, min_bar_height);
+  std::cout << bar_height << " " << max_width << std::endl;
   double max_bid_size = 0;
   double max_ask_size = 0;
 
