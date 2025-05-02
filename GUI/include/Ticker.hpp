@@ -24,9 +24,10 @@ class Ticker : public Widget {
     const ImU32 ask_text_color_32 = IM_COL32(255, 102, 102, 255);
     const ImU32 bid_text_color_32 = IM_COL32(102, 255, 153, 255);
     const ImU32 white_32 = IM_COL32(255, 255, 255, 255);
- 
     const ImU32 ask_bar_color = IM_COL32(255, 64, 64, 153);
     const ImU32 bid_bar_color = IM_COL32(51, 204, 102, 153);
+    const ImU32 ask_bar_color_light = IM_COL32(255, 64, 64, 90);
+    const ImU32 bid_bar_color_light = IM_COL32(51, 204, 102, 90);
 
     std::shared_ptr<Level1> level1;
     std::shared_ptr<DataStore> datastore;

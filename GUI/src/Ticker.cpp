@@ -14,18 +14,18 @@ Ticker::~Ticker() {
   ws->unsubscribe(unsub_msg);
 }
 
-// probably need to redo this at some point
 void Ticker::draw() {
   
-  // get updates from datastore if there are any
   auto update = datastore->getTicker(symbol);  
 
   if (update != nullptr) level1 = update;
   if (level1 == nullptr) return;
   
-  ImGui::SetNextWindowSize(ImVec2(435, 380), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSize(ImVec2(435, 250), ImGuiCond_FirstUseEver);
   
   ImGui::Begin(window_name.c_str(), &show);
+  
+  ImGui::Dummy(ImVec2(0.f, 5.f));
   
   ImVec4 text_color = (level1->price_change >= 0) ? bid_text_color : ask_text_color;
 
@@ -43,7 +43,7 @@ void Ticker::draw() {
 
   ImGui::Dummy(ImVec2(0.f, 10.f));
   
-  ImGui::BeginChild("BidAskBar", ImVec2(0,bar_height+10), false, ImGuiWindowFlags_NoScrollbar);
+  ImGui::BeginChild("BidAskBar", ImVec2(0, bar_height*2 + 10), false, ImGuiWindowFlags_NoScrollbar);
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
   ImVec2 pos = ImGui::GetWindowPos();
@@ -69,11 +69,11 @@ void Ticker::draw() {
   x2 = x1 + (bar_length/2);
   y2 = y1 + bar_height;
 
-  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), bid_bar_color);
+  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), bid_bar_color_light);
 
   x1 = x2;
   x2 = pos.x + bar_length;
-  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), ask_bar_color);
+  draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), ask_bar_color_light);
    
   // add bid size to bar and price to bar
   float y_pos = pos.y + y_start + bar_height + (bar_height)/2 - 10;
