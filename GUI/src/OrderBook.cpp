@@ -69,7 +69,6 @@ void OrderBook::draw() {
   float y_start = win_size.y * .03;
 
   float bar_height = std::max((win_size.y) / 40.0f, min_bar_height);
-  std::cout << bar_height << " " << max_width << std::endl;
   double max_bid_size = 0;
   double max_ask_size = 0;
 

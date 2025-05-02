@@ -1,5 +1,8 @@
 #include "App.hpp"
 
+ImFont* App::default_font = nullptr;
+ImFont* App::large_font = nullptr;
+
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
@@ -28,7 +31,8 @@ App::App() {
   io->ConfigFlags |= ImGuiConfigFlags_None;
   io->ConfigWindowsMoveFromTitleBarOnly;
 
-  io->Fonts->AddFontFromFileTTF("JetBrainsMono-Regular.ttf", 18);
+  App::default_font = io->Fonts->AddFontFromFileTTF("JetBrainsMono-Regular.ttf", 20);
+  App::large_font = io->Fonts->AddFontFromFileTTF("JetBrainsMono-Regular.ttf", 40);
   
   styleApp();
 

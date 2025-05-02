@@ -71,9 +71,13 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
   double percent_change = item->at("data")[0]["change_pct"];
 
   double last_price = item->at("data")[0]["last"];
+
+  double high = item->at("data")[0]["high"];
+  double low = item->at("data")[0]["low"];
+  double volume = item->at("data")[0]["volume"];
   
   std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
-      price_change, percent_change, last_price);
+      price_change, percent_change, last_price, high, low, volume);
   
   datastore->setTicker(symbol, ld);
 }

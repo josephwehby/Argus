@@ -1,3 +1,5 @@
+#pragma once
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -24,6 +26,10 @@ class App {
     ~App();
     void update();
     void run();
+
+    static ImFont* default_font;
+    static ImFont* large_font;
+
   private:
     void render();
     void drawMenuBar();
