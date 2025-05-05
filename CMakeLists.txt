@@ -66,6 +66,6 @@ endif()
 add_custom_command(
   TARGET App
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/GUI/fonts/JetBrainsMono-Regular.ttf" "${CMAKE_BINARY_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/GUI/fonts/JetBrainsMono-Regular.ttf" "${CMAKE_BINARY_DIR}/Debug"
   COMMENT "Copying jet brains font to output directory"
 )

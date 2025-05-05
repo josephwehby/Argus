@@ -1,6 +1,6 @@
 #include "DataParser.hpp"
 
-DataParser::DataParser(std::shared_ptr<DataStore> ds) : datastore(ds) {
+DataParser::DataParser(std::shared_ptr<DataStore> ds, std::shared_ptr<ConnectionState> cs_) : datastore(ds), cs(cs_) {
   process_thread = std::thread(&DataParser::processLoop, this); 
 }
 
@@ -37,11 +37,15 @@ void DataParser::parseData(std::shared_ptr<json> item) {
 
   if (!item->contains("channel")) {
     std::cout << "[!] subscribe message: ignoring" << std::endl;
-    return;
+        return;
   }
 
   std::string channel = item->at("channel");
   if (channel == "heartbeat" || channel == "status") {
+    if (channel == "status" && item->at("data")[0]["system"] == "online") {
+      cs->setState(State::CONNECTED);
+    }
+
     return;
   }
   

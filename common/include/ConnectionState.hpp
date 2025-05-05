@@ -1,6 +1,8 @@
+#pragma once
+
 #include <mutex>
 
-enum State { CONNECTING, CONNECTED, CLOSED };
+enum class State { CONNECTING, CONNECTED, CLOSED };
 
 class ConnectionState {
   public:
@@ -12,5 +14,5 @@ class ConnectionState {
 
   private:
     State state;
-    std::mutex m;
+    mutable std::mutex m;
 };

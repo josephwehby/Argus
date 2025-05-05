@@ -18,6 +18,7 @@
 #include "root_certificates.hpp"
 #include "DataParser.hpp"
 #include "DataStore.hpp"
+#include "ConnectionState.hpp"
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -30,7 +31,7 @@ using json = nlohmann::json;
 
 class WebSocket : public std::enable_shared_from_this<WebSocket> {
   public:
-    explicit WebSocket(net::io_context&, ssl::context&, std::shared_ptr<DataStore>);
+    explicit WebSocket(net::io_context&, ssl::context&, std::shared_ptr<DataStore>, std::shared_ptr<ConnectionState>);
     ~WebSocket();
     void connect();
     void subscribe(json&);
@@ -53,6 +54,7 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     std::string m_port = "443";
     
     DataParser data_parser;
+    std::shared_ptr<ConnectionState> cs;
 
     tcp::resolver m_resolver;
     ssl::context m_ssl_ctx {ssl::context::tlsv12_client};

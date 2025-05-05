@@ -40,7 +40,7 @@ App::App() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // start up the websocket stuff
-  cs = std::make_shared<ConnectionState>();
+  cs = std::make_shared<ConnectionState>(State::CONNECTING);
   datastore = std::make_shared<DataStore>();
   initWebSocket();
 
@@ -75,7 +75,7 @@ void App::initWebSocket() {
     return;
   }
 
-  ws = std::make_shared<WebSocket>(ioc, ctx, datastore);
+  ws = std::make_shared<WebSocket>(ioc, ctx, datastore, cs);
 
   io_thread = std::thread([this](){
     ioc.run();     
@@ -178,6 +178,36 @@ void App::drawMenuBar() {
       }
       ImGui::EndMenu();
     }
+    
+    State state = cs->getState();
+    std::string status = "";
+    ImVec4 status_color;
+
+    switch(state) {
+      case State::CONNECTING:
+        status_color = ImVec4(1.00f, 0.84f, 0.00f, 1.00f);
+        status = "Connecting";
+        break;
+      case State::CONNECTED:
+        status_color = ImVec4(50/255.f, 205/255.f, 50/255.f, 1.f);
+        status = "Online";
+        break;
+      case State::CLOSED:
+        status_color = ImVec4(220/255.f, 20/255.f, 60/255.f, 1.f);
+        status = "Offline";
+        break;
+      default:
+        break;
+    }
+    
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImVec2 text_size = ImGui::CalcTextSize(status.c_str());
+    ImVec2 screen_size = ImGui::GetContentRegionAvail();
+
+    float new_x = pos.x + screen_size.x - text_size.x - 5; 
+    ImGui::SetCursorPosX(new_x);
+    ImGui::TextColored(status_color, status.c_str());
+
     ImGui::EndMainMenuBar();
   }
 }

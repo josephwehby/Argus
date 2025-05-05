@@ -4,10 +4,11 @@ void fail(beast::error_code ec, char const* what) {
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, std::shared_ptr<DataStore> ds) 
+WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, std::shared_ptr<DataStore> ds, std::shared_ptr<ConnectionState> cs_) 
   : m_resolver(net::make_strand(ioc)),
     m_ws(net::make_strand(ioc), m_ssl_ctx),
-    data_parser(ds) {
+    data_parser(ds, cs_),
+    cs(cs_) {
       
       m_ssl_ctx = std::move(ctx);
 }
