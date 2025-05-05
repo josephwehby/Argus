@@ -32,6 +32,8 @@ void DataParser::processLoop() {
 }
 
 void DataParser::parseData(std::shared_ptr<json> item) {
+  std::string d = item->dump();
+  std::cout << d << std::endl;
 
   if (!item->contains("channel")) {
     std::cout << "[!] subscribe message: ignoring" << std::endl;
@@ -40,7 +42,6 @@ void DataParser::parseData(std::shared_ptr<json> item) {
 
   std::string channel = item->at("channel");
   if (channel == "heartbeat" || channel == "status") {
-    //std::cout << "[!] heartbeat or status channel: ignoring" << std::endl; 
     return;
   }
   

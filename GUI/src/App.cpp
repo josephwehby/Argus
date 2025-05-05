@@ -40,8 +40,10 @@ App::App() {
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // start up the websocket stuff
+  cs = std::make_shared<ConnectionState>();
   datastore = std::make_shared<DataStore>();
-  connected = initWebSocket();
+  initWebSocket();
+
 }
 
 App::~App() {
@@ -65,12 +67,12 @@ App::~App() {
   glfwTerminate();
 }
 
-bool App::initWebSocket() {
+void App::initWebSocket() {
   load_root_certificates(this->ctx, this->ec);
 
   if (ec) {
     std::cout << "Error " << ec << std::endl;
-    return false;
+    return;
   }
 
   ws = std::make_shared<WebSocket>(ioc, ctx, datastore);
@@ -81,7 +83,7 @@ bool App::initWebSocket() {
 
   ws->connect();
 
-  return true;
+  return;
 }
 
 void App::update() {

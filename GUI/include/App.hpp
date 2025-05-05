@@ -19,6 +19,7 @@
 #include "Chart.hpp"
 #include "DataStore.hpp"
 #include "WebSocket.hpp"
+#include "ConnectionState.hpp"
 
 class App {
   public:
@@ -34,19 +35,19 @@ class App {
     void render();
     void drawMenuBar();
     void styleApp();
-    bool initWebSocket();
+    void initWebSocket();
 
     const char* glsl_version;
     ImGuiIO* io;
     GLFWwindow* window;
-    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
+    ImVec4 clear_color = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
     
-    std::vector<std::unique_ptr<Widget>> widgets;
     bool connected = false;
-
+    std::vector<std::unique_ptr<Widget>> widgets;
     std::shared_ptr<DataStore> datastore;
-    
     std::shared_ptr<WebSocket> ws;
+    std::shared_ptr<ConnectionState> cs;
+
     net::io_context ioc;
     boost::system::error_code ec;
     ssl::context ctx {ssl::context::tlsv12_client};

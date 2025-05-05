@@ -21,7 +21,7 @@ void Ticker::draw() {
   if (update != nullptr) level1 = update;
   if (level1 == nullptr) return;
   
-  ImGui::SetNextWindowSize(ImVec2(435, 250), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSize(ImVec2(440, 250), ImGuiCond_FirstUseEver);
   
   ImGui::Begin(window_name.c_str(), &show);
   
