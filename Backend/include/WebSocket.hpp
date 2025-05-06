@@ -33,6 +33,7 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
   public:
     explicit WebSocket(net::io_context&, ssl::context&, std::shared_ptr<DataStore>, std::shared_ptr<ConnectionState>);
     ~WebSocket();
+    void fail(beast::error_code, char const*);
     void connect();
     void subscribe(json&);
     void unsubscribe(json&);

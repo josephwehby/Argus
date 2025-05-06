@@ -1,7 +1,8 @@
 #include "WebSocket.hpp"
 
-void fail(beast::error_code ec, char const* what) {
+void WebSocket::fail(beast::error_code ec, char const* what) {
     std::cerr << what << ": " << ec.message() << "\n";
+    cs->setState(State::CLOSED);
 }
 
 WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, std::shared_ptr<DataStore> ds, std::shared_ptr<ConnectionState> cs_) 

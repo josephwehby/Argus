@@ -150,6 +150,12 @@ void App::styleApp() {
 }
 
 void App::drawMenuBar() {
+  State state = cs->getState();
+
+  bool isDisabled = (state != State::CONNECTED) ? true : false;
+  
+  ImGui::BeginDisabled(isDisabled);
+
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {
       if (ImGui::MenuItem("BTC")) {
@@ -179,7 +185,6 @@ void App::drawMenuBar() {
       ImGui::EndMenu();
     }
     
-    State state = cs->getState();
     std::string status = "";
     ImVec4 status_color;
 
@@ -210,4 +215,6 @@ void App::drawMenuBar() {
 
     ImGui::EndMainMenuBar();
   }
+
+  ImGui::EndDisabled();
 }

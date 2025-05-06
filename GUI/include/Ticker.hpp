@@ -16,7 +16,7 @@ class Ticker : public Widget {
   private:
     const std::string channel = "ticker";
     
-    const float bar_height = 25;
+    const float bar_height = 20;
     
     const ImVec4 ask_text_color = ImVec4{1.f, 102/255.f, 102/255.f, 1.f};
     const ImVec4 bid_text_color = ImVec4{102/255.f, 1.f, 153/255.f, 1.f};
