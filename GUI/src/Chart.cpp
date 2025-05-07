@@ -92,7 +92,7 @@ void Chart::draw() {
 
           ImVec2 low_pos = ImPlot::PlotToPixels(time, candle.low);
           ImVec2 high_pos = ImPlot::PlotToPixels(time, candle.high);
-          draw_list->AddLine(low_pos, high_pos, color, half_width/4); 
+          draw_list->AddLine(low_pos, high_pos, color, half_width/2); 
           index++;
         }
 
@@ -104,12 +104,12 @@ void Chart::draw() {
 
     if (ImPlot::BeginPlot("##Volume Plot")) {
       ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_RangeFit);
-      ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_Opposite | ImPlotAxisFlags_RangeFit);
+      ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_RangeFit);
 
-      //ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
       ImPlot::SetupAxisFormat(ImAxis_X1, CandleFormatter);
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
-      
+      ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Log10);
+
       ImPlot::SetNextFillStyle(ImVec4(0.7f, 0.6f, 0.8f, 0.7f));
       ImPlot::PlotBars("##", volume_x.data(), volume_y.data(), volume_x.size(), half_width);
       ImPlot::EndPlot();
