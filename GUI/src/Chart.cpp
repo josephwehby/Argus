@@ -1,5 +1,13 @@
 #include "Chart.hpp"
 
+int CandleFormatter(double value, char* buff, int size, void*) {
+  std::time_t t = static_cast<std::time_t>(value);
+  std::tm local_tm;
+  localtime_s(&local_tm, &t);
+
+  return std::strftime(buff, size, "%I:%M%p", &local_tm);
+}
+
 Chart::Chart(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
@@ -56,10 +64,10 @@ void Chart::draw() {
 
       ImDrawList* draw_list = ImPlot::GetPlotDrawList();
       ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
-      ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
 
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first);
       ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
+      ImPlot::SetupAxisFormat(ImAxis_X1, CandleFormatter);
 
       if (ImPlot::BeginItem("##Price Chart")) {
         if (ImPlot::FitThisFrame()) {
@@ -95,9 +103,13 @@ void Chart::draw() {
     }
 
     if (ImPlot::BeginPlot("##Volume Plot")) {
-      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines,ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
-      ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+      ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_RangeFit);
+      ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_Opposite | ImPlotAxisFlags_RangeFit);
+
+      //ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+      ImPlot::SetupAxisFormat(ImAxis_X1, CandleFormatter);
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
+      
       ImPlot::SetNextFillStyle(ImVec4(0.7f, 0.6f, 0.8f, 0.7f));
       ImPlot::PlotBars("##", volume_x.data(), volume_y.data(), volume_x.size(), half_width);
       ImPlot::EndPlot();

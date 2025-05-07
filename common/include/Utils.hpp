@@ -52,8 +52,9 @@ namespace Utils {
   }
 
   inline long long UTCToUnix(std::string datetime) {
-    std::string trim = datetime.substr(0, datetime.find('.'));
 
+    std::string trim = datetime.substr(0, datetime.find('.'));
+    
     std::tm tm{};
 
     std::istringstream ss(trim);
@@ -65,16 +66,8 @@ namespace Utils {
     }
 
     std::time_t utc_time = _mkgmtime(&tm);
-
-    std::tm local_time{};
-    if (localtime_s(&local_time, &utc_time) != 0) {
-      std::cerr << "local time failed" << std::endl;
-      return -1;
-    }
-
-    std::time_t unix_time = std::mktime(&local_time);
-
-    return static_cast<long long>(unix_time);
+    
+    return static_cast<long long>(utc_time);
   }
 
 };
