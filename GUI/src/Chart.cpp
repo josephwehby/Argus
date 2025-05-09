@@ -96,6 +96,24 @@ void Chart::draw() {
           draw_list->AddLine(low_pos, high_pos, color, half_width/2); 
           index++;
         }
+        
+
+        // from close to edge of graph?
+        auto it = std::prev(candles.end());
+        ImU32 color = (it->second.open <= it->second.close) ? green : red;
+
+        ImPlotRect limits = ImPlot::GetPlotLimits();
+        ImVec2 max = ImPlot::PlotToPixels(limits.Max().x, it->second.close); 
+        ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
+
+        std::string current_price = Utils::formatPrice(it->second.close);
+        ImVec2 current_price_size = ImGui::CalcTextSize(current_price.c_str());
+
+        ImVec2 anchor(max.x, it->second.close);
+        anchor.x -= 20;
+
+        draw_list->AddText(anchor, color, current_price.c_str()); 
+        draw_list->AddLine(min, max, color, 1);
 
         ImPlot::EndItem();
       }
@@ -105,7 +123,7 @@ void Chart::draw() {
 
     if (ImPlot::BeginPlot("##Volume Plot", ImVec2(-1,-1), ImPlotFlags_Crosshairs)) {
       ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels);
-      ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_RangeFit);
+      ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines |  ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_Opposite);
 
       ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
