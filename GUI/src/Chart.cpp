@@ -1,11 +1,11 @@
 #include "Chart.hpp"
 
-int CandleFormatter(double value, char* buff, int size, void*) {
+int TimeFormatter(double value, char* buff, int size, void*) {
   std::time_t t = static_cast<std::time_t>(value);
   std::tm local_tm;
   localtime_s(&local_tm, &t);
 
-  return std::strftime(buff, size, "%I:%M%p", &local_tm);
+  return std::strftime(buff, size, "%I:%M", &local_tm);
 }
 
 Chart::Chart(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
@@ -40,12 +40,12 @@ void Chart::draw() {
 
   double width = .25;
   double half_width = width;
-
+  
   std::vector<double> volume_x(candles.size());
   std::vector<double> volume_y(candles.size());
 
   if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
-
+    
     half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
 
     ImPlotStyle& style = ImPlot::GetStyle();
@@ -60,14 +60,14 @@ void Chart::draw() {
     style.AnnotationPadding = ImVec2(0, 0);
     style.FitPadding = ImVec2(0, 0);
 
-    if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs | ImPlotFlags_NoBoxSelect)) {
+    if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
 
       ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
+      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_Opposite);
 
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first);
       ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
-      ImPlot::SetupAxisFormat(ImAxis_X1, CandleFormatter);
+      ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
 
       if (ImPlot::BeginItem("##Price Chart")) {
         if (ImPlot::FitThisFrame()) {
@@ -80,18 +80,19 @@ void Chart::draw() {
         
         int index = 0;
         for (const auto& [time, candle] : candles) {
-
-          volume_x[index] = time;
+          
+          // this is to align it to the left. implot auto centers it
+          volume_x[index] = time+half_width;
           volume_y[index] = candle.volume;
-
+          
           ImU32 color = (candle.open <= candle.close) ? green : red;
-          ImVec2 open_pos = ImPlot::PlotToPixels(time - half_width, candle.open);
-          ImVec2 close_pos = ImPlot::PlotToPixels(time + half_width, candle.close);
+          ImVec2 open_pos = ImPlot::PlotToPixels(time, candle.open);
+          ImVec2 close_pos = ImPlot::PlotToPixels(time + (2*half_width), candle.close);
 
           draw_list->AddRectFilled(open_pos, close_pos, color);
 
-          ImVec2 low_pos = ImPlot::PlotToPixels(time, candle.low);
-          ImVec2 high_pos = ImPlot::PlotToPixels(time, candle.high);
+          ImVec2 low_pos = ImPlot::PlotToPixels(time+half_width, candle.low);
+          ImVec2 high_pos = ImPlot::PlotToPixels(time+half_width, candle.high);
           draw_list->AddLine(low_pos, high_pos, color, half_width/2); 
           index++;
         }
@@ -102,21 +103,19 @@ void Chart::draw() {
       ImPlot::EndPlot();
     }
 
-    if (ImPlot::BeginPlot("##Volume Plot")) {
-      ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_RangeFit);
+    if (ImPlot::BeginPlot("##Volume Plot", ImVec2(-1,-1), ImPlotFlags_Crosshairs)) {
+      ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels);
       ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_RangeFit);
 
-      ImPlot::SetupAxisFormat(ImAxis_X1, CandleFormatter);
+      ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
-      ImPlot::SetupAxisScale(ImAxis_Y1, ImPlotScale_Log10);
 
       ImPlot::SetNextFillStyle(ImVec4(0.7f, 0.6f, 0.8f, 0.7f));
-      ImPlot::PlotBars("##", volume_x.data(), volume_y.data(), volume_x.size(), half_width);
+      ImPlot::PlotBars("##", volume_x.data(), volume_y.data(), volume_x.size(), half_width*2);
       ImPlot::EndPlot();
     }
 
     ImPlot::EndSubplots();
   }
-    
   ImGui::End();
 }
