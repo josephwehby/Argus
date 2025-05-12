@@ -37,6 +37,88 @@ void Chart::draw() {
 
   ImGui::SetNextWindowSize(ImVec2(800, 690), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show);
+  if (ImGui::Button("Switch View")) {
+    show_candles = (show_candles == true) ? false : true;
+  }
+
+  if (show_candles) {
+    drawCandles();
+  } else {
+    drawLine();
+  }
+  ImGui::End();
+}
+
+void Chart::drawLine() {
+  std::vector<double> price_y(candles.size(), 0);
+  std::vector<double> volume_y(candles.size(), 0);
+  std::vector<double> time_x(candles.size(), 0);
+
+  double width = .25;
+  double half_width = width;
+  half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
+
+  int index = 0;
+  for (const auto&[time, candle] : candles) {
+    price_y[index] = candle.close;
+    volume_y[index] = candle.volume;
+    time_x[index] = time;
+    index++; 
+  }
+
+  if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
+
+    ImPlotStyle& style = ImPlot::GetStyle();
+    style.Colors[ImPlotCol_PlotBg] = background_color;
+    style.Colors[ImPlotCol_Crosshairs] = ImVec4(1,1,1,0.5f);
+
+    style.PlotPadding = ImVec2(5, 5);
+    style.LabelPadding = ImVec2(10, 10);
+    style.LegendPadding = ImVec2(0, 0);
+    style.LegendInnerPadding = ImVec2(0, 0);
+    style.MousePosPadding = ImVec2(0, 0);
+    style.AnnotationPadding = ImVec2(0, 0);
+    style.FitPadding = ImVec2(0, 0);
+
+    if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
+
+      ImDrawList* draw_list = ImPlot::GetPlotDrawList();
+      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_Opposite);
+
+      ImPlot::SetupAxisLimits(ImAxis_X1, time_x[0], time_x.back());
+      ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
+      ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
+
+      if (ImPlot::BeginItem("##Price Chart")) {
+        ImVec4 fill_color = ImVec4(0.2f, 0.4f, 1.0f, 0.1f);
+        ImPlot::PushStyleColor(ImPlotCol_Fill, fill_color);
+        ImPlot::PlotLine("##Line Chart", time_x.data(), price_y.data(), price_y.size());
+        ImPlot::PlotShaded("##Shaded Chart", time_x.data(), price_y.data(), price_y.size(), -INFINITY);
+        ImPlot::PopStyleColor();
+        ImPlot::EndItem();
+      }
+      
+      ImPlot::EndPlot();
+    }
+
+    if (ImPlot::BeginPlot("##Volume Plot", ImVec2(-1,-1), ImPlotFlags_Crosshairs)) {
+      ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels);
+      ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines |  ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_Opposite);
+
+      ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
+      ImPlot::SetupAxisLimits(ImAxis_X1, time_x[0], time_x.back() + 5);
+
+      ImPlot::SetNextFillStyle(ImVec4(0.7f, 0.6f, 0.8f, 0.7f));
+      ImPlot::PlotBars("##", time_x.data(), volume_y.data(), time_x.size(), half_width*2);
+      ImPlot::EndPlot();
+    }
+
+    ImPlot::EndSubplots();
+  }
+
+}
+
+void Chart::drawCandles() {
 
   double width = .25;
   double half_width = width;
@@ -63,7 +145,7 @@ void Chart::draw() {
     if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
 
       ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_Opposite);
+      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_Opposite);
 
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first);
       ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
@@ -136,5 +218,6 @@ void Chart::draw() {
 
     ImPlot::EndSubplots();
   }
-  ImGui::End();
 }
+
+

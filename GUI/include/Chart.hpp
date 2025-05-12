@@ -22,10 +22,13 @@ class Chart : public Widget {
     void draw() override;
   private:
     void updateCandles();
+    void drawCandles();
+    void drawLine();
 
     std::string symbol;
     const std::string channel = "ohlc"; 
     float ratios[2] = {2.5, 1};
+    bool show_candles = true;
 
     const ImU32 green = IM_COL32(102, 255, 153, 255);
     const ImU32 red = IM_COL32(255, 102, 102, 255);
