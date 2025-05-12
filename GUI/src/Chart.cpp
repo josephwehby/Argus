@@ -103,16 +103,17 @@ void Chart::draw() {
         ImU32 color = (it->second.open <= it->second.close) ? green : red;
 
         ImPlotRect limits = ImPlot::GetPlotLimits();
-        ImVec2 max = ImPlot::PlotToPixels(limits.Max().x, it->second.close); 
-        ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
 
         std::string current_price = Utils::formatPrice(it->second.close);
         ImVec2 current_price_size = ImGui::CalcTextSize(current_price.c_str());
-
-        ImVec2 anchor(max.x, it->second.close);
-        anchor.x -= 20;
-
-        draw_list->AddText(anchor, color, current_price.c_str()); 
+        
+        ImVec2 price_pos = ImPlot::PlotToPixels(limits.Max().x, it->second.close);
+        price_pos.x -= (current_price_size.x + 20);
+        price_pos.y -= current_price_size.y;
+        draw_list->AddText(price_pos, color, current_price.c_str()); 
+        
+        ImVec2 max = ImPlot::PlotToPixels(limits.Max().x, it->second.close); 
+        ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
         draw_list->AddLine(min, max, color, 1);
 
         ImPlot::EndItem();
