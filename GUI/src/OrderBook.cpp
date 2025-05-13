@@ -96,17 +96,17 @@ void OrderBook::draw() {
     float x2 = pos.x + x_start + max_width;
     float y2 = y1 + bar_height;
 
-    draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), ask_bar_color);
+    draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), Colors::Red_Bar_U32);
     
     ImVec2 ask_price_pos(pos.x + x_start + 5, y1 + (bar_height/2) - 10);
     std::string ask_price = Utils::formatPrice(level.first); 
-    draw_list->AddText(ask_price_pos, ask_text_color, ask_price.c_str());
+    draw_list->AddText(ask_price_pos, Colors::Red_U32, ask_price.c_str());
 
     std::string ask_size = std::to_string(level.second);
     ImVec2 ask_size_size = ImGui::CalcTextSize(ask_size.c_str());
     ImVec2 ask_size_pos(x2 - ask_size_size.x - 5, y1 + (bar_height/2) - 10); 
 
-    draw_list->AddText(ask_size_pos, IM_COL32(255,255,255,255), ask_size.c_str());
+    draw_list->AddText(ask_size_pos, Colors::White_U32, ask_size.c_str());
 
     row++;
   }
@@ -126,17 +126,17 @@ void OrderBook::draw() {
     float x2 = pos.x + x_start + max_width;
     float y2 = y1 + bar_height;
 
-    draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), bid_bar_color);
+    draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), Colors::Green_Bar_U32);
     
     ImVec2 bid_price_pos(pos.x + x_start + 5, y1 + (bar_height/2) - 10);
     std::string bid_price = Utils::formatPrice(level.first); 
-    draw_list->AddText(bid_price_pos, bid_text_color, bid_price.c_str());
+    draw_list->AddText(bid_price_pos, Colors::Green_U32, bid_price.c_str());
 
     std::string bid_size = std::to_string(level.second);
     ImVec2 bid_size_size = ImGui::CalcTextSize(bid_size.c_str());
     ImVec2 bid_size_pos(x2 - bid_size_size.x - 5, y1 + (bar_height/2) - 10); 
 
-    draw_list->AddText(bid_size_pos, IM_COL32(255,255,255,255), bid_size.c_str());
+    draw_list->AddText(bid_size_pos, Colors::White_U32, bid_size.c_str());
 
     row++;
     levels++;

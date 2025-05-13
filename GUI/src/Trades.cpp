@@ -40,9 +40,9 @@ void Trades::draw() {
       ImVec4 color;
       
       if (trade.side == TradeSide::Buy) {
-        color = bid_text_color; 
+        color = Colors::Green_V4; 
       } else {
-        color = ask_text_color;
+        color = Colors::Red_V4;
       }
     
       std::string order_type = (trade.type == TradeType::Limit) ? "LMT" : "MKT";
