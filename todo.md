@@ -1,3 +1,4 @@
 - use binance instead of kraken
 - implement ping request for kraken server so connection does not disconnect
 - fix times on chart and trades widgets
+- add all of these colors to some namespace so i can stop redefinign them everywhere

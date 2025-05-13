@@ -69,8 +69,8 @@ void Chart::drawLine() {
   if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
 
     ImPlotStyle& style = ImPlot::GetStyle();
-    style.Colors[ImPlotCol_PlotBg] = background_color;
-    style.Colors[ImPlotCol_Crosshairs] = ImVec4(1,1,1,0.5f);
+    style.Colors[ImPlotCol_PlotBg] = Colors::Background_V4;
+    style.Colors[ImPlotCol_Crosshairs] = Crosshair_Color;
 
     style.PlotPadding = ImVec2(5, 5);
     style.LabelPadding = ImVec2(10, 10);
@@ -90,8 +90,7 @@ void Chart::drawLine() {
       ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
 
       if (ImPlot::BeginItem("##Price Chart")) {
-        ImVec4 fill_color = ImVec4(0.2f, 0.4f, 1.0f, 0.1f);
-        ImPlot::PushStyleColor(ImPlotCol_Fill, fill_color);
+        ImPlot::PushStyleColor(ImPlotCol_Fill, Colors::Blue_V4);
         ImPlot::PlotLine("##Line Chart", time_x.data(), price_y.data(), price_y.size());
         ImPlot::PlotShaded("##Shaded Chart", time_x.data(), price_y.data(), price_y.size(), -INFINITY);
         ImPlot::PopStyleColor();
@@ -108,7 +107,7 @@ void Chart::drawLine() {
       ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
       ImPlot::SetupAxisLimits(ImAxis_X1, time_x[0], time_x.back() + 5);
 
-      ImPlot::SetNextFillStyle(ImVec4(0.7f, 0.6f, 0.8f, 0.7f));
+      ImPlot::SetNextFillStyle(Colors::Purple_V4);
       ImPlot::PlotBars("##", time_x.data(), volume_y.data(), time_x.size(), half_width*2);
       ImPlot::EndPlot();
     }
@@ -131,8 +130,8 @@ void Chart::drawCandles() {
     half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
 
     ImPlotStyle& style = ImPlot::GetStyle();
-    style.Colors[ImPlotCol_PlotBg] = background_color;
-    style.Colors[ImPlotCol_Crosshairs] = ImVec4(1,1,1,0.5f);
+    style.Colors[ImPlotCol_PlotBg] = Colors::Background_V4;
+    style.Colors[ImPlotCol_Crosshairs] = Crosshair_Color;
 
     style.PlotPadding = ImVec2(5, 5);
     style.LabelPadding = ImVec2(10, 10);
@@ -167,7 +166,8 @@ void Chart::drawCandles() {
           volume_x[index] = time+half_width;
           volume_y[index] = candle.volume;
           
-          ImU32 color = (candle.open <= candle.close) ? green : red;
+          ImU32 color = (candle.open <= candle.close) ? Colors::Green_U32 : Colors::Red_U32;
+
           ImVec2 open_pos = ImPlot::PlotToPixels(time, candle.open);
           ImVec2 close_pos = ImPlot::PlotToPixels(time + (2*half_width), candle.close);
 
@@ -182,21 +182,19 @@ void Chart::drawCandles() {
 
         // from close to edge of graph?
         auto it = std::prev(candles.end());
-        ImU32 color = (it->second.open <= it->second.close) ? green : red;
+        
+        ImU32 color = (it->second.open <= it->second.close) ? Colors::Green_U32 : Colors::Red_U32;
+        ImVec4 tag_color = (it->second.open <= it->second.close) ? Colors::Green_V4 : Colors::Red_V4;
 
         ImPlotRect limits = ImPlot::GetPlotLimits();
 
         std::string current_price = Utils::formatPrice(it->second.close);
         ImVec2 current_price_size = ImGui::CalcTextSize(current_price.c_str());
-        
-        ImVec2 price_pos = ImPlot::PlotToPixels(limits.Max().x, it->second.close);
-        price_pos.x -= (current_price_size.x + 20);
-        price_pos.y -= current_price_size.y;
-        draw_list->AddText(price_pos, color, current_price.c_str()); 
-        
+
+        ImPlot::TagY(it->second.close, tag_color, true);
         ImVec2 max = ImPlot::PlotToPixels(limits.Max().x, it->second.close); 
         ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
-        draw_list->AddLine(min, max, color, 1);
+        draw_list->AddLine(min, max, color, .5);
 
         ImPlot::EndItem();
       }
@@ -211,7 +209,7 @@ void Chart::drawCandles() {
       ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
 
-      ImPlot::SetNextFillStyle(ImVec4(0.7f, 0.6f, 0.8f, 0.7f));
+      ImPlot::SetNextFillStyle(Colors::Purple_V4);
       ImPlot::PlotBars("##", volume_x.data(), volume_y.data(), volume_x.size(), half_width*2);
       ImPlot::EndPlot();
     }
