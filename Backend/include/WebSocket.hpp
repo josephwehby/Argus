@@ -15,7 +15,6 @@
 #include <stdexcept>
 #include <exception>
 
-#include "root_certificates.hpp"
 #include "DataParser.hpp"
 #include "DataStore.hpp"
 #include "ConnectionState.hpp"
@@ -51,8 +50,11 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     void send(json&);
     void onClose(beast::error_code);
 
-    std::string m_host = "ws.kraken.com";
-    std::string m_port = "443";
+    //std::string m_host = "ws.kraken.com";
+    //std::string m_port = "443";
+    
+    std::string m_host = "stream.binance.com";
+    std::string m_port = "9443";
     
     DataParser data_parser;
     std::shared_ptr<ConnectionState> cs;

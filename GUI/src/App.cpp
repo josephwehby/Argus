@@ -69,7 +69,7 @@ App::~App() {
 
 void App::initWebSocket() {
   load_root_certificates(this->ctx, this->ec);
-
+  ctx.set_default_verify_paths();
   if (ec) {
     std::cout << "Error " << ec << std::endl;
     return;

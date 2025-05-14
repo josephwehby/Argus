@@ -1,4 +1,5 @@
 - use binance instead of kraken
-- implement ping request for kraken server so connection does not disconnect
-- fix times on chart and trades widgets
-- add all of these colors to some namespace so i can stop redefinign them everywhere
+- connect to binance on backend
+- incrementally switch parsing to reflect binance data. start with trades
+- send pong frame every 30ish seconds or disconnected
+- update symbols on frontend as binance uses different symbols than kraken

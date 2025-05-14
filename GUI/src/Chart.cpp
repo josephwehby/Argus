@@ -94,6 +94,23 @@ void Chart::drawLine() {
         ImPlot::PlotLine("##Line Chart", time_x.data(), price_y.data(), price_y.size());
         ImPlot::PlotShaded("##Shaded Chart", time_x.data(), price_y.data(), price_y.size(), -INFINITY);
         ImPlot::PopStyleColor();
+
+        auto it = std::prev(candles.end());
+        
+        ImU32 color = (it->second.open <= it->second.close) ? Colors::Green_U32 : Colors::Red_U32;
+        ImVec4 tag_color = (it->second.open <= it->second.close) ? Colors::Green_V4 : Colors::Red_V4;
+
+        ImPlotRect limits = ImPlot::GetPlotLimits();
+
+        std::string current_price = Utils::formatPrice(it->second.close);
+        ImVec2 current_price_size = ImGui::CalcTextSize(current_price.c_str());
+
+        ImPlot::TagY(it->second.close, tag_color, true);
+        ImVec2 max = ImPlot::PlotToPixels(limits.Max().x, it->second.close); 
+        ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
+        draw_list->AddLine(min, max, color, .5);
+
+
         ImPlot::EndItem();
       }
       
