@@ -3,7 +3,7 @@
 namespace JsonBuilder {
   json generateSubscribe(std::string symbol, const std::string& channel, int64_t id, int opt) {
     
-    std::transform(symbol.begin(), symbol.end(), symbol.begin(), [](unsigned char c) { return std::tolower(c); }); 
+    std::transform(symbol.cbegin(), symbol.cend(), symbol.begin(), [](char c) { return std::tolower(c); }); 
     std::string m = symbol + "@" + channel; 
     
     json msg = {
@@ -22,9 +22,9 @@ namespace JsonBuilder {
     return msg;
   }
 
-  json generateUnsubscribe(std::string& symbol, const std::string& channel, int64_t id, int opt) {
+  json generateUnsubscribe(std::string symbol, const std::string& channel, int64_t id, int opt) {
     
-    std::transform(symbol.begin(), symbol.end(), symbol.begin(), [](unsigned char c) { return std::tolower(c); }); 
+    std::transform(symbol.cbegin(), symbol.cend(), symbol.begin(), [](char c) { return std::tolower(c); }); 
     std::string m = symbol + "@" + channel; 
     
     json msg = {
