@@ -4,12 +4,12 @@ Trades::Trades(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, st
   symbol = token;
   window_name = "Trades: " + symbol + " ##" + std::to_string(window_id);
 
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel);
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id);
   ws->subscribe(sub_msg);
 }
 
 Trades::~Trades() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel);
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id);
   ws->unsubscribe(unsub_msg);
 }
 
@@ -27,10 +27,9 @@ void Trades::draw() {
   ImGui::SetNextWindowSize(ImVec2(340, 690), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show);
 
-  if (ImGui::BeginTable("trades_table", 4, ImGuiTableFlags_SizingStretchSame)) {
+  if (ImGui::BeginTable("trades_table", 3, ImGuiTableFlags_SizingStretchSame)) {
     ImGui::TableSetupColumn("Price");
     ImGui::TableSetupColumn("Qty");
-    ImGui::TableSetupColumn("Type");
     ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthStretch);
     ImGui::TableHeadersRow();
 
@@ -45,14 +44,10 @@ void Trades::draw() {
         color = Colors::Red_V4;
       }
     
-      std::string order_type = (trade.type == TradeType::Limit) ? "LMT" : "MKT";
-
       ImGui::TableNextColumn();
       ImGui::TextColored(color, "%s", trade.price.c_str());
       ImGui::TableNextColumn();
       ImGui::Text("%s", trade.size.c_str());
-      ImGui::TableNextColumn();
-      ImGui::Text("%s", order_type.c_str());
       ImGui::TableNextColumn();
       ImGui::Text("%s", trade.time.c_str());
     }

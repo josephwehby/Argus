@@ -68,8 +68,8 @@ App::~App() {
 }
 
 void App::initWebSocket() {
-  load_root_certificates(this->ctx, this->ec);
   ctx.set_default_verify_paths();
+  
   if (ec) {
     std::cout << "Error " << ec << std::endl;
     return;
@@ -159,28 +159,28 @@ void App::drawMenuBar() {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Ticker>(datastore, ws, "BTC/USD"));
+        widgets.push_back(std::make_unique<Ticker>(datastore, ws, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("OrderBook")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<OrderBook>(datastore, ws, "BTC/USD"));
+        widgets.push_back(std::make_unique<OrderBook>(datastore, ws, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Chart")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Chart>(datastore, ws, "BTC/USD"));
+        widgets.push_back(std::make_unique<Chart>(datastore, ws, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Trades")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Trades>(datastore, ws, "BTC/USD"));
+        widgets.push_back(std::make_unique<Trades>(datastore, ws, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }

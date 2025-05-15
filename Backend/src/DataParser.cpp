@@ -32,12 +32,12 @@ void DataParser::processLoop() {
 }
 
 void DataParser::parseData(std::shared_ptr<json> item) {
+  /*
   if (!item->contains("channel")) {
     std::cout << "[!] subscribe message: ignoring" << std::endl;
         return;
   }
 
-  std::string channel = item->at("channel");
   if (channel == "heartbeat" || channel == "status") {
     if (channel == "status" && item->at("data")[0]["system"] == "online") {
       cs->setState(State::CONNECTED);
@@ -45,6 +45,14 @@ void DataParser::parseData(std::shared_ptr<json> item) {
 
     return;
   }
+  */
+  std::cout << item->dump() << std::endl;  
+  if (!item->contains("e")) {
+    std::cout << "item does not contain market data" << std::endl;
+    return;
+  }
+
+  std::string channel = item->at("e");
   
   if (channel == "ticker") {
     parseTicker(item);    
@@ -114,14 +122,11 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {
-  std::string symbol = item->at("data")[0]["symbol"];
+  std::string symbol = item->at("s");
   
   std::vector<Trade> trades;
-  for (const auto trade : item->at("data")) {
-    TradeType type = (trade["ord_type"] == "limit") ? TradeType::Limit : TradeType::Market;
-    TradeSide side = (trade["side"] == "buy") ? TradeSide::Buy : TradeSide::Sell;
-    trades.emplace_back(type, side, Utils::formatPrice(trade["price"]), Utils::formatSize(trade["qty"]), Utils::formatTime(trade["timestamp"])); 
-  }
-
+  TradeSide side = (item->at("m") == true) ? TradeSide::Sell: TradeSide::Buy;
+  trades.emplace_back(side, Utils::formatPrice(item->at("p")), Utils::formatSize(item->at("q")), Utils::formatTime(item->at("T"))); 
+  
   datastore->setTrades(symbol, trades);
 }

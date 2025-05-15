@@ -3,14 +3,16 @@
 #include <string>
 #include <random>
 #include <chrono>
+#include <cstdint>
+#include <limits>
 
 #include "imgui.h"
 
 class Widget {
   public:
     Widget() {
-      std::mt19937 mt{ std::random_device{}() };
-      std::uniform_int_distribution<> randomID{11111111,99999999};
+      std::mt19937_64 mt{ std::random_device{}() };
+      std::uniform_int_distribution<int64_t> randomID{11111111, std::numeric_limits<int64_t>::max()};
       window_id = randomID(mt); 
     }
 
@@ -21,7 +23,7 @@ class Widget {
     virtual void draw() = 0;
 
   protected:
-    int window_id;
+    int64_t window_id;
     bool show = true;
     std::string symbol;
     std::string window_name;

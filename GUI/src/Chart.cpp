@@ -12,12 +12,12 @@ Chart::Chart(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std:
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
   
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, 1);
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, 1);
   ws->subscribe(sub_msg);
 }
 
 Chart::~Chart() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, 1);
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, 1);
   ws->unsubscribe(unsub_msg);
 }
 

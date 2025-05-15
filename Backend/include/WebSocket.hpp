@@ -1,6 +1,5 @@
 #pragma once
 
-#include "root_certificates.hpp"
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
@@ -53,7 +52,7 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     //std::string m_host = "ws.kraken.com";
     //std::string m_port = "443";
     
-    std::string m_host = "stream.binance.com";
+    std::string m_host = "data-stream.binance.vision";
     std::string m_port = "9443";
     
     DataParser data_parser;

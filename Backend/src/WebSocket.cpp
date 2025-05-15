@@ -80,7 +80,7 @@ void WebSocket::onConnect(beast::error_code ec, tcp::resolver::results_type::end
   }
 
   beast::get_lowest_layer(m_ws).expires_after(std::chrono::seconds(30));
-
+  
   if (!SSL_set_tlsext_host_name(m_ws.next_layer().native_handle(), m_host.c_str())) {
     ec = beast::error_code(static_cast<int>(::ERR_get_error()), net::error::get_ssl_category());
     return fail(ec, "connect");
@@ -109,7 +109,7 @@ void WebSocket::onSSLHandshake(beast::error_code ec) {
    m_ws.set_option(websocket::stream_base::decorator(
     [](websocket::request_type& req) {
       //req.set(http::field::host, "ws.kraken.com");
-      req.set(http::field::host, "stream.binance.com");
+      req.set(http::field::host, "data-stream.binance.vision");
       req.set(http::field::user_agent,
         std::string(BOOST_BEAST_VERSION_STRING) +
         " websocket-client-async-ssl");
@@ -124,7 +124,8 @@ void WebSocket::onHandshake(beast::error_code ec) {
   if (ec) {
     return fail(ec, "handshake");
   }
-
+  
+  cs->setState(State::CONNECTED);
   doRead();
 }
 
@@ -137,8 +138,8 @@ void WebSocket::onRead(beast::error_code ec, std::size_t bytes_transferred) {
   
   std::string data = beast::buffers_to_string(m_buffer.data());
   json jsonData = json::parse(data);
-  //data_parser.pushData(jsonData);
-  std::cout << jsonData.dump() << std::endl;
+  data_parser.pushData(jsonData);
+  //std::cout << jsonData.dump() << std::endl;
   m_buffer.consume(m_buffer.size());
 
   doRead();

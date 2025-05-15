@@ -5,12 +5,12 @@ Ticker::Ticker(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, st
   symbol = token;
   window_name = "Ticker: " + symbol + "  ##" + std::to_string(getWindowID());
   
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel); 
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id); 
   ws->subscribe(sub_msg);
 }
 
 Ticker::~Ticker() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel);
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id);
   ws->unsubscribe(unsub_msg);
 }
 
