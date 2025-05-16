@@ -53,7 +53,7 @@ void DataParser::parseData(std::shared_ptr<json> item) {
   }
 
   std::string channel = item->at("e");
-  
+   
   if (channel == "ticker") {
     parseTicker(item);    
   } else if (channel == "book") {
@@ -124,9 +124,8 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
 void DataParser::parseTrade(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
   
-  std::vector<Trade> trades;
   TradeSide side = (item->at("m") == true) ? TradeSide::Sell: TradeSide::Buy;
-  trades.emplace_back(side, Utils::formatPrice(item->at("p")), Utils::formatSize(item->at("q")), Utils::formatTime(item->at("T"))); 
-  
-  datastore->setTrades(symbol, trades);
+  Trade trade(side, Utils::formatPrice(item->at("p")), Utils::formatSize(item->at("q")), Utils::formatMilliTime(item->at("T"))); 
+  std::cout << item->dump() << std::endl; 
+  datastore->setTrade(symbol, trade);
 }

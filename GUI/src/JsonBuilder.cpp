@@ -29,9 +29,9 @@ namespace JsonBuilder {
     
     json msg = {
       {"method", "UNSUBSCRIBE"},
-      {"params", {
-        {m}
-      }},
+      {"params", 
+        json::array({m})
+      },
       {"id", id}
     };
 

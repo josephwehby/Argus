@@ -16,6 +16,21 @@ namespace Utils {
 
     return oss.str();
   }
+
+  inline void formatPrice(std::string& price) {
+    auto pos = price.find('.');
+
+    if (pos == std::string::npos) {
+      return;
+    }
+
+    int length = price.size() - pos - 1;
+    while (length > 2) {
+      price.pop_back();
+      length--;
+    }
+
+  }
   
   inline std::string formatSize(double size) {
     std::ostringstream oss;
@@ -23,6 +38,21 @@ namespace Utils {
     oss << std::fixed << std::setprecision(6) << size;
 
     return oss.str();
+  }
+
+  inline void formatSize(std::string& size) {
+    auto pos = size.find('.');
+
+    if (pos == std::string::npos) {
+      return;
+    }
+
+    int length = size.size() - pos - 1;
+    while (length > 5) {
+      size.pop_back();
+      length--;
+    }
+
   }
 
   inline std::string formatTime(const std::string datetime) {
@@ -43,6 +73,21 @@ namespace Utils {
     std::tm local_time{};
     if (localtime_s(&local_time, &utc_time) != 0) {
       std::cerr << "local time failed" << std::endl;
+      return "";
+    }
+
+    std::ostringstream oss;
+    oss << std::put_time(&local_time, "%H:%M:%S");
+    return oss.str();
+  }
+  
+  
+  inline std::string formatMilliTime(long long milliseconds_time) {
+    time_t seconds = static_cast<time_t> (milliseconds_time/1000);
+
+    std::tm local_time{};
+    if (localtime_s(&local_time, &seconds) != 0) {
+      std::cerr << "local time conversion failed" << std::endl;
       return "";
     }
 

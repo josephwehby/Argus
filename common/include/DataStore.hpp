@@ -21,7 +21,7 @@ class DataStore {
     void setTicker(const std::string&, std::shared_ptr<Level1>);
     std::shared_ptr<Level1> getTicker(const std::string&) const;
     
-    void setTrades(const std::string&, const std::vector<Trade>&);
+    void setTrade(const std::string&, const Trade&);
     std::vector<Trade> getTrades(const std::string&);
 
     void setBook(const std::string&, const BookUpdate&);

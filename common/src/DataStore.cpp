@@ -20,9 +20,10 @@ std::shared_ptr<Level1> DataStore::getTicker(const std::string& symbol) const {
 }
 
 /* Trade access methods */
-void DataStore::setTrades(const std::string& symbol, const std::vector<Trade>& trades) {
+void DataStore::setTrade(const std::string& symbol, const Trade& trade) {
   std::lock_guard<std::mutex> lock(m);
-  trade_data[symbol].insert(trade_data[symbol].end(), trades.begin(), trades.end());
+  //trade_data[symbol].insert(trade_data[symbol].end(), trades.begin(), trades.end());
+  trade_data[symbol].push_back(std::move(trade));
 }
 
 std::vector<Trade> DataStore::getTrades(const std::string& symbol) {

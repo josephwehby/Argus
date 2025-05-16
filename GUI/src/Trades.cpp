@@ -55,7 +55,5 @@ void Trades::draw() {
     ImGui::EndTable();
   } 
 
-       
-
   ImGui::End();
 }
