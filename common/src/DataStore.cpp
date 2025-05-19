@@ -5,15 +5,15 @@ DataStore::DataStore() { }
 DataStore::~DataStore() {}
 
 /* Ticker access methods */
-void DataStore::setTicker(const std::string& symbol, std::shared_ptr<Level1> ld) {
+void DataStore::setTicker(const std::string& symbol, const Level1& ld) {
   std::lock_guard<std::mutex> lock(m);
-  ticker_data[symbol] = ld;
+  ticker_data[symbol] = std::move(ld);
 }
 
-std::shared_ptr<Level1> DataStore::getTicker(const std::string& symbol) const {
+Level1 DataStore::getTicker(const std::string& symbol) const {
   std::lock_guard<std::mutex> lock(m);
   if (!ticker_data.contains(symbol)) {
-    return nullptr;
+    return Level1{};
   }
 
   return ticker_data.at(symbol);

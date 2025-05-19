@@ -46,15 +46,14 @@ void DataParser::parseData(std::shared_ptr<json> item) {
     return;
   }
   */
-  std::cout << item->dump() << std::endl;  
   if (!item->contains("e")) {
     std::cout << "item does not contain market data" << std::endl;
     return;
   }
 
   std::string channel = item->at("e");
-   
-  if (channel == "ticker") {
+  
+  if (channel == "24hrTicker") {
     parseTicker(item);    
   } else if (channel == "book") {
     parseBook(item);
@@ -69,24 +68,24 @@ void DataParser::parseData(std::shared_ptr<json> item) {
 
 void DataParser::parseTicker(std::shared_ptr<json> item) {
   
-  std::string symbol = item->at("data")[0]["symbol"];
+  std::string symbol = item->at("s");
+  double best_bid = std::stod(std::string(item->at("b")));
+  double best_ask = std::stod(std::string(item->at("a")));
+
+  double best_bid_size = std::stod(std::string(item->at("B")));
+  double best_ask_size = std::stod(std::string(item->at("A")));
+
+  double price_change = std::stod(std::string(item->at("p")));
+  double percent_change = std::stod(std::string(item->at("P")));
+
+  double last_price = std::stod(std::string(item->at("c")));
+
+  double high = std::stod(std::string(item->at("h")));
+  double low = std::stod(std::string(item->at("l")));
+  double volume = std::stod(std::string(item->at("v")));
   
-  double best_bid = item->at("data")[0]["bid"];
-  double best_ask = item->at("data")[0]["ask"];
-
-  double best_bid_size = item->at("data")[0]["bid_qty"];
-  double best_ask_size = item->at("data")[0]["ask_qty"];
-
-  double price_change = item->at("data")[0]["change"];
-  double percent_change = item->at("data")[0]["change_pct"];
-
-  double last_price = item->at("data")[0]["last"];
-
-  double high = item->at("data")[0]["high"];
-  double low = item->at("data")[0]["low"];
-  double volume = item->at("data")[0]["volume"];
-  
-  std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
+  // i dont think this needs to be a shared ptr. can remove this later
+  Level1 ld(best_bid, best_ask, best_bid_size, best_ask_size, 
       price_change, percent_change, last_price, high, low, volume);
   
   datastore->setTicker(symbol, ld);
@@ -126,6 +125,5 @@ void DataParser::parseTrade(std::shared_ptr<json> item) {
   
   TradeSide side = (item->at("m") == true) ? TradeSide::Sell: TradeSide::Buy;
   Trade trade(side, Utils::formatPriceFromString(item->at("p")), Utils::formatSizeFromString(item->at("q")), Utils::formatMilliTime(item->at("T"))); 
-  std::cout << item->dump() << std::endl; 
   datastore->setTrade(symbol, trade);
 }

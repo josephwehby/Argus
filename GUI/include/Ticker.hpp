@@ -19,7 +19,8 @@ class Ticker : public Widget {
     
     const float bar_height = 20;
     
-    std::shared_ptr<Level1> level1;
+    Level1 level1;
+    
     std::shared_ptr<DataStore> datastore;
     std::shared_ptr<WebSocket> ws;
 };

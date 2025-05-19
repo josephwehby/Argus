@@ -18,7 +18,7 @@ class Trades : public Widget {
     void draw() override;
   private:
     const std::string channel = "trade";
-    unsigned int max_capacity = 40;
+    unsigned int max_capacity = 60;
 
     std::shared_ptr<WebSocket> ws;
     std::deque<Trade> trades;

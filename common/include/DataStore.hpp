@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include <iostream>
+#include <utility>
 
 #include "Level1.hpp"
 #include "Trade.hpp"
@@ -18,8 +19,8 @@ class DataStore {
     DataStore(const DataStore&) = delete;
     DataStore& operator=(const DataStore&) = delete;
         
-    void setTicker(const std::string&, std::shared_ptr<Level1>);
-    std::shared_ptr<Level1> getTicker(const std::string&) const;
+    void setTicker(const std::string&, const Level1&);
+    Level1 getTicker(const std::string&) const;
     
     void setTrade(const std::string&, const Trade&);
     std::vector<Trade> getTrades(const std::string&);
@@ -31,7 +32,7 @@ class DataStore {
     std::vector<Candle> getCandles(const std::string&);
   private:
     mutable std::mutex m;
-    std::unordered_map<std::string, std::shared_ptr<Level1>> ticker_data;
+    std::unordered_map<std::string, Level1> ticker_data;
     std::unordered_map<std::string, std::vector<Trade>> trade_data;
     std::unordered_map<std::string, BookUpdate> book_data;
     std::unordered_map<std::string, std::vector<Candle>> candle_data;
