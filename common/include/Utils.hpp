@@ -17,11 +17,11 @@ namespace Utils {
     return oss.str();
   }
 
-  inline void formatPrice(std::string& price) {
+  inline std::string formatPriceFromString(std::string price) {
     auto pos = price.find('.');
 
     if (pos == std::string::npos) {
-      return;
+      return "";
     }
 
     int length = price.size() - pos - 1;
@@ -30,6 +30,7 @@ namespace Utils {
       length--;
     }
 
+    return price;
   }
   
   inline std::string formatSize(double size) {
@@ -40,11 +41,11 @@ namespace Utils {
     return oss.str();
   }
 
-  inline void formatSize(std::string& size) {
+  inline std::string formatSizeFromString(std::string size) {
     auto pos = size.find('.');
 
     if (pos == std::string::npos) {
-      return;
+      return "";
     }
 
     int length = size.size() - pos - 1;
@@ -53,6 +54,7 @@ namespace Utils {
       length--;
     }
 
+    return size;
   }
 
   inline std::string formatTime(const std::string datetime) {
@@ -93,7 +95,7 @@ namespace Utils {
 
     std::ostringstream oss;
     oss << std::put_time(&local_time, "%H:%M:%S");
-    return oss.str();
+    return oss.str(); 
   }
 
   inline long long UTCToUnix(std::string datetime) {

@@ -125,7 +125,7 @@ void DataParser::parseTrade(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
   
   TradeSide side = (item->at("m") == true) ? TradeSide::Sell: TradeSide::Buy;
-  Trade trade(side, Utils::formatPrice(item->at("p")), Utils::formatSize(item->at("q")), Utils::formatMilliTime(item->at("T"))); 
+  Trade trade(side, Utils::formatPriceFromString(item->at("p")), Utils::formatSizeFromString(item->at("q")), Utils::formatMilliTime(item->at("T"))); 
   std::cout << item->dump() << std::endl; 
   datastore->setTrade(symbol, trade);
 }

@@ -14,9 +14,9 @@ Trades::~Trades() {
 }
 
 void Trades::draw() {
-  
+   
   auto update = datastore->getTrades(symbol);
-
+  
   if (update.size() > 0) {
     for (auto& t : update) {
       trades.push_front(std::move(t));

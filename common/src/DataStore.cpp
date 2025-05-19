@@ -33,7 +33,7 @@ std::vector<Trade> DataStore::getTrades(const std::string& symbol) {
   
   auto trades = std::move(trade_data[symbol]);   
   trade_data[symbol].clear();
-
+  
   return trades;
 }
 
