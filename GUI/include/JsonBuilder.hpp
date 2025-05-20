@@ -7,6 +7,6 @@
 using json = nlohmann::json;
 
 namespace JsonBuilder {
-  json generateSubscribe(std::string, const std::string&, int64_t, int opt = -1);
-  json generateUnsubscribe(std::string, const std::string&, int64_t, int opt = -1); 
+  json generateSubscribe(std::string, const std::string&, int64_t, std::string = "");
+  json generateUnsubscribe(std::string, const std::string&, int64_t, std::string = ""); 
 };

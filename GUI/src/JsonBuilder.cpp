@@ -1,10 +1,17 @@
 #include "JsonBuilder.hpp"
+#include <iostream>
 
 namespace JsonBuilder {
-  json generateSubscribe(std::string symbol, const std::string& channel, int64_t id, int opt) {
+  json generateSubscribe(std::string symbol, const std::string& channel, int64_t id, std::string opt) {
     
     std::transform(symbol.cbegin(), symbol.cend(), symbol.begin(), [](char c) { return std::tolower(c); }); 
     std::string m = symbol + "@" + channel; 
+    
+    if (opt != "") {
+      if (channel == "kline") {
+        m = m + "_" + opt;
+      }
+    }
     
     json msg = {
       {"method", "SUBSCRIBE"},
@@ -14,19 +21,21 @@ namespace JsonBuilder {
       {"id", id}
     };
     
-    if (opt != -1) {
-      if (channel == "ohlc") msg["params"]["interval"] = opt;
-      if (channel == "book") msg["params"]["depth"] = opt;
-    }
-    
+        
     return msg;
   }
 
-  json generateUnsubscribe(std::string symbol, const std::string& channel, int64_t id, int opt) {
+  json generateUnsubscribe(std::string symbol, const std::string& channel, int64_t id, std::string opt) {
     
     std::transform(symbol.cbegin(), symbol.cend(), symbol.begin(), [](char c) { return std::tolower(c); }); 
     std::string m = symbol + "@" + channel; 
     
+    if (opt != "") {
+      if (channel == "kline") {
+        m = m + "_" + opt;
+      }
+    }
+
     json msg = {
       {"method", "UNSUBSCRIBE"},
       {"params", 
@@ -34,11 +43,6 @@ namespace JsonBuilder {
       },
       {"id", id}
     };
-
-    if (opt != -1) {
-      if (channel == "ohlc") msg["params"]["interval"] = opt;
-      if (channel == "book") msg["params"]["depth"] = opt;
-    }
 
     return msg;
   }

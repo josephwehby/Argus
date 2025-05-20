@@ -57,7 +57,7 @@ void DataParser::parseData(std::shared_ptr<json> item) {
     parseTicker(item);    
   } else if (channel == "book") {
     parseBook(item);
-  } else if (channel == "ohlc") {
+  } else if (channel == "kline") {
     parseOHLC(item);
   } else if (channel == "trade") {
     parseTrade(item);
@@ -108,16 +108,18 @@ void DataParser::parseBook(std::shared_ptr<json> item) {
 }
 
 void DataParser::parseOHLC(std::shared_ptr<json> item) {
-  std::string symbol = item->at("data")[0]["symbol"];
+  std::string symbol = item->at("s");
   
-  std::vector<Candle> candles;
+  double open = std::stod(std::string(item->at("k")["o"])); 
+  double close = std::stod(std::string(item->at("k")["c"])); 
+  double high = std::stod(std::string(item->at("k")["h"])); 
+  double low = std::stod(std::string(item->at("k")["l"])); 
+  double buy_volume = std::stod(std::string(item->at("k")["V"])); 
+  double volume = std::stod(std::string(item->at("k")["v"])); 
+  long long unix_time = item->at("k")["t"].get<long long>() / 1000;
 
-  for (const auto candle : item->at("data")) {
-    candles.emplace_back(candle["open"], candle["high"], candle["low"], candle["close"], candle["volume"], 
-        candle["interval"], candle["interval_begin"], Utils::UTCToUnix(candle["interval_begin"]));
-  }
-  
-  datastore->setCandles(symbol, candles);
+  Candle candle(open, high, low, close, buy_volume, volume, 1, unix_time);
+  datastore->setCandle(symbol, candle);
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {

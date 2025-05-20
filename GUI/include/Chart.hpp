@@ -29,7 +29,8 @@ class Chart : public Widget {
     const ImVec4 Crosshair_Color = ImVec4{1,1,1,0.5f};
 
     std::string symbol;
-    const std::string channel = "ohlc"; 
+    const std::string channel = "kline"; 
+
     float ratios[2] = {2.5, 1};
     bool show_candles = true;
 

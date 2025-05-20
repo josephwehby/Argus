@@ -2,9 +2,9 @@
 
 int TimeFormatter(double value, char* buff, int size, void*) {
   std::time_t t = static_cast<std::time_t>(value);
-  std::tm local_tm;
+  std::tm local_tm {};
   localtime_s(&local_tm, &t);
-
+  
   return std::strftime(buff, size, "%I:%M", &local_tm);
 }
 
@@ -12,12 +12,12 @@ Chart::Chart(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std:
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
   
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, 1);
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, "1m");
   ws->subscribe(sub_msg);
 }
 
 Chart::~Chart() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, 1);
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, "1m");
   ws->unsubscribe(unsub_msg);
 }
 
@@ -139,9 +139,6 @@ void Chart::drawCandles() {
   double width = .25;
   double half_width = width;
   
-  std::vector<double> volume_x(candles.size());
-  std::vector<double> volume_y(candles.size());
-
   if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
     
     half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
@@ -176,12 +173,7 @@ void Chart::drawCandles() {
           }
         }
         
-        int index = 0;
         for (const auto& [time, candle] : candles) {
-          
-          // this is to align it to the left. implot auto centers it
-          volume_x[index] = time+half_width;
-          volume_y[index] = candle.volume;
           
           ImU32 color = (candle.open <= candle.close) ? Colors::Green_U32 : Colors::Red_U32;
 
@@ -193,7 +185,6 @@ void Chart::drawCandles() {
           ImVec2 low_pos = ImPlot::PlotToPixels(time+half_width, candle.low);
           ImVec2 high_pos = ImPlot::PlotToPixels(time+half_width, candle.high);
           draw_list->AddLine(low_pos, high_pos, color, half_width/2); 
-          index++;
         }
         
 
@@ -226,8 +217,29 @@ void Chart::drawCandles() {
       ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
 
-      ImPlot::SetNextFillStyle(Colors::Purple_V4);
-      ImPlot::PlotBars("##", volume_x.data(), volume_y.data(), volume_x.size(), half_width*2);
+      ImDrawList* draw_list = ImPlot::GetPlotDrawList();
+
+      if (ImPlot::BeginItem("## Volume Bars")) {
+        if (ImPlot::FitThisFrame()) {
+
+          for (const auto& [time, candle] : candles) {
+              ImPlot::FitPoint(ImPlotPoint(time, 0));
+              ImPlot::FitPoint(ImPlotPoint(time, candle.volume + 5));
+          }
+        }
+        
+        for (const auto& [time, candle] : candles) {
+          double sell_volume = candle.volume - candle.buy_volume;
+          
+          ImU32 color = (candle.buy_volume >= sell_volume) ? Colors::Green_U32 : Colors::Red_U32;
+
+          ImVec2 bottom = ImPlot::PlotToPixels(time, 0);
+          ImVec2 top = ImPlot::PlotToPixels(time + (2*half_width), candle.volume);
+
+          draw_list->AddRectFilled(bottom, top, color);
+        }
+        
+      }
       ImPlot::EndPlot();
     }
 

@@ -22,7 +22,6 @@ Level1 DataStore::getTicker(const std::string& symbol) const {
 /* Trade access methods */
 void DataStore::setTrade(const std::string& symbol, const Trade& trade) {
   std::lock_guard<std::mutex> lock(m);
-  //trade_data[symbol].insert(trade_data[symbol].end(), trades.begin(), trades.end());
   trade_data[symbol].push_back(std::move(trade));
 }
 
@@ -55,9 +54,9 @@ BookUpdate DataStore::getBook(const std::string& symbol) {
 }
 
 /* Candle access methods */
-void DataStore::setCandles(const std::string& symbol, const std::vector<Candle>& candles) {
+void DataStore::setCandle(const std::string& symbol, const Candle& candle) {
   std::lock_guard<std::mutex> lock(m);
-  candle_data[symbol].insert(candle_data[symbol].end(), candles.begin(), candles.end());
+  candle_data[symbol].push_back(std::move(candle));
 }
 
 std::vector<Candle> DataStore::getCandles(const std::string& symbol) {
