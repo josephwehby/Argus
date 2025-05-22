@@ -23,9 +23,11 @@ class Chart : public Widget {
     void draw() override;
   private:
     void updateCandles();
+    void setStyle();
     void drawCandles();
     void drawLine();
-    
+    void drawVolume(double);
+
     const ImVec4 Crosshair_Color = ImVec4{1,1,1,0.5f};
 
     std::string symbol;

@@ -1,13 +1,5 @@
 #include "Chart.hpp"
 
-int TimeFormatter(double value, char* buff, int size, void*) {
-  std::time_t t = static_cast<std::time_t>(value);
-  std::tm local_tm {};
-  localtime_s(&local_tm, &t);
-  
-  return std::strftime(buff, size, "%I:%M", &local_tm);
-}
-
 Chart::Chart(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
@@ -51,6 +43,22 @@ void Chart::draw() {
   ImGui::End();
 }
 
+void Chart::setStyle() {
+  ImPlotStyle& style = ImPlot::GetStyle();
+  
+  style.Colors[ImPlotCol_PlotBg] = Colors::Background_V4;
+  style.Colors[ImPlotCol_Crosshairs] = Crosshair_Color;
+
+  style.PlotPadding = ImVec2(5, 5);
+  style.LabelPadding = ImVec2(10, 10);
+  style.LegendPadding = ImVec2(0, 0);
+  style.LegendInnerPadding = ImVec2(0, 0);
+  style.MousePosPadding = ImVec2(0, 0);
+  style.AnnotationPadding = ImVec2(0, 0);
+  style.FitPadding = ImVec2(0, 0);
+  style.UseLocalTime = true;
+}
+
 void Chart::drawLine() {
   std::vector<double> price_y(candles.size(), 0);
   std::vector<double> volume_y(candles.size(), 0);
@@ -67,29 +75,21 @@ void Chart::drawLine() {
     time_x[index] = time;
     index++; 
   }
+  
+  setStyle();
 
   if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
 
-    ImPlotStyle& style = ImPlot::GetStyle();
-    style.Colors[ImPlotCol_PlotBg] = Colors::Background_V4;
-    style.Colors[ImPlotCol_Crosshairs] = Crosshair_Color;
-
-    style.PlotPadding = ImVec2(5, 5);
-    style.LabelPadding = ImVec2(10, 10);
-    style.LegendPadding = ImVec2(0, 0);
-    style.LegendInnerPadding = ImVec2(0, 0);
-    style.MousePosPadding = ImVec2(0, 0);
-    style.AnnotationPadding = ImVec2(0, 0);
-    style.FitPadding = ImVec2(0, 0);
-
-    if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
+        if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
 
       ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels, ImPlotAxisFlags_Opposite);
-
+      
+      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks, ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
+      
+      ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
       ImPlot::SetupAxisLimits(ImAxis_X1, time_x[0], time_x.back());
+      
       ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
-      ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
 
       if (ImPlot::BeginItem("##Price Chart")) {
         ImPlot::PushStyleColor(ImPlotCol_Fill, Colors::Blue_V4);
@@ -112,24 +112,13 @@ void Chart::drawLine() {
         ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
         draw_list->AddLine(min, max, color, .5);
 
-
         ImPlot::EndItem();
       }
       
       ImPlot::EndPlot();
     }
 
-    if (ImPlot::BeginPlot("##Volume Plot", ImVec2(-1,-1), ImPlotFlags_Crosshairs)) {
-      ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoTickLabels);
-      ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines |  ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_Opposite);
-
-      ImPlot::SetupAxisFormat(ImAxis_X1, TimeFormatter);
-      ImPlot::SetupAxisLimits(ImAxis_X1, time_x[0], time_x.back() + 5);
-
-      ImPlot::SetNextFillStyle(Colors::Purple_V4);
-      ImPlot::PlotBars("##", time_x.data(), volume_y.data(), time_x.size(), half_width*2);
-      ImPlot::EndPlot();
-    }
+    drawVolume(half_width); 
 
     ImPlot::EndSubplots();
   }
@@ -138,39 +127,14 @@ void Chart::drawLine() {
 
 void Chart::drawCandles() {
 
-  double width = .5;
+  double width = .25;
   double half_width = width;
   
   if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
     
     half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
 
-    ImPlotStyle& style = ImPlot::GetStyle();
-    style.Colors[ImPlotCol_PlotBg] = Colors::Background_V4;
-    style.Colors[ImPlotCol_Crosshairs] = Crosshair_Color;
-
-    style.PlotPadding = ImVec2(5, 5);
-    style.LabelPadding = ImVec2(10, 10);
-    style.LegendPadding = ImVec2(0, 0);
-    style.LegendInnerPadding = ImVec2(0, 0);
-    style.MousePosPadding = ImVec2(0, 0);
-    style.AnnotationPadding = ImVec2(0, 0);
-    style.FitPadding = ImVec2(0, 0);
-    style.UseLocalTime = true;
-    
-    double max_price = std::max_element(candles.begin(), candles.end(), [](auto& a, auto& b){
-        return a.second.high < b.second.high; 
-        })->second.high;
-
-    double min_price = std::min_element(candles.begin(), candles.end(), [](auto& a, auto& b){
-        return a.second.high > b.second.high; 
-        })->second.low;
-      
-    double max_volume = std::max_element(candles.begin(), candles.end(), [](auto& a, auto& b){
-        return a.second.volume < b.second.volume;
-        })->second.volume;
-    
-    double padding = std::prev(candles.end())->first - candles.begin()->first * .1;
+    setStyle();
 
     if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
 
@@ -225,43 +189,44 @@ void Chart::drawCandles() {
       
       ImPlot::EndPlot();
     }
-
-    if (ImPlot::BeginPlot("##Volume Plot", ImVec2(-1,-1), ImPlotFlags_Crosshairs)) {
-      ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks);
-      ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_Opposite | ImPlotAxisFlags_AutoFit);
-      
-
-      ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
-      ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
-      //ImPlot::SetupAxisLimits(ImAxis_Y1, 0, max_volume*1.1, ImPlotCond_Always);
-
-      ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-
-      if (ImPlot::BeginItem("## Volume Bars")) {
-        
-        if (ImPlot::FitThisFrame()) {
-          for (const auto& [time, candle] : candles) {
-              ImPlot::FitPoint(ImPlotPoint(time, 0));
-              ImPlot::FitPoint(ImPlotPoint(time, candle.volume + 5));
-          }
-        }
-
-        for (const auto& [time, candle] : candles) {
-          ImVec2 buy_bottom = ImPlot::PlotToPixels(time - half_width, 0);
-          ImVec2 buy_top = ImPlot::PlotToPixels(time + half_width, candle.buy_volume);
-          ImVec2 sell_bottom = ImPlot::PlotToPixels(time - half_width, candle.buy_volume);
-          ImVec2 sell_top = ImPlot::PlotToPixels(time + half_width, candle.volume);
-
-          draw_list->AddRectFilled(buy_bottom, buy_top, Colors::Green_U32);
-          draw_list->AddRectFilled(sell_bottom, sell_top, Colors::Red_U32);
-        }
-        
-      }
-      ImPlot::EndPlot();
-    }
-
+    
+    drawVolume(half_width);
+    
     ImPlot::EndSubplots();
   }
 }
 
+void Chart::drawVolume(double half_width) {
+  if (ImPlot::BeginPlot("##Volume Plot", ImVec2(-1,-1), ImPlotFlags_Crosshairs)) {
+    ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks);
+    ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_Opposite | ImPlotAxisFlags_AutoFit);
+      
 
+    ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+    ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first + 5);
+
+    ImDrawList* draw_list = ImPlot::GetPlotDrawList();
+
+    if (ImPlot::BeginItem("## Volume Bars")) {
+      
+      if (ImPlot::FitThisFrame()) {
+        for (const auto& [time, candle] : candles) {
+            ImPlot::FitPoint(ImPlotPoint(time, 0));
+            ImPlot::FitPoint(ImPlotPoint(time, candle.volume + 5));
+        }
+      }
+
+      for (const auto& [time, candle] : candles) {
+        ImVec2 buy_bottom = ImPlot::PlotToPixels(time - half_width, 0);
+        ImVec2 buy_top = ImPlot::PlotToPixels(time + half_width, candle.buy_volume);
+        ImVec2 sell_bottom = ImPlot::PlotToPixels(time - half_width, candle.buy_volume);
+        ImVec2 sell_top = ImPlot::PlotToPixels(time + half_width, candle.volume);
+
+        draw_list->AddRectFilled(buy_bottom, buy_top, Colors::Green_U32);
+        draw_list->AddRectFilled(sell_bottom, sell_top, Colors::Red_U32);
+      }
+      
+    }
+    ImPlot::EndPlot();
+  }
+}

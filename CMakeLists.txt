@@ -55,6 +55,7 @@ target_include_directories(App PRIVATE
   "${CMAKE_SOURCE_DIR}/Backend/include"
   "${CMAKE_SOURCE_DIR}/common/include/"
   ${nlohmann_json_INCLUDE_DIRS}
+  "${CMAKE_SOURCE_DIR}/Backend/libs/cpp-httplib/"
 )
 
 target_link_libraries(App PRIVATE glfw OpenGL::GL Boost::asio Boost::beast OpenSSL::SSL OpenSSL::Crypto nlohmann_json::nlohmann_json user32.lib gdi32.lib)
