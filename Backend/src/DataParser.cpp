@@ -32,20 +32,6 @@ void DataParser::processLoop() {
 }
 
 void DataParser::parseData(std::shared_ptr<json> item) {
-  /*
-  if (!item->contains("channel")) {
-    std::cout << "[!] subscribe message: ignoring" << std::endl;
-        return;
-  }
-
-  if (channel == "heartbeat" || channel == "status") {
-    if (channel == "status" && item->at("data")[0]["system"] == "online") {
-      cs->setState(State::CONNECTED);
-    }
-
-    return;
-  }
-  */
   if (!item->contains("e")) {
     std::cout << "item does not contain market data" << std::endl;
     return;
@@ -59,6 +45,8 @@ void DataParser::parseData(std::shared_ptr<json> item) {
     parseBook(item);
   } else if (channel == "kline") {
     parseOHLC(item);
+  } else if (channel == "kline-historic") {
+    parseOHLCHistoric(item);
   } else if (channel == "trade") {
     parseTrade(item);
   } else {
@@ -84,7 +72,6 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
   double low = std::stod(std::string(item->at("l")));
   double volume = std::stod(std::string(item->at("v")));
   
-  // i dont think this needs to be a shared ptr. can remove this later
   Level1 ld(best_bid, best_ask, best_bid_size, best_ask_size, 
       price_change, percent_change, last_price, high, low, volume);
   
@@ -120,6 +107,25 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
 
   Candle candle(open, high, low, close, buy_volume, volume, 1, unix_time);
   datastore->setCandle(symbol, candle);
+}
+
+void DataParser::parseOHLCHistoric(std::shared_ptr<json> item) {
+  std::string symbol = item->at("s");
+  std::vector<Candle> candles;
+  
+  for (const auto& candle : item->at("c")) {
+    long long unix_time = candle[0].get<long long>()/1000;
+    double open = std::stod(candle[1].get<std::string>());
+    double high = std::stod(candle[2].get<std::string>());
+    double low = std::stod(candle[3].get<std::string>());
+    double close = std::stod(candle[4].get<std::string>());
+    double volume = std::stod(candle[5].get<std::string>());
+    double buy_volume = std::stod(candle[9].get<std::string>());
+    candles.emplace_back(open, high, low, close, buy_volume, volume, 1, unix_time);
+    datastore->setCandles(symbol, candles);
+  }
+
+  datastore->setCandles(symbol, candles);
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {

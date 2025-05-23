@@ -29,7 +29,7 @@ using json = nlohmann::json;
 
 class WebSocket : public std::enable_shared_from_this<WebSocket> {
   public:
-    explicit WebSocket(net::io_context&, ssl::context&, std::shared_ptr<DataStore>, std::shared_ptr<ConnectionState>);
+    explicit WebSocket(net::io_context&, ssl::context&, std::shared_ptr<DataParser>, std::shared_ptr<ConnectionState>);
     ~WebSocket();
     void fail(beast::error_code, char const*);
     void connect();
@@ -55,7 +55,7 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     std::string m_host = "data-stream.binance.vision";
     std::string m_port = "9443";
     
-    DataParser data_parser;
+    std::shared_ptr<DataParser> dp;
     std::shared_ptr<ConnectionState> cs;
 
     tcp::resolver m_resolver;

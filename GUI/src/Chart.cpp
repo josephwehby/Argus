@@ -1,9 +1,11 @@
 #include "Chart.hpp"
 
-Chart::Chart(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
+Chart::Chart(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::shared_ptr<HttpsClient> _hc, std::string token) : datastore(ds), ws(_ws), hc(_hc) {
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
   
+  hc->getHistoricalChart(symbol, "1m", "10");
+
   json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, "1m");
   ws->subscribe(sub_msg);
 }

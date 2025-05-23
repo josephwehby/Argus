@@ -59,6 +59,11 @@ void DataStore::setCandle(const std::string& symbol, const Candle& candle) {
   candle_data[symbol].push_back(std::move(candle));
 }
 
+void DataStore::setCandles(const std::string& symbol, const std::vector<Candle>& candles) {
+  std::lock_guard<std::mutex> lock(m);
+  candle_data[symbol].insert(candle_data[symbol].begin(), candles.begin(), candles.end());
+}
+
 std::vector<Candle> DataStore::getCandles(const std::string& symbol) {
   std::lock_guard<std::mutex> lock(m);
   if (!candle_data.contains(symbol)) return {};

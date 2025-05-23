@@ -8,16 +8,18 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "httplib.h"
+#include "DataParser.hpp"
 
 using json = nlohmann::json;
 
 class HttpsClient {
   public:
-    HttpsClient();
+    HttpsClient(std::shared_ptr<DataParser>);
     void getHistoricalChart(const std::string&, const std::string&, const std::string&);
   private:
-    const std::string url = "https://data-api.binance.vision";
-    const std::string enpoint = "/api/v3/";
-
+    const std::string url = "data-api.binance.vision";
+    const std::string endpoint = "/api/v3/";
+    
     httplib::SSLClient cli;
+    std::shared_ptr<DataParser> dp;
 };

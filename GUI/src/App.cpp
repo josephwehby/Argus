@@ -42,8 +42,9 @@ App::App() {
   // start up the websocket stuff
   cs = std::make_shared<ConnectionState>(State::CONNECTING);
   datastore = std::make_shared<DataStore>();
+  dp = std::make_shared<DataParser>(datastore, cs);
   initWebSocket();
-
+  hc = std::make_shared<HttpsClient>(dp);
 }
 
 App::~App() {
@@ -75,7 +76,7 @@ void App::initWebSocket() {
     return;
   }
 
-  ws = std::make_shared<WebSocket>(ioc, ctx, datastore, cs);
+  ws = std::make_shared<WebSocket>(ioc, ctx, dp, cs);
 
   io_thread = std::thread([this](){
     ioc.run();     
@@ -173,7 +174,7 @@ void App::drawMenuBar() {
 
     if (ImGui::BeginMenu("Chart")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Chart>(datastore, ws, "BTCUSDT"));
+        widgets.push_back(std::make_unique<Chart>(datastore, ws, hc, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }

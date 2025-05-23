@@ -13,12 +13,13 @@
 #include "Utils.hpp"
 #include "DataStore.hpp"
 #include "WebSocket.hpp"
+#include "HttpsClient.hpp"
 #include "JsonBuilder.hpp"
 #include "Colors.hpp"
 
 class Chart : public Widget {
   public:
-    Chart(std::shared_ptr<DataStore>, std::shared_ptr<WebSocket>, std::string);
+    Chart(std::shared_ptr<DataStore>, std::shared_ptr<WebSocket>, std::shared_ptr<HttpsClient>, std::string);
     ~Chart();
     void draw() override;
   private:
@@ -39,4 +40,5 @@ class Chart : public Widget {
     std::map<long long, Candle> candles;
     std::shared_ptr<DataStore> datastore;
     std::shared_ptr<WebSocket> ws;
+    std::shared_ptr<HttpsClient> hc;
 };

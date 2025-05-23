@@ -5,17 +5,17 @@ void WebSocket::fail(beast::error_code ec, char const* what) {
     cs->setState(State::CLOSED);
 }
 
-WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, std::shared_ptr<DataStore> ds, std::shared_ptr<ConnectionState> cs_) 
+WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, std::shared_ptr<DataParser> dp_, std::shared_ptr<ConnectionState> cs_) 
   : m_resolver(net::make_strand(ioc)),
     m_ws(net::make_strand(ioc), m_ssl_ctx),
-    data_parser(ds, cs_),
+    dp(dp_),
     cs(cs_) {
       
       m_ssl_ctx = std::move(ctx);
 }
 
 WebSocket::~WebSocket() {
-  data_parser.shutdown();
+  dp->shutdown();
 }
 
 void WebSocket::connect() {
@@ -138,7 +138,7 @@ void WebSocket::onRead(beast::error_code ec, std::size_t bytes_transferred) {
   
   std::string data = beast::buffers_to_string(m_buffer.data());
   json jsonData = json::parse(data);
-  data_parser.pushData(jsonData);
+  dp->pushData(jsonData);
   m_buffer.consume(m_buffer.size());
 
   doRead();

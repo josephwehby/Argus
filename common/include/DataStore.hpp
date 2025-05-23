@@ -29,6 +29,7 @@ class DataStore {
     BookUpdate getBook(const std::string&);
     
     void setCandle(const std::string&, const Candle&);
+    void setCandles(const std::string&, const std::vector<Candle>&);
     std::vector<Candle> getCandles(const std::string&);
   private:
     mutable std::mutex m;

@@ -20,6 +20,8 @@
 #include "DataStore.hpp"
 #include "WebSocket.hpp"
 #include "ConnectionState.hpp"
+#include "HttpsClient.hpp"
+#include "DataParser.hpp"
 
 class App {
   public:
@@ -43,10 +45,13 @@ class App {
     ImVec4 clear_color = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
     
     bool connected = false;
+    
     std::vector<std::unique_ptr<Widget>> widgets;
     std::shared_ptr<DataStore> datastore;
     std::shared_ptr<WebSocket> ws;
     std::shared_ptr<ConnectionState> cs;
+    std::shared_ptr<DataParser> dp;
+    std::shared_ptr<HttpsClient> hc;
 
     net::io_context ioc;
     boost::system::error_code ec;

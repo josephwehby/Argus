@@ -36,5 +36,6 @@ class DataParser {
     void parseTicker(std::shared_ptr<json>);
     void parseBook(std::shared_ptr<json>);
     void parseOHLC(std::shared_ptr<json>);
+    void parseOHLCHistoric(std::shared_ptr<json>);
     void parseTrade(std::shared_ptr<json>);
 };
