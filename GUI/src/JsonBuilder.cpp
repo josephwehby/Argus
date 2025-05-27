@@ -6,13 +6,15 @@ namespace JsonBuilder {
     
     std::transform(symbol.cbegin(), symbol.cend(), symbol.begin(), [](char c) { return std::tolower(c); }); 
     std::string m = symbol + "@" + channel; 
-    
+        
     if (opt != "") {
       if (channel == "kline") {
         m = m + "_" + opt;
+      } else if (channel == "depth") {
+        m = m + "@" + opt;
       }
     }
-    
+
     json msg = {
       {"method", "SUBSCRIBE"},
       {"params", 
@@ -33,6 +35,8 @@ namespace JsonBuilder {
     if (opt != "") {
       if (channel == "kline") {
         m = m + "_" + opt;
+      } else if (channel == "depth") {
+        m = m + "@" + opt;
       }
     }
 

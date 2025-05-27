@@ -40,8 +40,8 @@ void DataParser::parseData(std::shared_ptr<json> item) {
   std::string channel = item->at("e");
   
   if (channel == "24hrTicker") {
-    parseTicker(item);    
-  } else if (channel == "book") {
+    parseTicker(item); 
+  } else if (channel == "depthUpdate") {
     parseBook(item);
   } else if (channel == "kline") {
     parseOHLC(item);
@@ -79,19 +79,21 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
 }
 
 void DataParser::parseBook(std::shared_ptr<json> item) {
-  std::string symbol = item->at("data")[0]["symbol"];
-  
+  std::string symbol = item->at("s");
+
   BookUpdate book_update;
+  book_update.first_update = item->at("U"); 
+  book_update.last_update = item->at("u"); 
 
-  for (const auto& bid : (*item)["data"][0]["bids"]) {
-    book_update.bids.emplace_back(bid["price"], bid["qty"]); 
+  for (const auto& bid : (*item)["b"]) {
+    book_update.bids.emplace_back(bid[0], bid[1]);
   }
   
-  for (const auto& ask: (*item)["data"][0]["asks"]) {
-    book_update.asks.emplace_back(ask["price"], ask["qty"]); 
+  for (const auto& ask: (*item)["a"]) {
+    book_update.asks.emplace_back(ask[0], ask[1]);
   }
 
-  datastore->setBook(symbol, book_update);
+  // this will not be pushed to data store but to ob manager
 }
 
 void DataParser::parseOHLC(std::shared_ptr<json> item) {

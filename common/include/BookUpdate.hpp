@@ -13,6 +13,9 @@ struct EntryUpdate {
 };
 
 struct BookUpdate {
+  unsigned int first_update;
+  unsigned int last_update;
+
   std::vector<EntryUpdate> bids;
   std::vector<EntryUpdate> asks;
 };

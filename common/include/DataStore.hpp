@@ -19,16 +19,16 @@ class DataStore {
     DataStore(const DataStore&) = delete;
     DataStore& operator=(const DataStore&) = delete;
         
-    void setTicker(const std::string&, const Level1&);
+    void setTicker(const std::string&, Level1);
     Level1 getTicker(const std::string&) const;
     
-    void setTrade(const std::string&, const Trade&);
+    void setTrade(const std::string&, Trade);
     std::vector<Trade> getTrades(const std::string&);
 
     void setBook(const std::string&, const BookUpdate&);
     BookUpdate getBook(const std::string&);
     
-    void setCandle(const std::string&, const Candle&);
+    void setCandle(const std::string&, Candle);
     void setCandles(const std::string&, const std::vector<Candle>&);
     std::vector<Candle> getCandles(const std::string&);
   private:

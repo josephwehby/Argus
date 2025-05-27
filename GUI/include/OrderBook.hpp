@@ -23,7 +23,9 @@ class OrderBook : public Widget {
     const unsigned int depth_view = 20;
     const float min_bar_height = 20.0f;
 
-    const std::string channel = "book";
+    const std::string channel = "depth";
+    const std::string speed = "100ms";
+
     std::map<double, double, std::greater<double>> bids;
     std::map<double, double, std::greater<double>> asks;
     

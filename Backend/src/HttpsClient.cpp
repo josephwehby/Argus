@@ -23,6 +23,5 @@ void HttpsClient::getHistoricalChart(const std::string& symbol, const std::strin
   modified["e"] = "kline-historic";
   modified["c"] = response;
 
-  std::cout << modified.dump() << std::endl;
   dp->pushData(modified);
 }
