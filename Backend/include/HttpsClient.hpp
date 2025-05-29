@@ -16,6 +16,7 @@ class HttpsClient {
   public:
     HttpsClient(std::shared_ptr<DataParser>);
     void getHistoricalChart(const std::string&, const std::string&, const std::string&);
+    void getOrderBook(const std::string&, const std::string&);
   private:
     const std::string url = "data-api.binance.vision";
     const std::string endpoint = "/api/v3/";

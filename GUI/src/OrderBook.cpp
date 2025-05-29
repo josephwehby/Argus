@@ -3,14 +3,15 @@
 OrderBook::OrderBook(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
   symbol = token;
   window_name = "OrderBook: " + symbol + " ##" + std::to_string(window_id);
-
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, speed);
-  ws->subscribe(sub_msg);
+  
+  // moving to ob manager
+  //json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, speed);
+  //ws->subscribe(sub_msg);
 }
 
 OrderBook::~OrderBook() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, speed);
-  ws->unsubscribe(unsub_msg);
+  //json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, speed);
+  //ws->unsubscribe(unsub_msg);
 }
 
 void OrderBook::updateBook() {

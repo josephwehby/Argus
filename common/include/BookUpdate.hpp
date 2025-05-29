@@ -13,6 +13,8 @@ struct EntryUpdate {
 };
 
 struct BookUpdate {
+  std::string symbol;
+
   unsigned int first_update;
   unsigned int last_update;
 
