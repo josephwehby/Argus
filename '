@@ -20,19 +20,13 @@ using json = nlohmann::json;
 class HttpsClient {
   public:
     HttpsClient(std::shared_ptr<DataParser>);
-    ~HttpsClient();
-    void pushRequest(HttpsTask&);
-    void shutdown();
+    void getHistoricalChart(const std::string&, const std::string&, const std::string&);
+    void getOrderBook(const std::string&, const std::string&);
   private:
-    void processLoop();
-    void getHistoricalChart(std::shared_ptr<HttpsTask>);
-    void getOrderBook(std::shared_ptr<HttpsTask>);
-     
     const std::string url = "data-api.binance.vision";
     const std::string endpoint = "/api/v3/";
     
     httplib::SSLClient cli;
-    std::thread process_thread;
     std::shared_ptr<DataParser> dp;
     SafeQueue<HttpsTask> events;
 };

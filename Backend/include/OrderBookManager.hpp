@@ -2,33 +2,41 @@
 
 #include <iostream>
 #include <thread>
-#include <vector>
-#include <map>
+#include <mutex>
 
 #include "BookUpdate.hpp"
 #include "SafeQueue.hpp"
 #include "HttpsClient.hpp"
 #include "WebSocket.hpp"
 #include "JsonBuilder.hpp"
+#include "BookSnapshot.hpp"
 
 class OrderBookManager {
   public:
-    OrderBookManager(std::string&, std::shared_ptr<WebSocket>, std::shared_ptr<HttpsClient>);
+    OrderBookManager(std::string&, std::shared_ptr<WebSocket>, std::shared_ptr<DataParser>);
     ~OrderBookManager();
-    void pushData(BookUpdate&);
+    void pushUpdate(BookUpdate&);
+    void pushSnapshot(BookSnapshot&);
+    BookSnapshot getBookSnapshot();
   private:
     void processLoop();
     void syncBook();
-    
+    bool applyUpdate(std::shared_ptr<BookUpdate>);    
+
     std::string symbol;
     const std::string speed = "100ms";
     const std::string limit = "20";
+    
+    BookSnapshot book;
 
-    SafeQueue<BookUpdate> events;
-    std::shared_ptr<WebSocket> ws;
+    SafeQueue<BookUpdate> updates;
+    SafeQueue<BookSnapshot> snapshots;
+
     HttpsClient hc;
+    std::shared_ptr<WebSocket> ws;
+    std::shared_ptr<DataParser> dp;
 
-    std::map<double, double> bids;
-    std::map<double, double> asks;
-};
+    mutable std::mutex m;
+    std::thread process_thread;
+ };
 

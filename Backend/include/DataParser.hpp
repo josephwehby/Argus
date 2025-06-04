@@ -14,7 +14,9 @@
 #include "Candle.hpp"
 #include "Utils.hpp"
 #include "BookUpdate.hpp"
+#include "BookSnapshot.hpp"
 #include "ConnectionState.hpp"
+//#include "MasterOrderBookManager.hpp"
 
 using json = nlohmann::json;
 
@@ -30,11 +32,13 @@ class DataParser {
     SafeQueue<json> data;
     std::shared_ptr<DataStore> datastore; 
     std::shared_ptr<ConnectionState> cs;
+    //std::shared_ptr<MasterOrderBookManager> mobm;
 
     void processLoop();
     void parseData(std::shared_ptr<json>);
     void parseTicker(std::shared_ptr<json>);
-    void parseBook(std::shared_ptr<json>);
+    void parseBookUpdate(std::shared_ptr<json>);
+    void parseBookSnapshot(std::shared_ptr<json>);
     void parseOHLC(std::shared_ptr<json>);
     void parseOHLCHistoric(std::shared_ptr<json>);
     void parseTrade(std::shared_ptr<json>);

@@ -14,6 +14,7 @@
 #include "DataStore.hpp"
 #include "WebSocket.hpp"
 #include "HttpsClient.hpp"
+#include "DataParser.hpp"
 #include "JsonBuilder.hpp"
 #include "Colors.hpp"
 
@@ -38,7 +39,7 @@ class Chart : public Widget {
     bool show_candles = true;
 
     std::map<long long, Candle> candles;
-    std::shared_ptr<DataStore> datastore;
     std::shared_ptr<WebSocket> ws;
+    std::shared_ptr<DataStore> ds;
     std::shared_ptr<HttpsClient> hc;
 };

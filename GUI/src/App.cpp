@@ -43,12 +43,16 @@ App::App() {
   cs = std::make_shared<ConnectionState>(State::CONNECTING);
   datastore = std::make_shared<DataStore>();
   dp = std::make_shared<DataParser>(datastore, cs);
-  initWebSocket();
   hc = std::make_shared<HttpsClient>(dp);
+  initWebSocket();
+  //mobm = std::make_shared<MasterOrderBookManager>(ws, dp);
 }
 
 App::~App() {
   widgets.clear();
+  
+  hc->shutdown();
+
   ws->close(); 
   ws->waitClose();
 
@@ -58,7 +62,7 @@ App::~App() {
   if (io_thread.joinable()) {
     io_thread.join();
   }
-
+  
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImPlot::DestroyContext();
@@ -167,7 +171,7 @@ void App::drawMenuBar() {
 
     if (ImGui::BeginMenu("OrderBook")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<OrderBook>(datastore, ws, "BTCUSDT"));
+        widgets.push_back(std::make_unique<OrderBook>(ws, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }

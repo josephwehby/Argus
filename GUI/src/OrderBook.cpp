@@ -1,56 +1,18 @@
 #include "OrderBook.hpp"
 
-OrderBook::OrderBook(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
+OrderBook::OrderBook(std::shared_ptr<WebSocket> _ws, std::string token) : ws(_ws) {
   symbol = token;
   window_name = "OrderBook: " + symbol + " ##" + std::to_string(window_id);
   
-  // moving to ob manager
-  //json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, speed);
-  //ws->subscribe(sub_msg);
+  //mobm->addOrderBook(symbol);
 }
 
 OrderBook::~OrderBook() {
-  //json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, speed);
-  //ws->unsubscribe(unsub_msg);
+  // need to add some sort of count to mobm so we can unsub if i am done reading from an ob
 }
 
 void OrderBook::updateBook() {
-  auto updates = datastore->getBook(symbol);
-
-  for (auto bid : updates.bids) {
-    if (bid.size == 0) {
-      bids.erase(bid.price); 
-    } else {
-      bids[bid.price] = bid.size; 
-    }
-  }
-
-  for (auto ask : updates.asks) {
-    if (ask.size == 0) {
-      asks.erase(ask.price); 
-    } else {
-      asks[ask.price] = ask.size; 
-    }
-  }
-
-  while (bids.size() > depth) {
-    auto it = std::prev(bids.end());
-    bids.erase(it);
-  }
-  
-  // think this is correct?
-  if (bids.size() > depth) {
-    auto it = bids.rbegin();
-    std::advance(it, bids.size() - depth);
-    bids.erase(it.base(), bids.end());
-  }
-  
-  if (asks.size() > depth) {
-    auto it = asks.begin();
-    std::advance(it, asks.size() - depth);
-    asks.erase(asks.begin(), it);
-  }
-  
+  //book = std::move(mobm->getOrderBook(symbol));
 }
 
 void OrderBook::draw() {
@@ -73,20 +35,13 @@ void OrderBook::draw() {
   double max_bid_size = 0;
   double max_ask_size = 0;
 
-  for (const auto& level : bids) max_bid_size = std::max(level.second, max_bid_size);
-  for (const auto& level : asks) max_ask_size = std::max(level.second, max_ask_size);
+  for (const auto& level : book.bids) max_bid_size = std::max(level.second, max_bid_size);
+  for (const auto& level : book.asks) max_ask_size = std::max(level.second, max_ask_size);
   
   int row = 0;
-  int levels = 0;
-  
-  levels = asks.size() - depth_view;
 
   // draw ask side of orderbook
-  for (const auto& level : asks) {
-    if (levels > 0) {
-      levels--;
-      continue;
-    }
+  for (const auto& level : book.asks) {
 
     float bar_length = static_cast<float>(level.second / max_ask_size) * max_width;
     bar_length = std::max(min_width, bar_length);
@@ -113,10 +68,7 @@ void OrderBook::draw() {
   }
 
   // draw the bid side of the order book
-  levels = 0; 
-  for (const auto& level : bids) {
-
-    if (levels == depth_view) break;
+  for (const auto& level : book.bids) {
 
     float bar_length = static_cast<float>(level.second / max_bid_size) * max_width;
     bar_length = std::max(min_width, bar_length);
@@ -140,7 +92,6 @@ void OrderBook::draw() {
     draw_list->AddText(bid_size_pos, Colors::White_U32, bid_size.c_str());
 
     row++;
-    levels++;
   }
 
   ImGui::End();

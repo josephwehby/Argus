@@ -1,9 +1,49 @@
 #include "HttpsClient.hpp"
 
-HttpsClient::HttpsClient(std::shared_ptr<DataParser> dp_) : dp(dp_), cli(url.c_str()) {}
+HttpsClient::HttpsClient(std::shared_ptr<DataParser> dp_) : dp(dp_), cli(url.c_str()) {
+  process_thread = std::thread(&HttpsClient::processLoop, this); 
+}
 
-json HttpsClient::getHistoricalChart(const std::string& symbol, const std::string& interval, const std::string & limit) {
-  std::string query = endpoint + "klines?symbol=" + symbol + "&interval=" + interval + "&limit=" + limit;
+HttpsClient::~HttpsClient() { 
+  if (process_thread.joinable()) {
+    process_thread.join();
+  }
+}
+
+void HttpsClient::shutdown() {
+  HttpsTask task;
+  task.type = HttpsTaskType::Empty;
+  events.push(task);
+}
+
+void HttpsClient::pushRequest(HttpsTask& task) {
+  events.push(task);
+}
+
+void HttpsClient::processLoop() {
+  bool run = true;
+
+  while (run) {
+    auto task = events.wait_and_pop();
+    
+    switch (task->type) {
+      case HttpsTaskType::HistoricalChart:
+        getHistoricalChart(task);
+        break;
+      case HttpsTaskType::OrderBook:
+        getOrderBook(task);
+        break;
+      case HttpsTaskType::Empty:
+        run = false;
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+void HttpsClient::getHistoricalChart(std::shared_ptr<HttpsTask> task) {
+  std::string query = endpoint + "klines?symbol=" + task->symbol + "&interval=" + task->interval + "&limit=" + task->limit;
   auto res = cli.Get(query);
   
   if (res == nullptr) {
@@ -19,15 +59,15 @@ json HttpsClient::getHistoricalChart(const std::string& symbol, const std::strin
 
   json response = json::parse(res->body);  
   json modified;
-  modified["s"] = symbol;
+  modified["s"] = task->symbol;
   modified["e"] = "kline-historic";
   modified["c"] = response;
 
   dp->pushData(modified);
 }
 
-json HttpsClient::getOrderBook(const std::string& symbol, const std::string& limit) {
-  std::string query = endpoint + "depth?symbol=" + symbol + "&limit=" + limit;
+void HttpsClient::getOrderBook(std::shared_ptr<HttpsTask> task) {
+  std::string query = endpoint + "depth?symbol=" + task->symbol + "&limit=" + task->limit;
   auto res = cli.Get(query);
 
   if (res == nullptr) {
@@ -42,7 +82,7 @@ json HttpsClient::getOrderBook(const std::string& symbol, const std::string& lim
   }
 
   json response = json::parse(res->body);
-  response["s"] = symbol;
+  response["s"] = task->symbol;
   response["e"] = "orderbook-snapshot";
 
   dp->pushData(response);

@@ -42,7 +42,9 @@ void DataParser::parseData(std::shared_ptr<json> item) {
   if (channel == "24hrTicker") {
     parseTicker(item); 
   } else if (channel == "depthUpdate") {
-    parseBook(item);
+    parseBookUpdate(item);
+  } else if (channel == "orderbook-snapshot") {
+    parseBookSnapshot(item);
   } else if (channel == "kline") {
     parseOHLC(item);
   } else if (channel == "kline-historic") {
@@ -78,7 +80,7 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
   datastore->setTicker(symbol, ld);
 }
 
-void DataParser::parseBook(std::shared_ptr<json> item) {
+void DataParser::parseBookUpdate(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
 
   BookUpdate book_update;
@@ -92,8 +94,26 @@ void DataParser::parseBook(std::shared_ptr<json> item) {
   for (const auto& ask: (*item)["a"]) {
     book_update.asks.emplace_back(ask[0], ask[1]);
   }
+  
+  // push update to mobm
+  //mobm->applyUpdate(book_update);
+}
 
-  // this will not be pushed to data store but to ob manager
+void DataParser::parseBookSnapshot(std::shared_ptr<json> item) {
+  std::string symbol = item->at("s");
+  BookSnapshot book_snapshot;
+  book_snapshot.last_update = item->at("lastUpdateId");
+
+  for (const auto& bid : (*item)["bids"]) {
+    book_snapshot.bids.emplace(bid[0], bid[1]);
+  }
+
+  for (const auto& ask: (*item)["asks"]) {
+    book_snapshot.asks.emplace(ask[0], ask[1]);
+  }
+
+  // push snapshot to mobm
+  //mobm->applySnapshot(book_update);
 }
 
 void DataParser::parseOHLC(std::shared_ptr<json> item) {

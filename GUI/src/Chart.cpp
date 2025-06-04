@@ -1,10 +1,12 @@
 #include "Chart.hpp"
 
-Chart::Chart(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::shared_ptr<HttpsClient> _hc, std::string token) : datastore(ds), ws(_ws), hc(_hc) {
+Chart::Chart(std::shared_ptr<DataStore> _ds, std::shared_ptr<WebSocket> _ws, std::shared_ptr<HttpsClient> _hc, std::string token) : ds(_ds), ws(_ws), hc(_hc) {
+
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
   
-  hc->getHistoricalChart(symbol, "1m", "10");
+  HttpsTask task{HttpsTaskType::HistoricalChart, symbol, "1m", "10"};
+  hc->pushRequest(task);
 
   json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, "1m");
   ws->subscribe(sub_msg);
@@ -16,7 +18,7 @@ Chart::~Chart() {
 }
 
 void Chart::updateCandles() {
-  auto updates = datastore->getCandles(symbol);
+  auto updates = ds->getCandles(symbol);
   
   for (auto update : updates) {
     candles[update.unix_time] = update;

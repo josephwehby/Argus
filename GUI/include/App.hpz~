@@ -22,7 +22,7 @@
 #include "ConnectionState.hpp"
 #include "DataParser.hpp"
 #include "HttpsClient.hpp"
-//#include "MasterOrderBookManager.hpp"
+#include "MasterOrderBookManager.hpp"
 
 class App {
   public:
@@ -52,7 +52,7 @@ class App {
     std::shared_ptr<WebSocket> ws;
     std::shared_ptr<ConnectionState> cs;
     std::shared_ptr<DataParser> dp;
-   // std::shared_ptr<MasterOrderBookManager> mobm;
+    std::shared_ptr<MasterOrderBookManager> mobm;
     std::shared_ptr<HttpsClient> hc;
 
     net::io_context ioc;

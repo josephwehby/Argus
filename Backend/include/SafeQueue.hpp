@@ -1,9 +1,7 @@
-/*
-This will handle all the incoming messages from the websocket
-*/
+#pragma once
 
 #include <mutex>
-#include <stack>
+#include <deque>
 #include <condition_variable>
 #include <stdexcept>
 #include <iostream>
@@ -27,7 +25,7 @@ class SafeQueue {
 
     void push(T value) {
       std::lock_guard<std::mutex> lock(m);
-      data.push(std::move(value));
+      data.push_back(std::move(value));
       data_cond.notify_one();
     }
 
@@ -35,11 +33,11 @@ class SafeQueue {
       std::lock_guard<std::mutex> lock(m);
       
       if (data.empty()) {
-        throw std::runtime_error("Stack is empty");
+        throw std::runtime_error("Deque is empty");
       }
 
-      std::shared_ptr<T> const res = std::make_shared<T>(data.top());
-      data.pop();
+      std::shared_ptr<T> const res = std::make_shared<T>(data.front());
+      data.pop_front();
       return res;
     }
 
@@ -48,14 +46,22 @@ class SafeQueue {
       std::unique_lock<std::mutex> lock(m);
       data_cond.wait(lock, [this]{ return !data.empty(); });
       
-      std::shared_ptr<T> const res = std::make_shared<T>(data.top());
-      data.pop();
+      std::shared_ptr<T> const res = std::make_shared<T>(data.front());
+      data.pop_front();
       return res;
 
     }
 
+    std::shared_ptr<T> wait_and_front() {
+      std::unique_lock<std::mutex> lock(m);
+      data_cond.wait(lock, [this]{ return !data.empty(); });
+      
+      std::shared_ptr<T> const res = std::make_shared<T>(data.front());
+      return res;
+    }
+
   private:
-    std::stack<T> data;
+    std::deque<T> data;
     mutable std::mutex m;
     std::condition_variable data_cond; 
 };
