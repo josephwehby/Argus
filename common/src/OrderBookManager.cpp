@@ -1,9 +1,22 @@
 #include "OrderBookManager.hpp"
 
-OrderBookManager::OrderBookManager(std::string& token, std::shared_ptr<WebSocket> ws_, std::shared_ptr<DataParser> dp_) : symbol(token), ws(ws_), dp(dp_), hc(dp_) {
+OrderBookManager::OrderBookManager(std::string& token, int64_t id_, std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_) : symbol(token), id(id_), ws(ws_), eb(eb_), hc(hc_) {
+  
+  event_channel_update += symbol;
+  event_channel_snapshot += symbol;
 
   json sub_msg = JsonBuilder::generateSubscribe(token, "depth", 1, speed);
   ws->subscribe(sub_msg);
+  
+  eb->subscribe(event_channel_update, id, [this](std::shared_ptr<IEvent> update){
+    auto book_update = std::dynamic_pointer_cast<BookUpdate>(update);
+    this->updates.push(*book_update);
+  });
+  
+  eb->subscribe(event_channel_snapshot, id, [this](std::shared_ptr<IEvent> update){
+    auto book_snapshot= std::dynamic_pointer_cast<BookSnapshot>(update);
+    this->snapshots.push(*book_snapshot);
+  });
 
   process_thread = std::thread(&OrderBookManager::processLoop, this);
 }
@@ -15,16 +28,9 @@ OrderBookManager::~OrderBookManager() {
 
   json unsub_msg = JsonBuilder::generateUnsubscribe(token, "depth", 1, speed);
   ws->unsubscribe(unsub_msg);
-}
 
-void OrderBookManager::pushUpdate(BookUpdate& update) {
-  std::lock_guard<std::mutex> lock(m);
-  updates.push(update);
-}
-
-void OrderBookManager::pushSnapshot(BookSnapshot& snapshot) {
-  std::lock_guard<std::mutex> lock(m);
-  snapshots.push(snapshot);
+  eb->unsubscribe(event_channel_update, id);
+  eb->unsubscribe(event_channel_snapshot, id);
 }
 
 BookSnapshot OrderBookManager::getBookSnapshot() {
@@ -51,7 +57,8 @@ void syncBook() {
   std::shared_ptr<BookUpdate> update = updates.wait_and_front();
 
   do {
-    hc.getOrderBook(symbol, limit);
+    HttpsTask task{HttpsTaskType::OrderBook, symbol, "0", "20"};
+    hc->pushRequest(task);
     book = snapshots.wait_and_pop();
   } while (book.last_update < update->first_update);
   
@@ -63,11 +70,11 @@ bool OrderBookManager::applyUpdate(std::shared_ptr<BookUpdate> event) {
   if (event->last_update < book.last_update) return true;
   if (event->first_update > book.last_update) return false;
 
-  for (const auto& bid :event->bids) {
+  for (const auto& bid : event->bids) {
     if (bid.size == 0) {
       book.bids.erase(bid.price);
     } else {
-      book.bids[price] = size;
+      book.bids[bid.price] = bid.size;
     }
   }
 
@@ -75,7 +82,7 @@ bool OrderBookManager::applyUpdate(std::shared_ptr<BookUpdate> event) {
     if (ask.size == 0) {
       book.asks.erase(ask.price);
     } else {
-      book.asks[price] = size;
+      book.asks[ask.price] = ask.size;
     }
   }
   

@@ -22,6 +22,7 @@
 #include "ConnectionState.hpp"
 #include "DataParser.hpp"
 #include "HttpsClient.hpp"
+#include "EventBus.hpp"
 //#include "MasterOrderBookManager.hpp"
 
 class App {
@@ -48,10 +49,11 @@ class App {
     bool connected = false;
     
     std::vector<std::unique_ptr<Widget>> widgets;
-    std::shared_ptr<DataStore> datastore;
+    std::shared_ptr<DataStore> ds;
     std::shared_ptr<WebSocket> ws;
     std::shared_ptr<ConnectionState> cs;
     std::shared_ptr<DataParser> dp;
+    std::shared_ptr<EventBus> eb;
    // std::shared_ptr<MasterOrderBookManager> mobm;
     std::shared_ptr<HttpsClient> hc;
 

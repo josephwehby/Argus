@@ -1,34 +1,46 @@
 #include "Chart.hpp"
 
-Chart::Chart(std::shared_ptr<DataStore> _ds, std::shared_ptr<WebSocket> _ws, std::shared_ptr<HttpsClient> _hc, std::string token) : ds(_ds), ws(_ws), hc(_hc) {
+Chart::Chart(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_, std::string token) : ws(ws_), eb(eb_), hc(hc_) {
 
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
-  
-  HttpsTask task{HttpsTaskType::HistoricalChart, symbol, "1m", "10"};
+  event_channel = "CANDLE:" + symbol;
+
+  HttpsTask task{HttpsTaskType::HistoricalChart, symbol, "1m", "30"};
   hc->pushRequest(task);
+  
+  std::string historical_candles_event_channel = "HISTORICAL_CANDLES:" + symbol;
+  eb->subscribe(historical_candles_event_channel, window_id, [this, historical_candles_event_channel](std::shared_ptr<IEvent> update){
+    auto historical_candles_event = std::dynamic_pointer_cast<HistoricalCandles>(update);
+
+    for (const auto& candle : historical_candles_event->candles) {
+      this->candles[candle.unix_time] = candle;
+    }
+
+    this->eb->deferUnsubscribe(historical_candles_event_channel, window_id);
+  });
 
   json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, "1m");
   ws->subscribe(sub_msg);
+
+  eb->subscribe(event_channel, window_id, [this](std::shared_ptr<IEvent> update) {
+    auto candle_event = std::dynamic_pointer_cast<Candle>(update);
+    
+    if (this->candles.contains(candle_event->unix_time) && this->candles[candle_event->unix_time].event_time > candle_event->event_time) return;
+
+    this->candles[candle_event->unix_time] = *candle_event;
+  });
+
 }
 
 Chart::~Chart() {
   json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, "1m");
   ws->unsubscribe(unsub_msg);
-}
-
-void Chart::updateCandles() {
-  auto updates = ds->getCandles(symbol);
-  
-  for (auto update : updates) {
-    candles[update.unix_time] = update;
-  }
+  eb->unsubscribe(event_channel, window_id);
 }
 
 void Chart::draw() {
 
-  updateCandles(); 
-  
   ImGui::SetNextWindowSize(ImVec2(800, 690), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show);
   

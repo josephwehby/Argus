@@ -2,10 +2,12 @@
 
 #include <string>
 
+#include "IEvent.hpp"
+
 enum class TradeSide { Buy, Sell };
 
-struct Trade {
-  Trade() {}
+struct Trade : public IEvent {
+  Trade() = default;
 
   Trade(TradeSide tradeside, std::string p, std::string s, std::string t) :
     side(tradeside), price(p), size(s), time(t) {}

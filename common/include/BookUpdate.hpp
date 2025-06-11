@@ -1,6 +1,6 @@
 #pragma once
-// potentially add another 2 fields where the data is string represented so that we dont have to keep calling
-// string operations every time orderbook renders
+
+#include "IEvent.hpp"
 
 struct EntryUpdate {
   
@@ -12,7 +12,7 @@ struct EntryUpdate {
   double size;
 };
 
-struct BookUpdate {
+struct BookUpdate : public IEvent {
   std::string symbol;
 
   unsigned long first_update;

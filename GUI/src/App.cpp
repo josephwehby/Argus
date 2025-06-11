@@ -39,10 +39,10 @@ App::App() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  // start up the websocket stuff
   cs = std::make_shared<ConnectionState>(State::CONNECTING);
-  datastore = std::make_shared<DataStore>();
-  dp = std::make_shared<DataParser>(datastore, cs);
+  ds = std::make_shared<DataStore>();
+  eb = std::make_shared<EventBus>();
+  dp = std::make_shared<DataParser>(ds, cs, eb);
   hc = std::make_shared<HttpsClient>(dp);
   initWebSocket();
   //mobm = std::make_shared<MasterOrderBookManager>(ws, dp);
@@ -119,7 +119,8 @@ void App::run() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
+    
+    eb->dispatchAll();
     update();
     render();
   }
@@ -164,7 +165,7 @@ void App::drawMenuBar() {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Ticker>(datastore, ws, "BTCUSDT"));
+        widgets.push_back(std::make_unique<Ticker>(ws, eb, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }
@@ -178,14 +179,14 @@ void App::drawMenuBar() {
 
     if (ImGui::BeginMenu("Chart")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Chart>(datastore, ws, hc, "BTCUSDT"));
+        widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Trades")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Trades>(datastore, ws, "BTCUSDT"));
+        widgets.push_back(std::make_unique<Trades>(ws, eb, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }

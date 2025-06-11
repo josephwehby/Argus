@@ -23,12 +23,18 @@ class SafeQueue {
       return data.empty();
     }
 
+    size_t size() const {
+      std::lock_guard<std::mutex> lock(m);
+      return data.size();
+    }
+
     void push(T value) {
       std::lock_guard<std::mutex> lock(m);
       data.push_back(std::move(value));
       data_cond.notify_one();
     }
-
+    
+    // maybe remake these try pops... and return nullptr if empty
     std::shared_ptr<T> pop() {
       std::lock_guard<std::mutex> lock(m);
       
@@ -41,8 +47,25 @@ class SafeQueue {
       return res;
     }
 
-    std::shared_ptr<T> wait_and_pop() {
+    void pop(T& value) {
+      std::lock_guard<std::mutex> lock(m);
+      
+      if (data.empty()) {
+        throw std::runtime_error("Deque is empty");
+      }
 
+      value = data.front();
+      data.pop_front();
+    }
+    
+    void wait_and_pop(T& value) {
+      std::unique_lock<std::mutex> lock(m);
+      data_cond.wait(lock, [this] { return !data.empty(); });
+      value = data.front();
+      data.pop_front();
+    }
+
+    std::shared_ptr<T> wait_and_pop() {
       std::unique_lock<std::mutex> lock(m);
       data_cond.wait(lock, [this]{ return !data.empty(); });
       

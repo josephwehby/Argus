@@ -10,9 +10,10 @@
 #include "implot_internal.h"
 #include "Widget.hpp"
 #include "Candle.hpp"
+#include "HistoricalCandles.hpp"
 #include "Utils.hpp"
-#include "DataStore.hpp"
 #include "WebSocket.hpp"
+#include "EventBus.hpp"
 #include "HttpsClient.hpp"
 #include "DataParser.hpp"
 #include "JsonBuilder.hpp"
@@ -20,7 +21,7 @@
 
 class Chart : public Widget {
   public:
-    Chart(std::shared_ptr<DataStore>, std::shared_ptr<WebSocket>, std::shared_ptr<HttpsClient>, std::string);
+    Chart(std::shared_ptr<WebSocket>, std::shared_ptr<EventBus>, std::shared_ptr<HttpsClient>, std::string);
     ~Chart();
     void draw() override;
   private:
@@ -34,12 +35,13 @@ class Chart : public Widget {
 
     std::string symbol;
     const std::string channel = "kline"; 
+    std::string event_channel;
 
     float ratios[2] = {2.5, 1};
     bool show_candles = true;
-
+    
     std::map<long long, Candle> candles;
     std::shared_ptr<WebSocket> ws;
-    std::shared_ptr<DataStore> ds;
+    std::shared_ptr<EventBus> eb;
     std::shared_ptr<HttpsClient> hc;
 };

@@ -12,17 +12,19 @@
 #include "Trade.hpp"
 #include "DataStore.hpp"
 #include "Candle.hpp"
+#include "HistoricalCandles.hpp"
 #include "Utils.hpp"
 #include "BookUpdate.hpp"
 #include "BookSnapshot.hpp"
 #include "ConnectionState.hpp"
 //#include "MasterOrderBookManager.hpp"
+#include "EventBus.hpp"
 
 using json = nlohmann::json;
 
 class DataParser {
   public:
-    DataParser(std::shared_ptr<DataStore>, std::shared_ptr<ConnectionState>);
+    DataParser(std::shared_ptr<DataStore>, std::shared_ptr<ConnectionState>, std::shared_ptr<EventBus>);
     ~DataParser();
     void pushData(json); 
     void shutdown();
@@ -32,6 +34,7 @@ class DataParser {
     SafeQueue<json> data;
     std::shared_ptr<DataStore> datastore; 
     std::shared_ptr<ConnectionState> cs;
+    std::shared_ptr<EventBus> eb;
     //std::shared_ptr<MasterOrderBookManager> mobm;
 
     void processLoop();

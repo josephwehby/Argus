@@ -1,24 +1,29 @@
 #include "Ticker.hpp"
 
-Ticker::Ticker(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds) {
-  ws = _ws;
+Ticker::Ticker(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::string token) : ws(ws_), eb(eb_) {
   symbol = token;
   window_name = "Ticker: " + symbol + "  ##" + std::to_string(getWindowID());
+  event_channel = "LEVEL1:" + symbol;
   
   json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id); 
   ws->subscribe(sub_msg);
+  
+  eb->subscribe(event_channel, window_id, [this](const std::shared_ptr<IEvent> update) {
+    auto level1_event = std::dynamic_pointer_cast<Level1>(update);
+    if (level1_event->empty) return;
+    this->level1 = *level1_event;
+  });
+
 }
 
 Ticker::~Ticker() {
   json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id);
   ws->unsubscribe(unsub_msg);
+  eb->unsubscribe(event_channel, window_id);
 }
 
 void Ticker::draw() {
   
-  auto update = datastore->getTicker(symbol);  
-  
-  if (update.empty == false) level1 = std::move(update);
   if (level1.empty) return;
   
   ImGui::SetNextWindowSize(ImVec2(440, 250), ImGuiCond_FirstUseEver);

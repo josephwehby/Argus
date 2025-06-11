@@ -1,6 +1,8 @@
 #pragma once
 
-struct Level1 {
+#include "IEvent.hpp"
+
+struct Level1 : public IEvent {
   
   Level1() {
     empty = true;

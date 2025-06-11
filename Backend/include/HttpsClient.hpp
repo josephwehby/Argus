@@ -1,5 +1,3 @@
-// may make this async later
-
 #pragma once
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT

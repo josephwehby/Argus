@@ -1,29 +1,28 @@
 #include "Trades.hpp"
 
-Trades::Trades(std::shared_ptr<DataStore> ds, std::shared_ptr<WebSocket> _ws, std::string token) : datastore(ds), ws(_ws) {
+Trades::Trades(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::string token) : ws(ws_), eb(eb_) {
   symbol = token;
   window_name = "Trades: " + symbol + " ##" + std::to_string(window_id);
-
+  event_channel = "TRADE:" + symbol;
+  
   json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id);
   ws->subscribe(sub_msg);
+
+  eb->subscribe(event_channel, window_id, [this](const std::shared_ptr<IEvent> update) {
+    auto trade_event = std::dynamic_pointer_cast<Trade>(update); 
+    this->trades.push_front(*trade_event);
+    if (this->trades.size() > this->max_capacity) this->trades.pop_back();
+  });
 }
 
 Trades::~Trades() {
   json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id);
   ws->unsubscribe(unsub_msg);
+  eb->unsubscribe(event_channel, window_id);
 }
 
 void Trades::draw() {
    
-  auto update = datastore->getTrades(symbol);
-  
-  if (update.size() > 0) {
-    for (auto& t : update) {
-      trades.push_front(std::move(t));
-      if (trades.size() > max_capacity) trades.pop_back();
-    }
-  }
-
   ImGui::SetNextWindowSize(ImVec2(340, 690), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show);
 

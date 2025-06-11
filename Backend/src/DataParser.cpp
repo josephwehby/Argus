@@ -1,6 +1,6 @@
 #include "DataParser.hpp"
 
-DataParser::DataParser(std::shared_ptr<DataStore> ds, std::shared_ptr<ConnectionState> cs_) : datastore(ds), cs(cs_) {
+DataParser::DataParser(std::shared_ptr<DataStore> ds, std::shared_ptr<ConnectionState> cs_, std::shared_ptr<EventBus> eb_) : datastore(ds), cs(cs_), eb(eb_) {
   process_thread = std::thread(&DataParser::processLoop, this); 
 }
 
@@ -74,10 +74,11 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
   double low = std::stod(std::string(item->at("l")));
   double volume = std::stod(std::string(item->at("v")));
   
-  Level1 ld(best_bid, best_ask, best_bid_size, best_ask_size, 
+  std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
       price_change, percent_change, last_price, high, low, volume);
-  
-  datastore->setTicker(symbol, ld);
+  ld->channel = "LEVEL1:" + symbol;
+
+  eb->publish(ld);
 }
 
 void DataParser::parseBookUpdate(std::shared_ptr<json> item) {
@@ -126,14 +127,16 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
   double buy_volume = std::stod(std::string(item->at("k")["V"])); 
   double volume = std::stod(std::string(item->at("k")["v"])); 
   long long unix_time = item->at("k")["t"].get<long long>() / 1000;
+  long long event_time = item->at("E").get<long long>();
 
-  Candle candle(open, high, low, close, buy_volume, volume, 1, unix_time);
-  datastore->setCandle(symbol, candle);
+  std::shared_ptr<Candle> candle = std::make_shared<Candle>(open, high, low, close, buy_volume, volume, 1, unix_time, event_time);
+  candle->channel = "CANDLE:" + symbol;
+  eb->publish(candle);
 }
 
 void DataParser::parseOHLCHistoric(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
-  std::vector<Candle> candles;
+  std::shared_ptr<HistoricalCandles> historical_candles = std::make_shared<HistoricalCandles>();
   
   for (const auto& candle : item->at("c")) {
     long long unix_time = candle[0].get<long long>()/1000;
@@ -143,17 +146,18 @@ void DataParser::parseOHLCHistoric(std::shared_ptr<json> item) {
     double close = std::stod(candle[4].get<std::string>());
     double volume = std::stod(candle[5].get<std::string>());
     double buy_volume = std::stod(candle[9].get<std::string>());
-    candles.emplace_back(open, high, low, close, buy_volume, volume, 1, unix_time);
-    datastore->setCandles(symbol, candles);
+    historical_candles->candles.emplace_back(open, high, low, close, buy_volume, volume, 1, unix_time, 0);
   }
-
-  datastore->setCandles(symbol, candles);
+  
+  historical_candles->channel = "HISTORICAL_CANDLES:" + symbol;
+  eb->publish(historical_candles);
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
   
   TradeSide side = (item->at("m") == true) ? TradeSide::Sell: TradeSide::Buy;
-  Trade trade(side, Utils::formatPriceFromString(item->at("p")), Utils::formatSizeFromString(item->at("q")), Utils::formatMilliTime(item->at("T"))); 
-  datastore->setTrade(symbol, trade);
+  std::shared_ptr<Trade> trade = std::make_shared<Trade>(side, Utils::formatPriceFromString(item->at("p")), Utils::formatSizeFromString(item->at("q")), Utils::formatMilliTime(item->at("T"))); 
+  trade->channel = "TRADE:" + symbol;
+  eb->publish(trade);
 }
