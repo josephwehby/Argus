@@ -16,7 +16,6 @@ void DataParser::shutdown() {
   data.push(nullptr);
 }
 
-// may need to use move semantics later on to reduce the copies but ill try this for now
 void DataParser::pushData(json new_data) {
   data.push(new_data);
 }
@@ -38,7 +37,7 @@ void DataParser::parseData(std::shared_ptr<json> item) {
   }
 
   std::string channel = item->at("e");
-  
+
   if (channel == "24hrTicker") {
     parseTicker(item); 
   } else if (channel == "depthUpdate") {
@@ -84,37 +83,37 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
 void DataParser::parseBookUpdate(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
 
-  BookUpdate book_update;
-  book_update.first_update = item->at("U"); 
-  book_update.last_update = item->at("u"); 
+  std::shared_ptr<BookUpdate> book_update = std::make_shared<BookUpdate>();
+  book_update->first_update = item->at("U"); 
+  book_update->last_update = item->at("u"); 
 
   for (const auto& bid : (*item)["b"]) {
-    book_update.bids.emplace_back(bid[0], bid[1]);
+    book_update->bids.emplace_back(std::stod(bid[0].get<std::string>()), std::stod(bid[1].get<std::string>()));
   }
   
   for (const auto& ask: (*item)["a"]) {
-    book_update.asks.emplace_back(ask[0], ask[1]);
+    book_update->asks.emplace_back(std::stod(ask[0].get<std::string>()), std::stod(ask[1].get<std::string>()));
   }
   
-  // push update to mobm
-  //mobm->applyUpdate(book_update);
+  book_update->channel = "BOOK_UPDATE:" + symbol;
+  eb->publish(book_update);
 }
 
 void DataParser::parseBookSnapshot(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
-  BookSnapshot book_snapshot;
-  book_snapshot.last_update = item->at("lastUpdateId");
+  std::shared_ptr<BookSnapshot> book_snapshot = std::make_shared<BookSnapshot>();
+  book_snapshot->last_update = item->at("lastUpdateId");
 
   for (const auto& bid : (*item)["bids"]) {
-    book_snapshot.bids.emplace(bid[0], bid[1]);
+    book_snapshot->bids.emplace(std::stod(bid[0].get<std::string>()), std::stod(bid[1].get<std::string>()));
   }
 
   for (const auto& ask: (*item)["asks"]) {
-    book_snapshot.asks.emplace(ask[0], ask[1]);
+    book_snapshot->asks.emplace(std::stod(ask[0].get<std::string>()), std::stod(ask[1].get<std::string>()));
   }
-
-  // push snapshot to mobm
-  //mobm->applySnapshot(book_update);
+  
+  book_snapshot->channel = "BOOK_SNAPSHOT:" + symbol;
+  eb->publish(book_snapshot);
 }
 
 void DataParser::parseOHLC(std::shared_ptr<json> item) {

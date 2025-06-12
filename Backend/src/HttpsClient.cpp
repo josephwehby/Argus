@@ -80,7 +80,7 @@ void HttpsClient::getOrderBook(std::shared_ptr<HttpsTask> task) {
     std::cerr << "HTTPS Error: " << httplib::to_string(error) << std::endl;
     return;
   }
-
+ 
   json response = json::parse(res->body);
   response["s"] = task->symbol;
   response["e"] = "orderbook-snapshot";

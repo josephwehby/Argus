@@ -4,20 +4,21 @@
 #include <thread>
 #include <mutex>
 
-#include "BookUpdate.hpp"
-#include "SafeQueue.hpp"
-#include "HttpsClient.hpp"
-#include "HttpsTaskType.hpp"
 #include "WebSocket.hpp"
+#include "HttpsClient.hpp"
+#include "EventBus.hpp"
+#include "HttpsTask.hpp"
 #include "JsonBuilder.hpp"
 #include "BookSnapshot.hpp"
-#include "EventBus.hpp"
+#include "BookUpdate.hpp"
+#include "SafeQueue.hpp"
 
 class OrderBookManager {
   public:
-    OrderBookManager(std::string&, int64_t, std::shared_ptr<WebSocket>, std::shared_ptr<EventBus>, std::shared_ptr<HttpsClient>);
+    OrderBookManager(std::shared_ptr<WebSocket>, std::shared_ptr<EventBus>, std::shared_ptr<HttpsClient>, std::string&, int64_t);
     ~OrderBookManager();
     BookSnapshot getBookSnapshot();
+    void shutdown();
   private:
     void processLoop();
     void syncBook();
@@ -27,7 +28,7 @@ class OrderBookManager {
     int64_t id;
     
     std::string event_channel_update = "BOOK_UPDATE:";
-    std::string event_channel_snapshot = "BOOK_SNAPSHOT";
+    std::string event_channel_snapshot = "BOOK_SNAPSHOT:";
 
     const std::string speed = "100ms";
     const std::string limit = "20";

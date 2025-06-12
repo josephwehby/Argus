@@ -1,11 +1,12 @@
 #include "OrderBookManager.hpp"
 
-OrderBookManager::OrderBookManager(std::string& token, int64_t id_, std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_) : symbol(token), id(id_), ws(ws_), eb(eb_), hc(hc_) {
+OrderBookManager::OrderBookManager(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_, std::string& symbol_, int64_t id_) : 
+  symbol(symbol_), id(id_), ws(ws_), eb(eb_), hc(hc_) {
   
   event_channel_update += symbol;
   event_channel_snapshot += symbol;
 
-  json sub_msg = JsonBuilder::generateSubscribe(token, "depth", 1, speed);
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, "depth", id, speed);
   ws->subscribe(sub_msg);
   
   eb->subscribe(event_channel_update, id, [this](std::shared_ptr<IEvent> update){
@@ -26,7 +27,7 @@ OrderBookManager::~OrderBookManager() {
     process_thread.join();
   }
 
-  json unsub_msg = JsonBuilder::generateUnsubscribe(token, "depth", 1, speed);
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, "depth", id, speed);
   ws->unsubscribe(unsub_msg);
 
   eb->unsubscribe(event_channel_update, id);
@@ -38,13 +39,25 @@ BookSnapshot OrderBookManager::getBookSnapshot() {
   return book;
 }
 
+void OrderBookManager::shutdown() {
+  BookUpdate stop;
+  stop.first_update = 0;
+  stop.last_update = 0;
+  updates.push(stop);
+
+  BookSnapshot end;
+  end.last_update = 0;
+  snapshots.push(end);
+}
+
 void OrderBookManager::processLoop() {
   syncBook();
   while (true) {
     auto event = updates.wait_and_pop();
-    if (event->is_null()) {
+    if (event->first_update == 0 && event->last_update == 0) {
       break;
     }
+    std::cout << "event" << std::endl;
     bool success = applyUpdate(event);
     if (!success) {
       std::cout << "OB for " << symbol << " is out of sync." << std::endl;
@@ -52,24 +65,37 @@ void OrderBookManager::processLoop() {
   }
 }
 
-void syncBook() {
-  std::lock_guard<std::mutex> lock(m);
+void OrderBookManager::syncBook() {
   std::shared_ptr<BookUpdate> update = updates.wait_and_front();
+  BookSnapshot sync_book;
+  std::cout << "sync" << std::endl;
 
   do {
-    HttpsTask task{HttpsTaskType::OrderBook, symbol, "0", "20"};
+    HttpsTask task{HttpsTaskType::OrderBook, symbol, "0", limit};
     hc->pushRequest(task);
-    book = snapshots.wait_and_pop();
-  } while (book.last_update < update->first_update);
+    sync_book = *(snapshots.wait_and_pop());
+    if (sync_book.last_update == 0) return;
+  } while (sync_book.last_update < update->first_update);
   
-  while (updates.wait_and_front()->last_update <= book.last_update) updates.pop();
+  std::cout << "removing events..." << std::endl;
+
+  while (true) {
+    auto front = updates.wait_and_front();
+    if (front->last_update <= sync_book.last_update) break;
+    updates.pop();
+  }
+
+  std::lock_guard<std::mutex> lock(m);
+  book = sync_book;
+
+  std::cout << "done syncing" << std::endl;
 }
 
 bool OrderBookManager::applyUpdate(std::shared_ptr<BookUpdate> event) {
   std::lock_guard<std::mutex> lock(m);
   if (event->last_update < book.last_update) return true;
   if (event->first_update > book.last_update) return false;
-
+  std::cout << "applying update" << std::endl;
   for (const auto& bid : event->bids) {
     if (bid.size == 0) {
       book.bids.erase(bid.price);

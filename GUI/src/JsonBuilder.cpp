@@ -23,7 +23,6 @@ namespace JsonBuilder {
       {"id", id}
     };
     
-        
     return msg;
   }
 

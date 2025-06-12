@@ -1,24 +1,18 @@
 #include "OrderBook.hpp"
 
-OrderBook::OrderBook(std::shared_ptr<WebSocket> _ws, std::string token) : ws(_ws) {
+OrderBook::OrderBook(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_, std::string token) : ws(ws_), book_manager(ws_, eb_, hc_, token, window_id) {
   symbol = token;
   window_name = "OrderBook: " + symbol + " ##" + std::to_string(window_id);
-  
-  //mobm->addOrderBook(symbol);
 }
 
 OrderBook::~OrderBook() {
-  // need to add some sort of count to mobm so we can unsub if i am done reading from an ob
-}
-
-void OrderBook::updateBook() {
-  //book = std::move(mobm->getOrderBook(symbol));
+  book_manager.shutdown(); 
 }
 
 void OrderBook::draw() {
 
-  updateBook();
-  
+  book = book_manager.getBookSnapshot();
+
   ImGui::SetNextWindowSize(ImVec2(435,1070), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show, ImGuiWindowFlags_NoScrollbar);
 

@@ -172,7 +172,7 @@ void App::drawMenuBar() {
 
     if (ImGui::BeginMenu("OrderBook")) {
       if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<OrderBook>(ws, "BTCUSDT"));
+        widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "BTCUSDT"));
       }
       ImGui::EndMenu();
     }
