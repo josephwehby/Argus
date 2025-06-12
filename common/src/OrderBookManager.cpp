@@ -2,7 +2,7 @@
 
 OrderBookManager::OrderBookManager(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_, std::string& symbol_, int64_t id_) : 
   symbol(symbol_), id(id_), ws(ws_), eb(eb_), hc(hc_) {
-  
+  std::cout << id << std::endl;  
   event_channel_update += symbol;
   event_channel_snapshot += symbol;
 
@@ -68,6 +68,7 @@ void OrderBookManager::processLoop() {
 void OrderBookManager::syncBook() {
   std::shared_ptr<BookUpdate> update = updates.wait_and_front();
   BookSnapshot sync_book;
+  
   std::cout << "sync" << std::endl;
 
   do {
@@ -81,8 +82,12 @@ void OrderBookManager::syncBook() {
 
   while (true) {
     auto front = updates.wait_and_front();
-    if (front->last_update <= sync_book.last_update) break;
-    updates.pop();
+    if (front->last_update <= sync_book.last_update) {
+      std::cout << "[SYNC] DROPPING " << front->last_update << " " << sync_book.last_update << std::endl;
+      updates.pop();
+    } else {
+      break;
+    }
   }
 
   std::lock_guard<std::mutex> lock(m);
@@ -93,9 +98,12 @@ void OrderBookManager::syncBook() {
 
 bool OrderBookManager::applyUpdate(std::shared_ptr<BookUpdate> event) {
   std::lock_guard<std::mutex> lock(m);
+  std::cout << event->last_update << " " << event->first_update << " " << book.last_update << std::endl;
   if (event->last_update < book.last_update) return true;
   if (event->first_update > book.last_update) return false;
+
   std::cout << "applying update" << std::endl;
+  
   for (const auto& bid : event->bids) {
     if (bid.size == 0) {
       book.bids.erase(bid.price);

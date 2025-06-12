@@ -15,8 +15,8 @@ struct EntryUpdate {
 struct BookUpdate : public IEvent {
   std::string symbol;
 
-  unsigned long first_update;
-  unsigned long last_update;
+  unsigned long long first_update;
+  unsigned long long last_update;
 
   std::vector<EntryUpdate> bids;
   std::vector<EntryUpdate> asks;

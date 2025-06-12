@@ -84,8 +84,8 @@ void DataParser::parseBookUpdate(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
 
   std::shared_ptr<BookUpdate> book_update = std::make_shared<BookUpdate>();
-  book_update->first_update = item->at("U"); 
-  book_update->last_update = item->at("u"); 
+  book_update->first_update = item->at("U").get<unsigned long long>(); 
+  book_update->last_update = item->at("u").get<unsigned long long>(); 
 
   for (const auto& bid : (*item)["b"]) {
     book_update->bids.emplace_back(std::stod(bid[0].get<std::string>()), std::stod(bid[1].get<std::string>()));
@@ -102,7 +102,7 @@ void DataParser::parseBookUpdate(std::shared_ptr<json> item) {
 void DataParser::parseBookSnapshot(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
   std::shared_ptr<BookSnapshot> book_snapshot = std::make_shared<BookSnapshot>();
-  book_snapshot->last_update = item->at("lastUpdateId");
+  book_snapshot->last_update = item->at("lastUpdateId").get<unsigned long long>();
 
   for (const auto& bid : (*item)["bids"]) {
     book_snapshot->bids.emplace(std::stod(bid[0].get<std::string>()), std::stod(bid[1].get<std::string>()));
