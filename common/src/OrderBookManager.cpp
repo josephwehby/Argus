@@ -51,16 +51,25 @@ void OrderBookManager::shutdown() {
 }
 
 void OrderBookManager::processLoop() {
+  bool sync = false;
   syncBook();
   while (true) {
+    
+    if (sync) {
+      syncBook();
+      sync = false;
+    }
+
     auto event = updates.wait_and_pop();
     if (event->first_update == 0 && event->last_update == 0) {
       break;
     }
-    std::cout << "event" << std::endl;
+
     bool success = applyUpdate(event);
     if (!success) {
       std::cout << "OB for " << symbol << " is out of sync." << std::endl;
+      sync = true;
+      updates.clear();
     }
   }
 }
@@ -92,18 +101,17 @@ void OrderBookManager::syncBook() {
 
   std::lock_guard<std::mutex> lock(m);
   book = sync_book;
-
   std::cout << "done syncing" << std::endl;
 }
 
 bool OrderBookManager::applyUpdate(std::shared_ptr<BookUpdate> event) {
   std::lock_guard<std::mutex> lock(m);
-  std::cout << event->last_update << " " << event->first_update << " " << book.last_update << std::endl;
-  if (event->last_update < book.last_update) return true;
-  if (event->first_update > book.last_update) return false;
-
-  std::cout << "applying update" << std::endl;
   
+  std::cout << event->last_update << " " << event->first_update << " " << book.last_update << std::endl;
+  
+  if (event->last_update < book.last_update) return true;
+  if (event->first_update > book.last_update+1) return false;
+
   for (const auto& bid : event->bids) {
     if (bid.size == 0) {
       book.bids.erase(bid.price);

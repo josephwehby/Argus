@@ -28,6 +28,11 @@ class SafeQueue {
       return data.size();
     }
 
+    void clear() {
+      std::lock_guard<std::mutex> lock(m);
+      data.clear(); 
+    }
+
     void push(T value) {
       std::lock_guard<std::mutex> lock(m);
       data.push_back(std::move(value));
