@@ -2,7 +2,6 @@
 
 OrderBookManager::OrderBookManager(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_, std::string& symbol_, int64_t id_) : 
   symbol(symbol_), id(id_), ws(ws_), eb(eb_), hc(hc_) {
-  std::cout << id << std::endl;  
   event_channel_update += symbol;
   event_channel_snapshot += symbol;
 
@@ -78,8 +77,6 @@ void OrderBookManager::syncBook() {
   std::shared_ptr<BookUpdate> update = updates.wait_and_front();
   BookSnapshot sync_book;
   
-  std::cout << "sync" << std::endl;
-
   do {
     HttpsTask task{HttpsTaskType::OrderBook, symbol, "0", limit};
     hc->pushRequest(task);
@@ -87,12 +84,9 @@ void OrderBookManager::syncBook() {
     if (sync_book.last_update == 0) return;
   } while (sync_book.last_update < update->first_update);
   
-  std::cout << "removing events..." << std::endl;
-
   while (true) {
     auto front = updates.wait_and_front();
     if (front->last_update <= sync_book.last_update) {
-      std::cout << "[SYNC] DROPPING " << front->last_update << " " << sync_book.last_update << std::endl;
       updates.pop();
     } else {
       break;
@@ -101,13 +95,10 @@ void OrderBookManager::syncBook() {
 
   std::lock_guard<std::mutex> lock(m);
   book = sync_book;
-  std::cout << "done syncing" << std::endl;
 }
 
 bool OrderBookManager::applyUpdate(std::shared_ptr<BookUpdate> event) {
   std::lock_guard<std::mutex> lock(m);
-  
-  std::cout << event->last_update << " " << event->first_update << " " << book.last_update << std::endl;
   
   if (event->last_update < book.last_update) return true;
   if (event->first_update > book.last_update+1) return false;
@@ -119,6 +110,11 @@ bool OrderBookManager::applyUpdate(std::shared_ptr<BookUpdate> event) {
       book.bids[bid.price] = bid.size;
     }
   }
+  
+  while (book.bids.size() > depth) {
+    auto it = std::prev(book.bids.end());
+    book.bids.erase(it);
+  } 
 
   for (const auto& ask : event->asks) {
     if (ask.size == 0) {
@@ -128,6 +124,11 @@ bool OrderBookManager::applyUpdate(std::shared_ptr<BookUpdate> event) {
     }
   }
   
+  while (book.asks.size() > depth) {
+    auto it = book.asks.begin();
+    book.asks.erase(it);
+  } 
+
   book.last_update = event->last_update;
   return true;
 }

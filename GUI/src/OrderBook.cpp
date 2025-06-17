@@ -28,7 +28,7 @@ void OrderBook::draw() {
   float bar_height = std::max((win_size.y) / 40.0f, min_bar_height);
   double max_bid_size = 0;
   double max_ask_size = 0;
-
+  
   for (const auto& level : book.bids) max_bid_size = std::max(level.second, max_bid_size);
   for (const auto& level : book.asks) max_ask_size = std::max(level.second, max_ask_size);
   

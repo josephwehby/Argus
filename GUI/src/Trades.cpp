@@ -10,7 +10,7 @@ Trades::Trades(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, st
 
   eb->subscribe(event_channel, window_id, [this](const std::shared_ptr<IEvent> update) {
     auto trade_event = std::dynamic_pointer_cast<Trade>(update); 
-    this->trades.push_front(*trade_event);
+    if (std::stod(trade_event->size) >= this->filter) this->trades.push_front(*trade_event);
     if (this->trades.size() > this->max_capacity) this->trades.pop_back();
   });
 }
@@ -23,8 +23,20 @@ Trades::~Trades() {
 
 void Trades::draw() {
    
-  ImGui::SetNextWindowSize(ImVec2(340, 690), ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSize(ImVec2(370, 690), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show);
+
+  ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+  if(ImGui::InputDouble("Qty", &filter)) {
+    trades.clear();
+  };
+  ImGui::SameLine(0, 15.f);
+  if (ImGui::Button("Reset")) {
+    trades.clear();
+    filter = 0;
+  }
+
+  ImGui::PopStyleVar();
 
   if (ImGui::BeginTable("trades_table", 3, ImGuiTableFlags_SizingStretchSame)) {
     ImGui::TableSetupColumn("Price");
@@ -33,6 +45,7 @@ void Trades::draw() {
     ImGui::TableHeadersRow();
 
     for (const auto& trade : trades) {
+
       ImGui::TableNextRow();
       
       ImVec4 color;

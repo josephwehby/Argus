@@ -32,7 +32,8 @@ class OrderBookManager {
 
     const std::string speed = "100ms";
     const std::string limit = "20";
-    
+    const unsigned int depth = 20;    
+
     BookSnapshot book;
 
     SafeQueue<BookUpdate> updates;

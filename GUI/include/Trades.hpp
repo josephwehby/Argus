@@ -20,6 +20,7 @@ class Trades : public Widget {
     const std::string channel = "trade";
     std::string event_channel;
     const unsigned int max_capacity = 60;
+    double filter = 0;
 
     std::shared_ptr<WebSocket> ws;
     std::deque<Trade> trades;

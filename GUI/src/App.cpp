@@ -45,7 +45,6 @@ App::App() {
   dp = std::make_shared<DataParser>(ds, cs, eb);
   hc = std::make_shared<HttpsClient>(dp);
   initWebSocket();
-  //mobm = std::make_shared<MasterOrderBookManager>(ws, dp);
 }
 
 App::~App() {
@@ -153,6 +152,11 @@ void App::styleApp() {
   style.Colors[ImGuiCol_FrameBg] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
   style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
   style.Colors[ImGuiCol_FrameBgActive] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
+  
+  style.Colors[ImGuiCol_Button]        = ImVec4(68/255.f, 71/255.f, 90/255.f, 1.0f);  // Base: #44475A
+  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(98/255.f, 114/255.f, 164/255.f, 1.0f); // Hover: #6272A4
+  style.Colors[ImGuiCol_ButtonActive]  = ImVec4(84/255.f, 94/255.f, 140/255.f, 1.0f);  // Active: #545E8C
+
 }
 
 void App::drawMenuBar() {
