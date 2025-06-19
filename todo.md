@@ -1,2 +1,1 @@
-- switch orderbook to binance
 - send pong frame every 30ish seconds or disconnected

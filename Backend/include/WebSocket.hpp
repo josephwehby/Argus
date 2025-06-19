@@ -13,6 +13,7 @@
 #include <future>
 #include <stdexcept>
 #include <exception>
+#include <deque>
 
 #include "DataParser.hpp"
 #include "DataStore.hpp"
@@ -45,13 +46,10 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     void onSSLHandshake(beast::error_code);
     void onRead(beast::error_code, std::size_t);
     void doRead();
-    void onWrite(beast::error_code, std::size_t);
     void send(json&);
+    void onWrite(beast::error_code, std::size_t);
     void onClose(beast::error_code);
 
-    //std::string m_host = "ws.kraken.com";
-    //std::string m_port = "443";
-    
     std::string m_host = "data-stream.binance.vision";
     std::string m_port = "9443";
     
@@ -62,7 +60,8 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     ssl::context m_ssl_ctx {ssl::context::tlsv12_client};
     websocket::stream<ssl::stream<beast::tcp_stream>> m_ws;
     beast::flat_buffer m_buffer;
-    
+    std::deque<std::shared_ptr<const std::string>> messages;
+
     std::promise<void> close_promise;
     std::future<void> close_future;
 };

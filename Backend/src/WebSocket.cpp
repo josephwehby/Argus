@@ -149,16 +149,27 @@ void WebSocket::doRead() {
       beast::bind_front_handler(&WebSocket::onRead, shared_from_this()));
 }
 
+void WebSocket::send(json& msg) {
+  messages.push_back(std::make_shared<const std::string>(msg.dump()));
+  
+  if (messages.size() > 1) return;
+  
+  m_ws.async_write(net::buffer(*messages.front()),
+      beast::bind_front_handler(&WebSocket::onWrite, shared_from_this()));
+}
+
 void WebSocket::onWrite(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
   if (ec) {
     return fail(ec, "on write");
   }
-}
 
-void WebSocket::send(json& msg) {
-  m_ws.async_write(net::buffer(msg.dump()),
+  messages.pop_front();
+
+  if (!messages.empty()) {
+    m_ws.async_write(net::buffer(*messages.front()),
       beast::bind_front_handler(&WebSocket::onWrite, shared_from_this()));
+  }
 }
 
 void WebSocket::onClose(beast::error_code ec) {

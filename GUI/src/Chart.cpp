@@ -5,12 +5,12 @@ Chart::Chart(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std:
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
   event_channel = "CANDLE:" + symbol;
+  historical_candles_event_channel = "HISTORICAL_CANDLES:" + symbol;
 
-  HttpsTask task{HttpsTaskType::HistoricalChart, symbol, "1m", "30"};
+  HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60"};
   hc->pushRequest(task);
   
-  std::string historical_candles_event_channel = "HISTORICAL_CANDLES:" + symbol;
-  eb->subscribe(historical_candles_event_channel, window_id, [this, historical_candles_event_channel](std::shared_ptr<IEvent> update){
+  eb->subscribe(historical_candles_event_channel, window_id, [this] (std::shared_ptr<IEvent> update){
     auto historical_candles_event = std::dynamic_pointer_cast<HistoricalCandles>(update);
 
     for (const auto& candle : historical_candles_event->candles) {
@@ -20,7 +20,7 @@ Chart::Chart(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std:
     this->eb->deferUnsubscribe(historical_candles_event_channel, window_id);
   });
 
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, "1m");
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, time_frame); 
   ws->subscribe(sub_msg);
 
   eb->subscribe(event_channel, window_id, [this](std::shared_ptr<IEvent> update) {
@@ -34,7 +34,7 @@ Chart::Chart(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std:
 }
 
 Chart::~Chart() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, "1m");
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, time_frame);
   ws->unsubscribe(unsub_msg);
   eb->unsubscribe(event_channel, window_id);
 }
@@ -42,12 +42,26 @@ Chart::~Chart() {
 void Chart::draw() {
 
   ImGui::SetNextWindowSize(ImVec2(800, 690), ImGuiCond_FirstUseEver);
-  ImGui::Begin(window_name.c_str(), &show);
+  ImGui::Begin(window_name.c_str(), &show, ImGuiWindowFlags_MenuBar);
   
-  if (ImGui::Button("Switch View")) {
-    show_candles = (show_candles == true) ? false : true;
-  }
+  if (ImGui::BeginMenuBar()) {
+    if (ImGui::BeginMenu("View")) {
+      if (ImGui::MenuItem("Candlesticks")) show_candles = true;
+      if (ImGui::MenuItem("Line")) show_candles = false;
+      ImGui::EndMenu();
+    }
 
+    if (ImGui::BeginMenu("Time Frame")) {
+      if (ImGui::MenuItem("1m")) changeTimeFrame("1m"); 
+      if (ImGui::MenuItem("5m")) changeTimeFrame("5m");
+      if (ImGui::MenuItem("15m")) changeTimeFrame("15m");
+      if (ImGui::MenuItem("1h")) changeTimeFrame("1h"); 
+      if (ImGui::MenuItem("1d")) changeTimeFrame("1d");
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
+  }
+  
   if (candles.size() > 0) {
     if (show_candles) {
       drawCandles();
@@ -246,3 +260,40 @@ void Chart::drawVolume(double half_width) {
     ImPlot::EndPlot();
   }
 }
+
+void Chart::changeTimeFrame(std::string time) {
+  if (time == time_frame) return;
+  
+  candles.clear();
+  
+  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, time_frame);
+  ws->unsubscribe(unsub_msg);
+  eb->unsubscribe(event_channel, window_id);
+
+  HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time, "60"};
+  hc->pushRequest(task);
+  
+  eb->subscribe(historical_candles_event_channel, window_id, [this](std::shared_ptr<IEvent> update){
+    auto historical_candles_event = std::dynamic_pointer_cast<HistoricalCandles>(update);
+
+    for (const auto& candle : historical_candles_event->candles) {
+      this->candles[candle.unix_time] = candle;
+    }
+
+    this->eb->deferUnsubscribe(historical_candles_event_channel, window_id);
+  });
+
+  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, time); 
+  ws->subscribe(sub_msg);
+
+  eb->subscribe(event_channel, window_id, [this](std::shared_ptr<IEvent> update) {
+    auto candle_event = std::dynamic_pointer_cast<Candle>(update);
+    
+    if (this->candles.contains(candle_event->unix_time) && this->candles[candle_event->unix_time].event_time > candle_event->event_time) return;
+
+    this->candles[candle_event->unix_time] = *candle_event;
+  });
+
+  time_frame = time;
+}
+

@@ -30,12 +30,15 @@ class Chart : public Widget {
     void drawCandles();
     void drawLine();
     void drawVolume(double);
+    void changeTimeFrame(std::string);
 
     const ImVec4 Crosshair_Color = ImVec4{1,1,1,0.5f};
 
     std::string symbol;
     const std::string channel = "kline"; 
     std::string event_channel;
+    std::string historical_candles_event_channel;
+    std::string time_frame = "1m";
 
     float ratios[2] = {2.5, 1};
     bool show_candles = true;
