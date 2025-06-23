@@ -16,7 +16,7 @@ App::App() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-  window = glfwCreateWindow(1700, 1100, "Argus", nullptr, nullptr);
+  window = glfwCreateWindow(1700, 1100, "Argus - Binance", nullptr, nullptr);
   
   if (window == nullptr) return;
 
@@ -168,30 +168,38 @@ void App::drawMenuBar() {
 
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {
-      if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Ticker>(ws, eb, "BTCUSDT"));
-      }
+      if (ImGui::MenuItem("BTC")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "ETCUSDT"));
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("OrderBook")) {
-      if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "BTCUSDT"));
-      }
+      if (ImGui::MenuItem("BTC")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "ETCUSDT"));
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Chart")) {
-      if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "BTCUSDT"));
-      }
+      if (ImGui::MenuItem("BTC")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "ETCUSDT"));
       ImGui::EndMenu();
     }
 
     if (ImGui::BeginMenu("Trades")) {
-      if (ImGui::MenuItem("BTC")) {
-        widgets.push_back(std::make_unique<Trades>(ws, eb, "BTCUSDT"));
-      }
+      if (ImGui::MenuItem("BTC")) widgets.push_back(std::make_unique<Trades>(ws, eb, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(std::make_unique<Trades>(ws, eb, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(std::make_unique<Trades>(ws, eb, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(std::make_unique<Trades>(ws, eb, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(std::make_unique<Trades>(ws, eb, "ETCUSDT"));
       ImGui::EndMenu();
     }
     

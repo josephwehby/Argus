@@ -1,1 +1,5 @@
 - send pong frame every 30ish seconds or disconnected
+- add vwap for intraday charts
+  - binance lets me specify start and end times but will only return a max of 1000 candles so i need to combine requests to get a full day of data
+  - so, i think i should only load a days worth of data or maybe more idk. complicated issue.
+  - only draw candles within visible range
