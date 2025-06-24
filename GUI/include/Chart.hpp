@@ -39,7 +39,9 @@ class Chart : public Widget {
     std::string event_channel;
     std::string historical_candles_event_channel;
     std::string time_frame = "1m";
-
+    
+    long long candles_before_load = 5;
+    bool loading_data = false;
     float ratios[2] = {2.5, 1};
     bool show_candles = true;
     

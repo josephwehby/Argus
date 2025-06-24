@@ -43,7 +43,20 @@ void HttpsClient::processLoop() {
 }
 
 void HttpsClient::getHistoricalChart(std::shared_ptr<HttpsTask> task) {
-  std::string query = endpoint + "klines?symbol=" + task->symbol + "&interval=" + task->interval + "&limit=" + task->limit;
+  std::string query = endpoint + "klines?symbol=" + task->symbol + "&interval=" + task->interval; 
+
+  if (!task->start_time.empty()) {
+    query += "&startTime=";
+    query += task->start_time;
+  }
+
+  if (!task->end_time.empty()) {
+    query += "&endTime=";
+    query += task->end_time;
+  }
+
+  query += "&limit=" + task->limit;
+
   auto res = cli.Get(query);
   
   if (res == nullptr) {

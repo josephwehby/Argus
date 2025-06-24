@@ -10,14 +10,15 @@ Chart::Chart(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std:
   HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60"};
   hc->pushRequest(task);
   
+  loading_data = true;
   eb->subscribe(historical_candles_event_channel, window_id, [this] (std::shared_ptr<IEvent> update){
     auto historical_candles_event = std::dynamic_pointer_cast<HistoricalCandles>(update);
 
     for (const auto& candle : historical_candles_event->candles) {
       this->candles[candle.unix_time] = candle;
     }
-
-    this->eb->deferUnsubscribe(historical_candles_event_channel, window_id);
+    
+    this->loading_data = false;
   });
 
   json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, time_frame); 
@@ -37,6 +38,7 @@ Chart::~Chart() {
   json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, time_frame);
   ws->unsubscribe(unsub_msg);
   eb->unsubscribe(event_channel, window_id);
+  eb->unsubscribe(historical_candles_event_channel, window_id);
 }
 
 void Chart::draw() {
@@ -120,6 +122,15 @@ void Chart::drawLine() {
       ImPlot::SetupAxisLimits(ImAxis_X1, time_x[0], time_x.back());
       
       ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
+      
+      ImPlotRect limits = ImPlot::GetPlotLimits();
+      long long threshold = Utils::getCandleDurationInSeconds(time_frame) * candles_before_load;
+
+      if (!loading_data && limits.X.Min < time_x[0] + threshold) {
+        HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60", std::to_string((time_x[0] - (threshold * 12))*1000), std::to_string(1000*time_x[0])};
+        hc->pushRequest(task);
+        loading_data = true;
+      }
 
       if (ImPlot::BeginItem("##Price Chart")) {
         ImPlot::PushStyleColor(ImPlotCol_Fill, Colors::Blue_V4);
@@ -175,6 +186,15 @@ void Chart::drawCandles() {
       ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first);
       
       ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
+      
+      ImPlotRect limits = ImPlot::GetPlotLimits();
+      long long threshold = Utils::getCandleDurationInSeconds(time_frame) * candles_before_load;
+
+      if (!loading_data && limits.X.Min < candles.begin()->first + threshold) {
+        HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60", std::to_string((candles.begin()->first - (threshold * 12))*1000), std::to_string(1000*candles.begin()->first)};
+        hc->pushRequest(task);
+        loading_data = true;
+      }
 
       if (ImPlot::BeginItem("##Price Chart")) {
 
@@ -269,18 +289,20 @@ void Chart::changeTimeFrame(std::string time) {
   json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, time_frame);
   ws->unsubscribe(unsub_msg);
   eb->unsubscribe(event_channel, window_id);
+  eb->unsubscribe(historical_candles_event_channel, window_id);
 
   HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time, "60"};
   hc->pushRequest(task);
-  
+
+  loading_data = true; 
   eb->subscribe(historical_candles_event_channel, window_id, [this](std::shared_ptr<IEvent> update){
     auto historical_candles_event = std::dynamic_pointer_cast<HistoricalCandles>(update);
 
     for (const auto& candle : historical_candles_event->candles) {
       this->candles[candle.unix_time] = candle;
     }
-
-    this->eb->deferUnsubscribe(historical_candles_event_channel, window_id);
+    
+    loading_data = false;
   });
 
   json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, time); 

@@ -117,4 +117,15 @@ namespace Utils {
     return static_cast<long long>(utc_time);
   }
 
+  inline long long getCandleDurationInSeconds(const std::string& time_frame) {
+
+    if (time_frame == "1m") return 60;
+    if (time_frame == "5m") return 300;
+    if (time_frame == "15m") return 900;
+    if (time_frame == "1h") return 3600;
+    if (time_frame == "1d") return 86400;
+
+    return 0;
+  }
+
 };
