@@ -126,8 +126,8 @@ void Chart::drawLine() {
       ImPlotRect limits = ImPlot::GetPlotLimits();
       long long threshold = Utils::getCandleDurationInSeconds(time_frame) * candles_before_load;
 
-      if (!loading_data && limits.X.Min < time_x[0] + threshold) {
-        HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60", std::to_string((time_x[0] - (threshold * 12))*1000), std::to_string(1000*time_x[0])};
+      if (!loading_data && limits.X.Min < (long long)time_x[0] + threshold) {
+        HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60", std::to_string(((long long)time_x[0] - (threshold * 12))*1000), std::to_string(1000*(long long)time_x[0])};
         hc->pushRequest(task);
         loading_data = true;
       }
