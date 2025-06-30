@@ -180,10 +180,8 @@ void Chart::drawLine(ImDrawList* draw_list) {
     index++; 
   }
   
-  ImPlot::PushStyleColor(ImPlotCol_Fill, Colors::Blue_V4);
+  ImPlot::SetNextLineStyle(Colors::Blue_V4, 2);
   ImPlot::PlotLine("##Line Chart", time_x.data(), price_y.data(), price_y.size());
-  ImPlot::PlotShaded("##Shaded Chart", time_x.data(), price_y.data(), price_y.size(), -INFINITY);
-  ImPlot::PopStyleColor();
 }
 
 void Chart::drawCandles(ImDrawList* draw_list, double half_width) {
