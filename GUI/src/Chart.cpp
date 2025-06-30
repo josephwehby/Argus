@@ -61,6 +61,11 @@ void Chart::draw() {
       if (ImGui::MenuItem("1d")) changeTimeFrame("1d");
       ImGui::EndMenu();
     }
+
+    if (ImGui::BeginMenu("Drawing")) {
+      if (ImGui::MenuItem("Line")) lines.push_back(std::prev(candles.end())->second.close);
+      ImGui::EndMenu();
+    }
     ImGui::EndMenuBar();
   }
   
@@ -112,7 +117,7 @@ void Chart::drawLine() {
 
   if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
 
-        if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
+      if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
 
       ImDrawList* draw_list = ImPlot::GetPlotDrawList();
       
@@ -152,6 +157,10 @@ void Chart::drawLine() {
         ImVec2 max = ImPlot::PlotToPixels(limits.Max().x, it->second.close); 
         ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
         draw_list->AddLine(min, max, color, .5);
+        
+        for (int i = 0; i < lines.size(); i++) {
+          ImPlot::DragLineY(i, &lines[i], Colors::Yellow_V4, 1);
+        }
 
         ImPlot::EndItem();
       }
@@ -233,7 +242,11 @@ void Chart::drawCandles() {
         ImVec2 max = ImPlot::PlotToPixels(limits.Max().x, it->second.close); 
         ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
         draw_list->AddLine(min, max, color, .5);
-
+        
+        for (int i = 0; i < lines.size(); i++) {
+          ImPlot::DragLineY(i, &lines[i], Colors::Yellow_V4, 1);
+        }
+        
         ImPlot::EndItem();
       }
       

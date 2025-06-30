@@ -40,12 +40,14 @@ class Chart : public Widget {
     std::string historical_candles_event_channel;
     std::string time_frame = "1m";
     
+    float ratios[2] = {2.5, 1};
     long long candles_before_load = 5;
     bool loading_data = false;
-    float ratios[2] = {2.5, 1};
     bool show_candles = true;
     
     std::map<long long, Candle> candles;
+    std::vector<double> lines;
+
     std::shared_ptr<WebSocket> ws;
     std::shared_ptr<EventBus> eb;
     std::shared_ptr<HttpsClient> hc;

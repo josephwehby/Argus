@@ -127,7 +127,7 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
   double volume = std::stod(std::string(item->at("k")["v"])); 
   long long unix_time = item->at("k")["t"].get<long long>() / 1000;
   long long event_time = item->at("E").get<long long>();
-
+  
   std::shared_ptr<Candle> candle = std::make_shared<Candle>(open, high, low, close, buy_volume, volume, 1, unix_time, event_time);
   candle->channel = "CANDLE:" + symbol;
   eb->publish(candle);
