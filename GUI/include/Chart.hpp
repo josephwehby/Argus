@@ -27,8 +27,9 @@ class Chart : public Widget {
   private:
     void updateCandles();
     void setStyle();
-    void drawCandles();
-    void drawLine();
+    void initDraw();
+    void drawCandles(ImDrawList*, double);
+    void drawLine(ImDrawList*);
     void drawVolume(double);
     void changeTimeFrame(std::string);
 

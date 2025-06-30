@@ -70,11 +70,7 @@ void Chart::draw() {
   }
   
   if (candles.size() > 0) {
-    if (show_candles) {
-      drawCandles();
-    } else {
-      drawLine();
-    }
+    initDraw();
   }
 
   ImGui::End();
@@ -96,23 +92,16 @@ void Chart::setStyle() {
   style.UseLocalTime = true;
 }
 
-void Chart::drawLine() {
-  std::vector<double> price_y(candles.size(), 0);
-  std::vector<double> volume_y(candles.size(), 0);
-  std::vector<double> time_x(candles.size(), 0);
 
+void Chart::initDraw() {
+  
+  double start_time = candles.begin()->first;
+  double end_time = std::prev(candles.end())->first;
   double width = .25;
   double half_width = width;
+  
   half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
 
-  int index = 0;
-  for (const auto&[time, candle] : candles) {
-    price_y[index] = candle.close;
-    volume_y[index] = candle.volume;
-    time_x[index] = time;
-    index++; 
-  }
-  
   setStyle();
 
   if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
@@ -124,24 +113,25 @@ void Chart::drawLine() {
       ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks, ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
       
       ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
-      ImPlot::SetupAxisLimits(ImAxis_X1, time_x[0], time_x.back());
+      ImPlot::SetupAxisLimits(ImAxis_X1, start_time, end_time); 
       
       ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
       
       ImPlotRect limits = ImPlot::GetPlotLimits();
       long long threshold = Utils::getCandleDurationInSeconds(time_frame) * candles_before_load;
 
-      if (!loading_data && limits.X.Min < (long long)time_x[0] + threshold) {
-        HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60", std::to_string(((long long)time_x[0] - (threshold * 12))*1000), std::to_string(1000*(long long)time_x[0])};
+      if (!loading_data && limits.X.Min < (long long)start_time + threshold) {
+        HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60", std::to_string(((long long)start_time - (threshold * 12))*1000), std::to_string(1000*(long long)start_time)};
         hc->pushRequest(task);
         loading_data = true;
       }
 
       if (ImPlot::BeginItem("##Price Chart")) {
-        ImPlot::PushStyleColor(ImPlotCol_Fill, Colors::Blue_V4);
-        ImPlot::PlotLine("##Line Chart", time_x.data(), price_y.data(), price_y.size());
-        ImPlot::PlotShaded("##Shaded Chart", time_x.data(), price_y.data(), price_y.size(), -INFINITY);
-        ImPlot::PopStyleColor();
+        if (show_candles) {
+          drawCandles(draw_list, half_width);
+        } else {
+          drawLine(draw_list);
+        }
 
         auto it = std::prev(candles.end());
         
@@ -160,6 +150,7 @@ void Chart::drawLine() {
         
         for (int i = 0; i < lines.size(); i++) {
           ImPlot::DragLineY(i, &lines[i], Colors::Yellow_V4, 1);
+          ImPlot::TagY(lines[i], Colors::Yellow_V4, true);
         }
 
         ImPlot::EndItem();
@@ -169,93 +160,52 @@ void Chart::drawLine() {
     }
 
     drawVolume(half_width); 
-
     ImPlot::EndSubplots();
   }
 
 }
 
-void Chart::drawCandles() {
 
-  double width = .25;
-  double half_width = width;
+void Chart::drawLine(ImDrawList* draw_list) {
   
-  if (ImPlot::BeginSubplots("##Stocks", 2, 1, ImVec2(-1,-1),ImPlotSubplotFlags_LinkCols | ImPlotSubplotFlags_NoTitle, ratios)) {
-    
-    half_width = (candles.size() > 1) ? ((candles.begin()->first - std::next(candles.begin(), 1)->first) * width) : width;
+  std::vector<double> price_y(candles.size(), 0);
+  std::vector<double> volume_y(candles.size(), 0);
+  std::vector<double> time_x(candles.size(), 0);
 
-    setStyle();
+  int index = 0;
+  for (const auto&[time, candle] : candles) {
+    price_y[index] = candle.close;
+    volume_y[index] = candle.volume;
+    time_x[index] = time;
+    index++; 
+  }
+  
+  ImPlot::PushStyleColor(ImPlotCol_Fill, Colors::Blue_V4);
+  ImPlot::PlotLine("##Line Chart", time_x.data(), price_y.data(), price_y.size());
+  ImPlot::PlotShaded("##Shaded Chart", time_x.data(), price_y.data(), price_y.size(), -INFINITY);
+  ImPlot::PopStyleColor();
+}
 
-    if (ImPlot::BeginPlot("##Graph", ImVec2(-1,-1), ImPlotFlags_NoFrame | ImPlotFlags_Crosshairs)) {
+void Chart::drawCandles(ImDrawList* draw_list, double half_width) {
 
-      ImDrawList* draw_list = ImPlot::GetPlotDrawList();
-      ImPlot::SetupAxes(0,0,ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks, ImPlotAxisFlags_AutoFit|ImPlotAxisFlags_RangeFit|ImPlotAxisFlags_Opposite);
-      
-      ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
-      ImPlot::SetupAxisLimits(ImAxis_X1, candles.begin()->first, std::prev(candles.end())->first);
-      
-      ImPlot::SetupAxisFormat(ImAxis_Y1, "$%.2f");
-      
-      ImPlotRect limits = ImPlot::GetPlotLimits();
-      long long threshold = Utils::getCandleDurationInSeconds(time_frame) * candles_before_load;
-
-      if (!loading_data && limits.X.Min < candles.begin()->first + threshold) {
-        HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60", std::to_string((candles.begin()->first - (threshold * 12))*1000), std::to_string(1000*candles.begin()->first)};
-        hc->pushRequest(task);
-        loading_data = true;
-      }
-
-      if (ImPlot::BeginItem("##Price Chart")) {
-
-        if (ImPlot::FitThisFrame()) {
-          for (const auto& [time, candle] : candles) {
-              ImPlot::FitPoint(ImPlotPoint(time, candle.low - 5));
-              ImPlot::FitPoint(ImPlotPoint(time, candle.high + 5));
-          }
-        }
-
-        for (const auto& [time, candle] : candles) {
-          ImU32 color = (candle.open <= candle.close) ? Colors::Green_U32 : Colors::Red_U32;
-
-          ImVec2 open_pos = ImPlot::PlotToPixels(time - half_width, candle.open);
-          ImVec2 close_pos = ImPlot::PlotToPixels(time + half_width, candle.close);
-
-          draw_list->AddRectFilled(open_pos, close_pos, color);
-
-          ImVec2 low_pos = ImPlot::PlotToPixels(time, candle.low);
-          ImVec2 high_pos = ImPlot::PlotToPixels(time, candle.high);
-          draw_list->AddLine(low_pos, high_pos, color, half_width/2); 
-        }
-
-        // from close to edge of graph?
-        auto it = std::prev(candles.end());
-        
-        ImU32 color = (it->second.open <= it->second.close) ? Colors::Green_U32 : Colors::Red_U32;
-        ImVec4 tag_color = (it->second.open <= it->second.close) ? Colors::Green_V4 : Colors::Red_V4;
-
-        ImPlotRect limits = ImPlot::GetPlotLimits();
-
-        std::string current_price = Utils::formatPrice(it->second.close);
-        ImVec2 current_price_size = ImGui::CalcTextSize(current_price.c_str());
-
-        ImPlot::TagY(it->second.close, tag_color, true);
-        ImVec2 max = ImPlot::PlotToPixels(limits.Max().x, it->second.close); 
-        ImVec2 min = ImPlot::PlotToPixels(limits.Min().x, it->second.close);
-        draw_list->AddLine(min, max, color, .5);
-        
-        for (int i = 0; i < lines.size(); i++) {
-          ImPlot::DragLineY(i, &lines[i], Colors::Yellow_V4, 1);
-        }
-        
-        ImPlot::EndItem();
-      }
-      
-      ImPlot::EndPlot();
+    if (ImPlot::FitThisFrame()) {
+    for (const auto& [time, candle] : candles) {
+        ImPlot::FitPoint(ImPlotPoint(time, candle.low - 5));
+        ImPlot::FitPoint(ImPlotPoint(time, candle.high + 5));
     }
-    
-    drawVolume(half_width);
-    
-    ImPlot::EndSubplots();
+  }
+
+  for (const auto& [time, candle] : candles) {
+    ImU32 color = (candle.open <= candle.close) ? Colors::Green_U32 : Colors::Red_U32;
+
+    ImVec2 open_pos = ImPlot::PlotToPixels(time - half_width, candle.open);
+    ImVec2 close_pos = ImPlot::PlotToPixels(time + half_width, candle.close);
+
+    draw_list->AddRectFilled(open_pos, close_pos, color);
+
+    ImVec2 low_pos = ImPlot::PlotToPixels(time, candle.low);
+    ImVec2 high_pos = ImPlot::PlotToPixels(time, candle.high);
+    draw_list->AddLine(low_pos, high_pos, color, half_width/2); 
   }
 }
 
