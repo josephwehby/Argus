@@ -1,5 +1,5 @@
-- send pong frame every 30ish seconds or disconnected
-- add vwap for intraday charts
-  - binance lets me specify start and end times but will only return a max of 1000 candles so i need to combine requests to get a full day of data
-  - so, i think i should only load a days worth of data or maybe more idk. complicated issue.
-  - only draw candles within visible range
+- add price alerts
+- centralize subscriptions
+  - right now i have each widget send their websocket request. however, if 2 widgets rely on the same data there is no need for an extra connection
+  - create sub manager which will only subscribe if there are no current connections and unsubscribe when the conenctions are at 0 for a specifc channel
+  - some sort of unordered_map with the channel name and number of conenctions
