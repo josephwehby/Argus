@@ -1,22 +1,9 @@
 #include "OrderBookManager.hpp"
 
-OrderBookManager::OrderBookManager(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_, std::string& symbol_, int64_t id_) : 
-  symbol(symbol_), id(id_), ws(ws_), eb(eb_), hc(hc_) {
+OrderBookManager::OrderBookManager(SubscriptionManager& sm_, HttpsClient& hc_, std::string& symbol_, int64_t id_) : 
+  sm(sm_), hc(hc_), symbol(symbol_), id(id_) {
   event_channel_update += symbol;
   event_channel_snapshot += symbol;
-
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, "depth", id, speed);
-  ws->subscribe(sub_msg);
-  
-  eb->subscribe(event_channel_update, id, [this](std::shared_ptr<IEvent> update){
-    auto book_update = std::dynamic_pointer_cast<BookUpdate>(update);
-    this->updates.push(*book_update);
-  });
-  
-  eb->subscribe(event_channel_snapshot, id, [this](std::shared_ptr<IEvent> update){
-    auto book_snapshot= std::dynamic_pointer_cast<BookSnapshot>(update);
-    this->snapshots.push(*book_snapshot);
-  });
 
   process_thread = std::thread(&OrderBookManager::processLoop, this);
 }
@@ -25,17 +12,50 @@ OrderBookManager::~OrderBookManager() {
   if (process_thread.joinable()) {
     process_thread.join();
   }
-
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, "depth", id, speed);
-  ws->unsubscribe(unsub_msg);
-
-  eb->unsubscribe(event_channel_update, id);
-  eb->unsubscribe(event_channel_snapshot, id);
+  
+  sm.unsubscribe(update_request);
+  sm.unsubscribe(snapshot_request);
 }
 
 BookSnapshot OrderBookManager::getBookSnapshot() {
   std::lock_guard<std::mutex> lock(m);
   return book;
+}
+
+void OrderBookManager::init() {
+  std::weak_ptr<OrderBookManager> self = shared_from_this();
+
+  update_request = {
+    symbol,
+    channel,
+    event_channel_update,
+    id,
+    [self](std::shared_ptr<IEvent> update){
+      if (auto locked = self.lock()) {
+        auto book_update = std::dynamic_pointer_cast<BookUpdate>(update);
+        locked->updates.push(*book_update);
+      }
+    },
+    speed
+  };
+  
+  sm.subscribe(update_request);
+  
+  snapshot_request = {
+    symbol,
+    channel,
+    event_channel_update,
+    id,
+    [self](std::shared_ptr<IEvent> update){
+      if (auto locked = self.lock()) {
+        auto book_snapshot= std::dynamic_pointer_cast<BookSnapshot>(update);
+        locked->snapshots.push(*book_snapshot);
+      }
+    },
+    std::nullopt
+  };
+
+  sm.subscribe(snapshot_request);
 }
 
 void OrderBookManager::shutdown() {
@@ -79,7 +99,7 @@ void OrderBookManager::syncBook() {
   
   do {
     HttpsTask task{HttpsTaskType::OrderBook, symbol, "0", limit};
-    hc->pushRequest(task);
+    hc.pushRequest(task);
     sync_book = *(snapshots.wait_and_pop());
     if (sync_book.last_update == 0) return;
   } while (sync_book.last_update < update->first_update);

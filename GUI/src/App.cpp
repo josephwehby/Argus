@@ -177,16 +177,14 @@ void App::drawMenuBar() {
       if (ImGui::MenuItem("ETC")) widgets.push_back(Utils::createWidget<Ticker>(sm, "ETCUSDT"));
       ImGui::EndMenu();
     }
-  /*
     if (ImGui::BeginMenu("OrderBook")) {
-      if (ImGui::MenuItem("BTC")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "BTCUSDT"));
-      if (ImGui::MenuItem("ETH")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "ETHUSDT"));
-      if (ImGui::MenuItem("SOL")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "SOLUSDT"));
-      if (ImGui::MenuItem("DOGE")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "DOGEUSDT"));
-      if (ImGui::MenuItem("ETC")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "ETCUSDT"));
+      if (ImGui::MenuItem("BTC")) widgets.push_back(Utils::createWidget<OrderBook>(sm, hc, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(Utils::createWidget<OrderBook>(sm, hc, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(Utils::createWidget<OrderBook>(sm, hc, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(Utils::createWidget<OrderBook>(sm, hc, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(Utils::createWidget<OrderBook>(sm, hc, "ETCUSDT"));
       ImGui::EndMenu();
     }
-*/
 
     if (ImGui::BeginMenu("Chart")) {
       if (ImGui::MenuItem("BTC")) widgets.push_back(Utils::createWidget<Chart>(sm, hc, "BTCUSDT"));

@@ -1,19 +1,22 @@
 #include "OrderBook.hpp"
 
-OrderBook::OrderBook(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_, std::string token) : ws(ws_), book_manager(ws_, eb_, hc_, token, window_id) {
+OrderBook::OrderBook(SubscriptionManager& sm_, HttpsClient& hc_, std::string token) :  
+  book_manager(std::make_shared<OrderBookManager>(sm_, hc_, token, window_id)) {
+
   symbol = token;
   window_name = "OrderBook: " + symbol + " ##" + std::to_string(window_id);
+  book_manager->init();
 }
 
 OrderBook::~OrderBook() {
-  book_manager.shutdown(); 
+  book_manager->shutdown(); 
 }
 
 void OrderBook::init() {}
 
 void OrderBook::draw() {
 
-  book = book_manager.getBookSnapshot();
+  book = book_manager->getBookSnapshot();
 
   ImGui::SetNextWindowSize(ImVec2(435,1070), ImGuiCond_FirstUseEver);
   ImGui::Begin(window_name.c_str(), &show, ImGuiWindowFlags_NoScrollbar);

@@ -8,17 +8,16 @@
 #include "Widget.hpp"
 #include "Utils.hpp"
 #include "DataStore.hpp"
-#include "WebSocket.hpp"
 #include "JsonBuilder.hpp"
 #include "Colors.hpp"
 #include "BookSnapshot.hpp"
 #include "OrderBookManager.hpp"
-#include "EventBus.hpp"
 #include "HttpsClient.hpp"
+#include "SubscriptionManager.hpp"
 
 class OrderBook : public Widget {
   public:
-    OrderBook(std::shared_ptr<WebSocket>, std::shared_ptr<EventBus>, std::shared_ptr<HttpsClient>, std::string);
+    OrderBook(SubscriptionManager& sm, HttpsClient&, std::string);
     ~OrderBook();
     void init() override;
     void draw() override; 
@@ -30,7 +29,5 @@ class OrderBook : public Widget {
     const std::string speed = "100ms";
 
     BookSnapshot book;
-
-    std::shared_ptr<WebSocket> ws;
-    OrderBookManager book_manager;
+    std::shared_ptr<OrderBookManager> book_manager;
 };
