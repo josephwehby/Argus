@@ -1,5 +1,9 @@
 #include "EventBus.hpp"
 
+EventBus::~EventBus() {
+  std::cout << "eb destructor ran" << std::endl;
+}
+
 void EventBus::subscribe(const std::string& channel, int64_t id, EventCallback callback) {
   subscriptions[channel][id] = callback;
 }
@@ -8,7 +12,7 @@ void EventBus::unsubscribe(const std::string& channel, int64_t id) {
   if (!subscriptions.contains(channel)) return;
   if (!subscriptions[channel].contains(id)) return;
 
-  subscriptions[channel].erase(id);  
+  subscriptions[channel].erase(id);
 }
 
 void EventBus::deferUnsubscribe(const std::string& channel, int64_t id) {
@@ -26,6 +30,8 @@ void EventBus::dispatchAll() {
     events.pop(event);
     
     auto it = subscriptions.find(event->channel);
+    if (it == subscriptions.end()) continue;
+    
     for (const auto&[_, callback]: it->second) {
       callback(event); 
     }

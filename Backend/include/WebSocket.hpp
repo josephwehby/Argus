@@ -5,6 +5,8 @@
 #include <boost/beast/websocket/ssl.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/beast/websocket/error.hpp>
+#include <boost/asio/error.hpp>
 #include <nlohmann/json.hpp>
 #include <cstdlib>
 #include <iostream>
@@ -30,7 +32,7 @@ using json = nlohmann::json;
 
 class WebSocket : public std::enable_shared_from_this<WebSocket> {
   public:
-    explicit WebSocket(net::io_context&, ssl::context&, std::shared_ptr<DataParser>, std::shared_ptr<ConnectionState>);
+    explicit WebSocket(net::io_context&, ssl::context&, DataParser&, ConnectionState&);
     ~WebSocket();
     void fail(beast::error_code, char const*);
     void connect();
@@ -53,8 +55,8 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
     std::string m_host = "data-stream.binance.vision";
     std::string m_port = "9443";
     
-    std::shared_ptr<DataParser> dp;
-    std::shared_ptr<ConnectionState> cs;
+    DataParser& dp;
+    ConnectionState& cs;
 
     tcp::resolver m_resolver;
     ssl::context m_ssl_ctx {ssl::context::tlsv12_client};

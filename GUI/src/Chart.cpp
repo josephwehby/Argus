@@ -1,44 +1,60 @@
 #include "Chart.hpp"
 
-Chart::Chart(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::shared_ptr<HttpsClient> hc_, std::string token) : ws(ws_), eb(eb_), hc(hc_) {
-
+Chart::Chart(SubscriptionManager& sm_, HttpsClient& hc_, std::string token) : sm(sm_), hc(hc_) {
   symbol = token;
   window_name = "Chart: " + symbol + " ##" + std::to_string(getWindowID()); 
   event_channel = "CANDLE:" + symbol;
   historical_candles_event_channel = "HISTORICAL_CANDLES:" + symbol;
-
-  HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60"};
-  hc->pushRequest(task);
-  
-  loading_data = true;
-  eb->subscribe(historical_candles_event_channel, window_id, [this] (std::shared_ptr<IEvent> update){
-    auto historical_candles_event = std::dynamic_pointer_cast<HistoricalCandles>(update);
-
-    for (const auto& candle : historical_candles_event->candles) {
-      this->candles[candle.unix_time] = candle;
-    }
-    
-    this->loading_data = false;
-  });
-
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, time_frame); 
-  ws->subscribe(sub_msg);
-
-  eb->subscribe(event_channel, window_id, [this](std::shared_ptr<IEvent> update) {
-    auto candle_event = std::dynamic_pointer_cast<Candle>(update);
-    
-    if (this->candles.contains(candle_event->unix_time) && this->candles[candle_event->unix_time].event_time > candle_event->event_time) return;
-
-    this->candles[candle_event->unix_time] = *candle_event;
-  });
-
 }
 
 Chart::~Chart() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, time_frame);
-  ws->unsubscribe(unsub_msg);
-  eb->unsubscribe(event_channel, window_id);
-  eb->unsubscribe(historical_candles_event_channel, window_id);
+  sm.unsubscribe(request);
+  sm.unsubscribe(historical_request);
+}
+
+void Chart::init() {
+  std::weak_ptr<Chart> self = shared_from_this();
+
+  HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60"};
+  hc.pushRequest(task);
+
+  request = SubscriptionRequest {
+    symbol, 
+    channel,
+    event_channel, 
+    window_id,
+    [self](const std::shared_ptr<IEvent> update) {
+      if (auto locked = self.lock()) {
+        auto candle_event = std::dynamic_pointer_cast<Candle>(update);
+        if (locked->candles.contains(candle_event->unix_time) && 
+            locked->candles[candle_event->unix_time].event_time > candle_event->event_time) return;
+        locked->candles[candle_event->unix_time] = *candle_event;
+      }
+    },
+    time_frame 
+  };
+
+  sm.subscribe(request);
+  
+  historical_request = SubscriptionRequest {
+    symbol, 
+    channel,
+    historical_candles_event_channel, 
+    window_id,
+    [self] (std::shared_ptr<IEvent> update){
+
+      if (auto locked = self.lock()) {
+        auto historical_candles_event = std::dynamic_pointer_cast<HistoricalCandles>(update);
+        for (const auto& candle : historical_candles_event->candles) {
+          locked->candles[candle.unix_time] = candle;
+        }
+        locked->loading_data = false;
+      }
+    },
+    time_frame 
+  };
+  
+  sm.subscribe(historical_request);
 }
 
 void Chart::draw() {
@@ -122,7 +138,7 @@ void Chart::initDraw() {
 
       if (!loading_data && limits.X.Min < (long long)start_time + threshold) {
         HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time_frame, "60", std::to_string(((long long)start_time - (threshold * 12))*1000), std::to_string(1000*(long long)start_time)};
-        hc->pushRequest(task);
+        hc.pushRequest(task);
         loading_data = true;
       }
 
@@ -247,35 +263,19 @@ void Chart::changeTimeFrame(std::string time) {
   
   candles.clear();
   
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id, time_frame);
-  ws->unsubscribe(unsub_msg);
-  eb->unsubscribe(event_channel, window_id);
-  eb->unsubscribe(historical_candles_event_channel, window_id);
+  sm.unsubscribe(request);
+  sm.unsubscribe(historical_request);
 
   HttpsTask task{HttpsTaskType::HistoricalChart, symbol, time, "60"};
-  hc->pushRequest(task);
-
+  hc.pushRequest(task);
+  
   loading_data = true; 
-  eb->subscribe(historical_candles_event_channel, window_id, [this](std::shared_ptr<IEvent> update){
-    auto historical_candles_event = std::dynamic_pointer_cast<HistoricalCandles>(update);
 
-    for (const auto& candle : historical_candles_event->candles) {
-      this->candles[candle.unix_time] = candle;
-    }
-    
-    loading_data = false;
-  });
+  request.params = time;
+  historical_request.params = time;
 
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id, time); 
-  ws->subscribe(sub_msg);
-
-  eb->subscribe(event_channel, window_id, [this](std::shared_ptr<IEvent> update) {
-    auto candle_event = std::dynamic_pointer_cast<Candle>(update);
-    
-    if (this->candles.contains(candle_event->unix_time) && this->candles[candle_event->unix_time].event_time > candle_event->event_time) return;
-
-    this->candles[candle_event->unix_time] = *candle_event;
-  });
+  sm.subscribe(request);
+  sm.subscribe(historical_request);
 
   time_frame = time;
 }

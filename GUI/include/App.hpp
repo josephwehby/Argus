@@ -23,7 +23,8 @@
 #include "DataParser.hpp"
 #include "HttpsClient.hpp"
 #include "EventBus.hpp"
-//#include "MasterOrderBookManager.hpp"
+#include "SubscriptionManager.hpp"
+#include "Utils.hpp"
 
 class App {
   public:
@@ -41,21 +42,21 @@ class App {
     void styleApp();
     void initWebSocket();
 
+    bool connected = false;
+    
+    std::vector<std::shared_ptr<Widget>> widgets;
+    
+    std::shared_ptr<WebSocket> ws;
+    ConnectionState cs;
+    EventBus eb;
+    SubscriptionManager sm;
+    DataParser dp;
+    HttpsClient hc;
+
     const char* glsl_version;
     ImGuiIO* io;
     GLFWwindow* window;
     ImVec4 clear_color = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
-    
-    bool connected = false;
-    
-    std::vector<std::unique_ptr<Widget>> widgets;
-    std::shared_ptr<DataStore> ds;
-    std::shared_ptr<WebSocket> ws;
-    std::shared_ptr<ConnectionState> cs;
-    std::shared_ptr<DataParser> dp;
-    std::shared_ptr<EventBus> eb;
-   // std::shared_ptr<MasterOrderBookManager> mobm;
-    std::shared_ptr<HttpsClient> hc;
 
     net::io_context ioc;
     boost::system::error_code ec;

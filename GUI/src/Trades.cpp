@@ -1,24 +1,36 @@
 #include "Trades.hpp"
 
-Trades::Trades(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::string token) : ws(ws_), eb(eb_) {
+Trades::Trades(SubscriptionManager& sm_, std::string token) : sm(sm_) {
   symbol = token;
   window_name = "Trades: " + symbol + " ##" + std::to_string(window_id);
   event_channel = "TRADE:" + symbol;
-  
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id);
-  ws->subscribe(sub_msg);
-
-  eb->subscribe(event_channel, window_id, [this](const std::shared_ptr<IEvent> update) {
-    auto trade_event = std::dynamic_pointer_cast<Trade>(update); 
-    if (std::stod(trade_event->size) >= this->filter) this->trades.push_front(*trade_event);
-    if (this->trades.size() > this->max_capacity) this->trades.pop_back();
-  });
 }
 
 Trades::~Trades() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id);
-  ws->unsubscribe(unsub_msg);
-  eb->unsubscribe(event_channel, window_id);
+  sm.unsubscribe(request);
+}
+
+void Trades::init() {
+
+  std::weak_ptr<Trades> self = shared_from_this();
+
+  request = SubscriptionRequest { 
+    symbol, 
+    channel, 
+    event_channel, 
+    window_id, 
+    [self] (const std::shared_ptr<IEvent> update) {
+      if (auto locked = self.lock()) {
+        auto trade_event = std::dynamic_pointer_cast<Trade>(update); 
+        if (std::stod(trade_event->size) >= locked->filter) locked->trades.push_front(*trade_event);
+        if (locked->trades.size() > locked->max_capacity) locked->trades.pop_back();
+      }
+    },
+    std::nullopt
+  };
+  
+  sm.subscribe(request);
+
 }
 
 void Trades::draw() {

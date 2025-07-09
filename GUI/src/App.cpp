@@ -7,7 +7,7 @@ static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-App::App() {
+App::App() : cs(State::CONNECTING), sm(eb), dp(eb), hc(dp) {
   glfwSetErrorCallback(glfw_error_callback);
   
   if (!glfwInit()) return;
@@ -39,28 +39,29 @@ App::App() {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  cs = std::make_shared<ConnectionState>(State::CONNECTING);
-  ds = std::make_shared<DataStore>();
-  eb = std::make_shared<EventBus>();
-  dp = std::make_shared<DataParser>(ds, cs, eb);
-  hc = std::make_shared<HttpsClient>(dp);
   initWebSocket();
+  sm.setWebSocket(ws);
 }
 
 App::~App() {
   widgets.clear();
+  hc.shutdown();
+  dp.shutdown();
   
-  hc->shutdown();
-
+  // might rename this to shutdown for consistency 
   ws->close(); 
   ws->waitClose();
 
   ws.reset();
   ioc.stop();
-
+  std::cout << "io stopped" << std::endl;
+  
   if (io_thread.joinable()) {
+    std::cout << "io joined" << std::endl;
     io_thread.join();
   }
+  //std::this_thread::sleep_for(std::chrono::seconds(2));
+  
   
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
@@ -69,6 +70,7 @@ App::~App() {
   
   glfwDestroyWindow(window);
   glfwTerminate();
+  std::cout << "app ran" << std::endl;
 }
 
 void App::initWebSocket() {
@@ -81,7 +83,7 @@ void App::initWebSocket() {
 
   ws = std::make_shared<WebSocket>(ioc, ctx, dp, cs);
 
-  io_thread = std::thread([this](){
+  io_thread = std::thread([&ioc = this->ioc](){
     ioc.run();     
   });
 
@@ -119,7 +121,7 @@ void App::run() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     
-    eb->dispatchAll();
+    eb.dispatchAll();
     update();
     render();
   }
@@ -153,14 +155,14 @@ void App::styleApp() {
   style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
   style.Colors[ImGuiCol_FrameBgActive] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
   
-  style.Colors[ImGuiCol_Button]        = ImVec4(68/255.f, 71/255.f, 90/255.f, 1.0f);  // Base: #44475A
-  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(98/255.f, 114/255.f, 164/255.f, 1.0f); // Hover: #6272A4
-  style.Colors[ImGuiCol_ButtonActive]  = ImVec4(84/255.f, 94/255.f, 140/255.f, 1.0f);  // Active: #545E8C
+  style.Colors[ImGuiCol_Button] = ImVec4(68/255.f, 71/255.f, 90/255.f, 1.0f);
+  style.Colors[ImGuiCol_ButtonHovered] = ImVec4(98/255.f, 114/255.f, 164/255.f, 1.0f);
+  style.Colors[ImGuiCol_ButtonActive]  = ImVec4(84/255.f, 94/255.f, 140/255.f, 1.0f);
 
 }
 
 void App::drawMenuBar() {
-  State state = cs->getState();
+  State state = cs.getState();
 
   bool isDisabled = (state != State::CONNECTED) ? true : false;
   
@@ -168,38 +170,38 @@ void App::drawMenuBar() {
 
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("Price")) {
-      if (ImGui::MenuItem("BTC")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "BTCUSDT"));
-      if (ImGui::MenuItem("ETH")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "ETHUSDT"));
-      if (ImGui::MenuItem("SOL")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "SOLUSDT"));
-      if (ImGui::MenuItem("DOGE")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "DOGEUSDT"));
-      if (ImGui::MenuItem("ETC")) widgets.push_back(std::make_unique<Ticker>(ws, eb, "ETCUSDT"));
+      if (ImGui::MenuItem("BTC")) widgets.push_back(Utils::createWidget<Ticker>(sm, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(Utils::createWidget<Ticker>(sm, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(Utils::createWidget<Ticker>(sm, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(Utils::createWidget<Ticker>(sm, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(Utils::createWidget<Ticker>(sm, "ETCUSDT"));
       ImGui::EndMenu();
     }
-
+  /*
     if (ImGui::BeginMenu("OrderBook")) {
-      if (ImGui::MenuItem("BTC")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "BTCUSDT"));
-      if (ImGui::MenuItem("ETH")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "ETHUSDT"));
-      if (ImGui::MenuItem("SOL")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "SOLUSDT"));
-      if (ImGui::MenuItem("DOGE")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "DOGEUSDT"));
-      if (ImGui::MenuItem("ETC")) widgets.push_back(std::make_unique<OrderBook>(ws, eb, hc, "ETCUSDT"));
+      if (ImGui::MenuItem("BTC")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(Utils::createWidget<OrderBook>(ws, eb, hc, "ETCUSDT"));
       ImGui::EndMenu();
     }
+*/
 
     if (ImGui::BeginMenu("Chart")) {
-      if (ImGui::MenuItem("BTC")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "BTCUSDT"));
-      if (ImGui::MenuItem("ETH")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "ETHUSDT"));
-      if (ImGui::MenuItem("SOL")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "SOLUSDT"));
-      if (ImGui::MenuItem("DOGE")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "DOGEUSDT"));
-      if (ImGui::MenuItem("ETC")) widgets.push_back(std::make_unique<Chart>(ws, eb, hc, "ETCUSDT"));
+      if (ImGui::MenuItem("BTC")) widgets.push_back(Utils::createWidget<Chart>(sm, hc, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(Utils::createWidget<Chart>(sm, hc, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(Utils::createWidget<Chart>(sm, hc, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(Utils::createWidget<Chart>(sm, hc, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(Utils::createWidget<Chart>(sm, hc, "ETCUSDT"));
       ImGui::EndMenu();
     }
-
     if (ImGui::BeginMenu("Trades")) {
-      if (ImGui::MenuItem("BTC")) widgets.push_back(std::make_unique<Trades>(ws, eb, "BTCUSDT"));
-      if (ImGui::MenuItem("ETH")) widgets.push_back(std::make_unique<Trades>(ws, eb, "ETHUSDT"));
-      if (ImGui::MenuItem("SOL")) widgets.push_back(std::make_unique<Trades>(ws, eb, "SOLUSDT"));
-      if (ImGui::MenuItem("DOGE")) widgets.push_back(std::make_unique<Trades>(ws, eb, "DOGEUSDT"));
-      if (ImGui::MenuItem("ETC")) widgets.push_back(std::make_unique<Trades>(ws, eb, "ETCUSDT"));
+      if (ImGui::MenuItem("BTC")) widgets.push_back(Utils::createWidget<Trades>(sm, "BTCUSDT"));
+      if (ImGui::MenuItem("ETH")) widgets.push_back(Utils::createWidget<Trades>(sm, "ETHUSDT"));
+      if (ImGui::MenuItem("SOL")) widgets.push_back(Utils::createWidget<Trades>(sm, "SOLUSDT"));
+      if (ImGui::MenuItem("DOGE")) widgets.push_back(Utils::createWidget<Trades>(sm, "DOGEUSDT"));
+      if (ImGui::MenuItem("ETC")) widgets.push_back(Utils::createWidget<Trades>(sm, "ETCUSDT"));
       ImGui::EndMenu();
     }
     

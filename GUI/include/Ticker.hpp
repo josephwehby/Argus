@@ -4,16 +4,17 @@
 #include "Widget.hpp"
 #include "Level1.hpp"
 #include "Utils.hpp"
-#include "WebSocket.hpp"
 #include "JsonBuilder.hpp"
 #include "Colors.hpp"
-#include "EventBus.hpp"
 #include "IEvent.hpp"
+#include "SubscriptionManager.hpp"
+#include "SubscriptionRequest.hpp"
 
-class Ticker : public Widget {
+class Ticker : public Widget, public std::enable_shared_from_this<Ticker> {
   public:
-    Ticker(std::shared_ptr<WebSocket>, std::shared_ptr<EventBus>, std::string);
+    Ticker(SubscriptionManager&, std::string);
     ~Ticker();
+    void init() override;
     void draw() override; 
   private:
     std::string event_channel;
@@ -22,6 +23,6 @@ class Ticker : public Widget {
     
     Level1 level1;
     
-    std::shared_ptr<WebSocket> ws;
-    std::shared_ptr<EventBus> eb;
+    SubscriptionRequest request;
+    SubscriptionManager& sm;
 };

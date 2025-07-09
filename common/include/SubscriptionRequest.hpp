@@ -4,8 +4,6 @@
 
 #include "IEvent.hpp"
 
-using EventCallback = std::function<void(std::shared_ptr<IEvent>)>;
-
 struct SubscriptionRequest {
   std::string symbol;
   std::string channel;

@@ -1,19 +1,20 @@
 #include "DataParser.hpp"
 
-DataParser::DataParser(std::shared_ptr<DataStore> ds, std::shared_ptr<ConnectionState> cs_, std::shared_ptr<EventBus> eb_) : datastore(ds), cs(cs_), eb(eb_) {
+DataParser::DataParser(EventBus& eb_) : eb(eb_) {
   process_thread = std::thread(&DataParser::processLoop, this); 
 }
 
 DataParser::~DataParser() {
-  if (process_thread.joinable()) {
-    process_thread.join();
-  }
-
-  datastore.reset();
+  std::cout << "dp ran" << std::endl;
 }
 
 void DataParser::shutdown() {
+  std::cout << "shutting down" << std::endl;
   data.push(nullptr);
+  if (process_thread.joinable()) {
+    process_thread.join();
+    std::cout << "joined" << std::endl;
+  }
 }
 
 void DataParser::pushData(json new_data) {
@@ -28,6 +29,8 @@ void DataParser::processLoop() {
     }
     parseData(next_item);
   }
+
+  std::cout << "broke the loop" << std::endl;
 }
 
 void DataParser::parseData(std::shared_ptr<json> item) {
@@ -77,7 +80,7 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
       price_change, percent_change, last_price, high, low, volume);
   ld->channel = "LEVEL1:" + symbol;
 
-  eb->publish(ld);
+  eb.publish(ld);
 }
 
 void DataParser::parseBookUpdate(std::shared_ptr<json> item) {
@@ -96,7 +99,7 @@ void DataParser::parseBookUpdate(std::shared_ptr<json> item) {
   }
   
   book_update->channel = "BOOK_UPDATE:" + symbol;
-  eb->publish(book_update);
+  eb.publish(book_update);
 }
 
 void DataParser::parseBookSnapshot(std::shared_ptr<json> item) {
@@ -113,7 +116,7 @@ void DataParser::parseBookSnapshot(std::shared_ptr<json> item) {
   }
   
   book_snapshot->channel = "BOOK_SNAPSHOT:" + symbol;
-  eb->publish(book_snapshot);
+  eb.publish(book_snapshot);
 }
 
 void DataParser::parseOHLC(std::shared_ptr<json> item) {
@@ -130,7 +133,7 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
   
   std::shared_ptr<Candle> candle = std::make_shared<Candle>(open, high, low, close, buy_volume, volume, 1, unix_time, event_time);
   candle->channel = "CANDLE:" + symbol;
-  eb->publish(candle);
+  eb.publish(candle);
 }
 
 void DataParser::parseOHLCHistoric(std::shared_ptr<json> item) {
@@ -149,7 +152,7 @@ void DataParser::parseOHLCHistoric(std::shared_ptr<json> item) {
   }
   
   historical_candles->channel = "HISTORICAL_CANDLES:" + symbol;
-  eb->publish(historical_candles);
+  eb.publish(historical_candles);
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {
@@ -158,5 +161,5 @@ void DataParser::parseTrade(std::shared_ptr<json> item) {
   TradeSide side = (item->at("m") == true) ? TradeSide::Sell: TradeSide::Buy;
   std::shared_ptr<Trade> trade = std::make_shared<Trade>(side, Utils::formatPriceFromString(item->at("p")), Utils::formatSizeFromString(item->at("q")), Utils::formatMilliTime(item->at("T"))); 
   trade->channel = "TRADE:" + symbol;
-  eb->publish(trade);
+  eb.publish(trade);
 }

@@ -9,6 +9,8 @@ OrderBook::~OrderBook() {
   book_manager.shutdown(); 
 }
 
+void OrderBook::init() {}
+
 void OrderBook::draw() {
 
   book = book_manager.getBookSnapshot();

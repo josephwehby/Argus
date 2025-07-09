@@ -7,6 +7,7 @@
 #include <iostream>
 #include <time.h>
 #include <stdlib.h>
+#include <utility>
 
 namespace Utils {
 
@@ -128,4 +129,11 @@ namespace Utils {
     return 0;
   }
 
+  template <typename T, typename... Args>
+  std::shared_ptr<T> createWidget(Args&&... args) {
+    std::cout << "creatung new widget" << std::endl;
+    auto widget = std::make_shared<T>(std::forward<Args>(args)...);
+    widget->init();
+    return widget;
+  }
 };

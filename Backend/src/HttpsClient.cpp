@@ -1,6 +1,6 @@
 #include "HttpsClient.hpp"
 
-HttpsClient::HttpsClient(std::shared_ptr<DataParser> dp_) : dp(dp_), cli(url.c_str()) {
+HttpsClient::HttpsClient(DataParser& dp_) : dp(dp_), cli(url.c_str()) {
   process_thread = std::thread(&HttpsClient::processLoop, this); 
 }
 
@@ -8,6 +8,7 @@ HttpsClient::~HttpsClient() {
   if (process_thread.joinable()) {
     process_thread.join();
   }
+  std::cout << "hc ran" << std::endl;
 }
 
 void HttpsClient::shutdown() {
@@ -76,7 +77,7 @@ void HttpsClient::getHistoricalChart(std::shared_ptr<HttpsTask> task) {
   modified["e"] = "kline-historic";
   modified["c"] = response;
 
-  dp->pushData(modified);
+  dp.pushData(modified);
 }
 
 void HttpsClient::getOrderBook(std::shared_ptr<HttpsTask> task) {
@@ -98,5 +99,5 @@ void HttpsClient::getOrderBook(std::shared_ptr<HttpsTask> task) {
   response["s"] = task->symbol;
   response["e"] = "orderbook-snapshot";
 
-  dp->pushData(response);
+  dp.pushData(response);
 }

@@ -13,16 +13,17 @@
 #include "HistoricalCandles.hpp"
 #include "Utils.hpp"
 #include "WebSocket.hpp"
-#include "EventBus.hpp"
+#include "SubscriptionManager.hpp"
+#include "SubscriptionRequest.hpp"
 #include "HttpsClient.hpp"
-#include "DataParser.hpp"
 #include "JsonBuilder.hpp"
 #include "Colors.hpp"
 
-class Chart : public Widget {
+class Chart : public Widget, public std::enable_shared_from_this<Chart> {
   public:
-    Chart(std::shared_ptr<WebSocket>, std::shared_ptr<EventBus>, std::shared_ptr<HttpsClient>, std::string);
+    Chart(SubscriptionManager&, HttpsClient&, std::string);
     ~Chart();
+    void init() override;
     void draw() override;
   private:
     void updateCandles();
@@ -43,13 +44,15 @@ class Chart : public Widget {
     
     float ratios[2] = {2.5, 1};
     long long candles_before_load = 5;
-    bool loading_data = false;
+    bool loading_data = true;
     bool show_candles = true;
     
     std::map<long long, Candle> candles;
     std::vector<double> lines;
 
-    std::shared_ptr<WebSocket> ws;
-    std::shared_ptr<EventBus> eb;
-    std::shared_ptr<HttpsClient> hc;
+    SubscriptionManager& sm;
+    HttpsClient& hc;
+
+    SubscriptionRequest request;
+    SubscriptionRequest historical_request;
 };

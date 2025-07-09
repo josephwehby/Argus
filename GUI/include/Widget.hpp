@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cstdint>
 #include <limits>
+#include <memory>
 
 #include "imgui.h"
 
@@ -20,6 +21,7 @@ class Widget {
     bool isOpen() { return show; }
 
     virtual ~Widget() = default;
+    virtual void init() = 0;
     virtual void draw() = 0;
 
   protected:

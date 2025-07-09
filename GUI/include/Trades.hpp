@@ -6,15 +6,16 @@
 #include "Trade.hpp"
 #include "Widget.hpp"
 #include "Utils.hpp"
-#include "WebSocket.hpp"
 #include "JsonBuilder.hpp"
 #include "Colors.hpp"
-#include "EventBus.hpp"
+#include "SubscriptionManager.hpp"
+#include "SubscriptionRequest.hpp"
 
-class Trades : public Widget {
+class Trades : public Widget, public std::enable_shared_from_this<Trades> {
   public:
-    Trades(std::shared_ptr<WebSocket>, std::shared_ptr<EventBus>, std::string);
+    Trades(SubscriptionManager&, std::string);
     ~Trades();
+    void init() override;
     void draw() override;
   private:
     const std::string channel = "trade";
@@ -22,7 +23,7 @@ class Trades : public Widget {
     const unsigned int max_capacity = 60;
     double filter = 0;
 
-    std::shared_ptr<WebSocket> ws;
     std::deque<Trade> trades;
-    std::shared_ptr<EventBus> eb;
+    SubscriptionRequest request;
+    SubscriptionManager& sm;
 };

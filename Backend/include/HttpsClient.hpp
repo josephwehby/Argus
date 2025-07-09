@@ -17,7 +17,7 @@ using json = nlohmann::json;
 
 class HttpsClient {
   public:
-    HttpsClient(std::shared_ptr<DataParser>);
+    HttpsClient(DataParser&);
     ~HttpsClient();
     void pushRequest(HttpsTask&);
     void shutdown();
@@ -31,6 +31,6 @@ class HttpsClient {
     
     httplib::SSLClient cli;
     std::thread process_thread;
-    std::shared_ptr<DataParser> dp;
+    DataParser& dp;
     SafeQueue<HttpsTask> events;
 };

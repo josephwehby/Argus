@@ -2,20 +2,21 @@
 
 void WebSocket::fail(beast::error_code ec, char const* what) {
     std::cerr << what << ": " << ec.message() << "\n";
-    cs->setState(State::CLOSED);
+    cs.setState(State::CLOSED);
 }
 
-WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, std::shared_ptr<DataParser> dp_, std::shared_ptr<ConnectionState> cs_) 
+WebSocket::WebSocket(net::io_context& ioc, ssl::context& ctx, DataParser& dp_, ConnectionState& cs_) 
   : m_resolver(net::make_strand(ioc)),
+    m_ssl_ctx(std::move(ctx)),
     m_ws(net::make_strand(ioc), m_ssl_ctx),
     dp(dp_),
     cs(cs_) {
       
-      m_ssl_ctx = std::move(ctx);
+      //m_ssl_ctx = std::move(ctx);
 }
 
 WebSocket::~WebSocket() {
-  dp->shutdown();
+  std::cout << "websocket desturctor ran" << std::endl;
 }
 
 void WebSocket::connect() {
@@ -41,7 +42,7 @@ void WebSocket::unsubscribe(json& unsubscribe_msg) {
 
 void WebSocket::close() {
   if (!m_ws.is_open()) return;
-  
+
   close_promise = std::promise<void>();
   close_future = close_promise.get_future();
 
@@ -52,7 +53,12 @@ void WebSocket::close() {
 
 void WebSocket::waitClose() {
   if (close_future.valid()) {
-    close_future.wait();
+    try {
+      close_future.wait();
+      std::cout << "ws closed" << std::endl;
+    } catch (const std::exception& e) {
+      std::cout << e.what() << std::endl;
+    }
   }
 }
 
@@ -108,7 +114,6 @@ void WebSocket::onSSLHandshake(beast::error_code ec) {
 
    m_ws.set_option(websocket::stream_base::decorator(
     [](websocket::request_type& req) {
-      //req.set(http::field::host, "ws.kraken.com");
       req.set(http::field::host, "data-stream.binance.vision");
       req.set(http::field::user_agent,
         std::string(BOOST_BEAST_VERSION_STRING) +
@@ -125,7 +130,7 @@ void WebSocket::onHandshake(beast::error_code ec) {
     return fail(ec, "handshake");
   }
   
-  cs->setState(State::CONNECTED);
+  cs.setState(State::CONNECTED);
   doRead();
 }
 
@@ -138,7 +143,7 @@ void WebSocket::onRead(beast::error_code ec, std::size_t bytes_transferred) {
   
   std::string data = beast::buffers_to_string(m_buffer.data());
   json jsonData = json::parse(data);
-  dp->pushData(jsonData);
+  dp.pushData(jsonData);
   m_buffer.consume(m_buffer.size());
 
   doRead();
@@ -174,9 +179,12 @@ void WebSocket::onWrite(beast::error_code ec, std::size_t bytes_transferred) {
 
 void WebSocket::onClose(beast::error_code ec) {
   if (ec) {
+    std::cout << "close error" << std::endl;
     close_promise.set_exception(std::make_exception_ptr(std::runtime_error("Error closing")));
+    std::cout << ec.value() << " - " << ec.message() << std::endl;
     return fail(ec, "close");
   }
+  
   std::cout << "websocket closed" << std::endl;
   close_promise.set_value();
 }

@@ -1,25 +1,35 @@
 #include "Ticker.hpp"
 
-Ticker::Ticker(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_, std::string token) : ws(ws_), eb(eb_) {
+Ticker::Ticker(SubscriptionManager& sm_, std::string token) : sm(sm_) {
   symbol = token;
   window_name = "Ticker: " + symbol + "  ##" + std::to_string(getWindowID());
   event_channel = "LEVEL1:" + symbol;
-  
-  json sub_msg = JsonBuilder::generateSubscribe(symbol, channel, window_id); 
-  ws->subscribe(sub_msg);
-  
-  eb->subscribe(event_channel, window_id, [this](const std::shared_ptr<IEvent> update) {
-    auto level1_event = std::dynamic_pointer_cast<Level1>(update);
-    if (level1_event->empty) return;
-    this->level1 = *level1_event;
-  });
-
 }
 
 Ticker::~Ticker() {
-  json unsub_msg = JsonBuilder::generateUnsubscribe(symbol, channel, window_id);
-  ws->unsubscribe(unsub_msg);
-  eb->unsubscribe(event_channel, window_id);
+  sm.unsubscribe(request);
+}
+
+void Ticker::init() {
+  
+  std::weak_ptr<Ticker> self = shared_from_this();
+
+  request = SubscriptionRequest { 
+    symbol, 
+    channel, 
+    event_channel, 
+    window_id, 
+    [self] (const std::shared_ptr<IEvent> update) {
+      if (auto locked = self.lock()) {
+        auto level1_event = std::dynamic_pointer_cast<Level1>(update);
+        if (level1_event->empty) return;
+        locked->level1 = *level1_event;
+      }
+    },
+    std::nullopt
+  };
+
+  sm.subscribe(request);
 }
 
 void Ticker::draw() {

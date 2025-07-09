@@ -9,16 +9,14 @@
 #include "IEvent.hpp"
 #include "SafeQueue.hpp"
 
-using EventCallback = std::function<void(std::shared_ptr<IEvent>)>;
-
 class EventBus {
   public:
     EventBus() = default;
-    
+    ~EventBus();    
     void subscribe(const std::string& channel, int64_t, EventCallback);
     void unsubscribe(const std::string& channel, int64_t);
     void deferUnsubscribe(const std::string& channel, int64_t);
-
+    
     void publish(std::shared_ptr<IEvent>);
     void dispatchAll();
   private:

@@ -20,6 +20,7 @@ class OrderBook : public Widget {
   public:
     OrderBook(std::shared_ptr<WebSocket>, std::shared_ptr<EventBus>, std::shared_ptr<HttpsClient>, std::string);
     ~OrderBook();
+    void init() override;
     void draw() override; 
   private:
     const unsigned int depth = 20;

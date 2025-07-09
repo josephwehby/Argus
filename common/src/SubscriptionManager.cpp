@@ -1,10 +1,16 @@
 #include "SubscriptionManager.hpp"
 
-SubscriptionManager::SubscriptionManager(std::shared_ptr<WebSocket> ws_, std::shared_ptr<EventBus> eb_) : ws(ws_), eb(eb_) { }
+SubscriptionManager::SubscriptionManager(EventBus& eb_) : eb(eb_) { }
+
+SubscriptionManager::~SubscriptionManager() {
+  std::cout << "sm destructor ran" << std::endl;
+}
+
+void SubscriptionManager::setWebSocket(std::shared_ptr<WebSocket> ws_) { ws = ws_; }
 
 void SubscriptionManager::subscribe(const SubscriptionRequest& request) {
 
-  if (!subscriptions.contains(request.channel)) {
+  if (!subscriptions.contains(request.event_channel)) {
 
     json sub_msg;
     if (request.params.has_value()) {
@@ -12,20 +18,19 @@ void SubscriptionManager::subscribe(const SubscriptionRequest& request) {
     } else {
       sub_msg = JsonBuilder::generateSubscribe(request.symbol, request.channel, request.id);
     }
-
+    
     ws->subscribe(sub_msg);
   }
-  
-  subscriptions[request.channel]++;
 
-  eb->subscribe(request.event_channel, request.id, request.callback);
+  subscriptions[request.event_channel]++;
+  eb.subscribe(request.event_channel, request.id, request.callback);
 }
 
-void SubscriptionManager::unsubscribe(SubscriptionRequest request) {
+void SubscriptionManager::unsubscribe(const SubscriptionRequest& request) {
 
-  if (!subscriptions.contains(request.channel)) return;
+  if (!subscriptions.contains(request.event_channel)) return;
   
-  if (subscriptions[request.channel] == 1) {
+  if (subscriptions[request.event_channel] == 1) {
     
     json unsub_msg;
     if (request.params.has_value()) {
@@ -35,10 +40,10 @@ void SubscriptionManager::unsubscribe(SubscriptionRequest request) {
     }
 
     ws->unsubscribe(unsub_msg);
-    subscriptions.erase(request.channel);
+    subscriptions.erase(request.event_channel);
   } else {
-    subscriptions[request.channel]--;
+    subscriptions[request.event_channel]--;
   }
 
-  eb->unsubscribe(request.event_channel, request.id);
+  eb.unsubscribe(request.event_channel, request.id);
 }
