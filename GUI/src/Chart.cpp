@@ -31,7 +31,8 @@ void Chart::init() {
         locked->candles[candle_event->unix_time] = *candle_event;
       }
     },
-    time_frame 
+    time_frame,
+    false
   };
 
   sm.subscribe(request);
@@ -51,7 +52,8 @@ void Chart::init() {
         locked->loading_data = false;
       }
     },
-    time_frame 
+    time_frame,
+    true
   };
   
   sm.subscribe(historical_request);

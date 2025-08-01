@@ -88,7 +88,7 @@ void App::initWebSocket() {
   });
 
   ws->connect();
-
+  std::cout << "connected" << std::endl;
   return;
 }
 
@@ -200,6 +200,10 @@ void App::drawMenuBar() {
       if (ImGui::MenuItem("SOL")) widgets.push_back(Utils::createWidget<Trades>(sm, "SOLUSDT"));
       if (ImGui::MenuItem("DOGE")) widgets.push_back(Utils::createWidget<Trades>(sm, "DOGEUSDT"));
       if (ImGui::MenuItem("ETC")) widgets.push_back(Utils::createWidget<Trades>(sm, "ETCUSDT"));
+      ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Other")) {
+      if (ImGui::MenuItem("Alerts")) widgets.push_back(Utils::createWidget<Alerts>(sm));
       ImGui::EndMenu();
     }
     

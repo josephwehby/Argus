@@ -26,7 +26,8 @@ void Trades::init() {
         if (locked->trades.size() > locked->max_capacity) locked->trades.pop_back();
       }
     },
-    std::nullopt
+    std::nullopt,
+    false
   };
   
   sm.subscribe(request);

@@ -54,6 +54,7 @@ class WebSocket : public std::enable_shared_from_this<WebSocket> {
 
     std::string m_host = "data-stream.binance.vision";
     std::string m_port = "9443";
+    const unsigned int wait_time = 15;
     
     DataParser& dp;
     ConnectionState& cs;

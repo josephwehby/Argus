@@ -26,7 +26,8 @@ void Ticker::init() {
         locked->level1 = *level1_event;
       }
     },
-    std::nullopt
+    std::nullopt,
+    false
   };
 
   sm.subscribe(request);

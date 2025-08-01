@@ -15,20 +15,38 @@ OrderBook::~OrderBook() {
 void OrderBook::init() {}
 
 void OrderBook::draw() {
-
+  
   book = book_manager->getBookSnapshot();
-
+  
   ImGui::SetNextWindowSize(ImVec2(435,1070), ImGuiCond_FirstUseEver);
-  ImGui::Begin(window_name.c_str(), &show, ImGuiWindowFlags_NoScrollbar);
+  ImGui::Begin(window_name.c_str(), &show, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
+  if (ImGui::BeginMenuBar()) {
+    if (ImGui::BeginMenu("View")) {
+      if (ImGui::MenuItem("Classic")) classic = true;
+      if (ImGui::MenuItem("Depth")) classic = false;
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
+  }
+
+  if (classic) {
+    drawClassic(draw_list);
+  } else {
+    drawDepth(draw_list);
+  }
+  ImGui::End();
+}
+
+void OrderBook::drawClassic(ImDrawList* draw_list) {
   ImVec2 pos = ImGui::GetWindowPos();
   ImVec2 win_size = ImGui::GetContentRegionAvail();
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
   float max_width = win_size.x;
   float min_width = max_width * .05;
   float x_start = win_size.x *.01;
-  float y_start = win_size.y * .03;
+  float y_start = win_size.y * .05;
 
   float bar_height = std::max((win_size.y) / 40.0f, min_bar_height);
   double max_bid_size = 0;
@@ -92,6 +110,78 @@ void OrderBook::draw() {
 
     row++;
   }
+}
 
-  ImGui::End();
+void OrderBook::drawDepth(ImDrawList* draw_list) {
+  std::vector<double> bid_prices(depth/bin_size), bid_volumes(depth/bin_size);
+  std::vector<double> ask_prices(depth/bin_size), ask_volumes(depth/bin_size);
+  
+  int index = 0;
+  for (auto it = book.bids.rbegin(); it != book.bids.rend(); ) {
+    double volume = 0;
+    for (int i = 0; i < bin_size && it != book.bids.rend(); i++, it++) {
+      volume += it->second;
+    }
+
+    bid_prices[index] = index*bin_size;
+    bid_volumes[index] = volume;
+    index++;
+  }
+  
+  index = 0;
+  for (auto it = book.asks.rbegin(); it != book.asks.rend(); ) {
+    double volume = 0;
+    for (int i = 0; i < bin_size && it != book.asks.rend(); i++, it++) {
+      volume += it->second;
+    }
+    ask_prices[index] = index*bin_size+depth;
+    ask_volumes[index] = volume;
+    index++;
+  }
+
+  double max_bid_size = 0;
+  double max_ask_size = 0;
+  
+  for (const double volume : bid_volumes) max_bid_size = std::max(volume, max_bid_size);
+  for (const double volume : ask_volumes) max_ask_size = std::max(volume, max_ask_size);
+  
+  for (int i = 0; i < bid_volumes.size(); i++) bid_volumes[i] = std::max(1.0, (bid_volumes[i]/max_bid_size)*max_height);
+  for (int i = 0; i < ask_volumes.size(); i++) ask_volumes[i] = std::max(1.0, (ask_volumes[i]/max_ask_size)*max_height);
+  
+  bid_prices.push_back(bid_prices.back() + bin_size);
+  bid_volumes.push_back(bid_volumes.back());
+  
+  ask_prices.push_back(ask_prices.back() + bin_size);
+  ask_volumes.push_back(ask_volumes.back());
+
+  /*
+  int i = 0;
+  for (auto it = book.bids.rbegin(); it != book.bids.rend(); it++, i++) {
+    bid_prices[i] = i; 
+    bid_volumes[i] = std::max((it->second/max_bid_size)*max_height, 1.0);
+  }
+  
+  i = 0;
+  for (auto it = book.asks.rbegin(); it != book.asks.rend(); it++, i++) {
+    ask_prices[i] = i + depth; 
+    ask_volumes[i] = std::max((it->second/max_ask_size)*max_height, 1.0);
+  }
+  */
+  if (ImPlot::BeginPlot("##Market Depth")) {
+    ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickLabels);
+    ImPlot::SetupAxis(ImAxis_Y1, nullptr, ImPlotAxisFlags_NoGridLines | ImPlotAxisFlags_NoTickMarks | ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickLabels);
+    
+    ImPlot::SetupAxisLimits(ImAxis_X1, 0, depth*2, ImPlotCond_Always);
+    ImPlot::SetupAxisLimits(ImAxis_Y1, 0, max_height, ImPlotCond_Always);
+
+    ImPlot::PushStyleColor(ImPlotCol_Fill, Colors::Green_Light_V4);
+    ImPlot::PushStyleColor(ImPlotCol_Line, Colors::Green_Light_V4);
+    ImPlot::PlotShaded("##Bids", bid_prices.data(), bid_volumes.data(), bid_volumes.size());
+    ImPlot::PopStyleColor();
+    ImPlot::PushStyleColor(ImPlotCol_Fill, Colors::Red_Light_V4);
+    ImPlot::PushStyleColor(ImPlotCol_Line, Colors::Red_Light_V4);
+    ImPlot::PlotShaded("##Asks", ask_prices.data(), ask_volumes.data(), ask_volumes.size());
+    ImPlot::PopStyleColor();
+    ImPlot::EndPlot();
+  }
 }

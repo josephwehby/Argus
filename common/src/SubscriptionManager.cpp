@@ -10,7 +10,7 @@ void SubscriptionManager::setWebSocket(std::shared_ptr<WebSocket> ws_) { ws = ws
 
 void SubscriptionManager::subscribe(const SubscriptionRequest& request) {
 
-  if (!subscriptions.contains(request.event_channel)) {
+  if (!subscriptions.contains(request.event_channel) && !request.https) {
 
     json sub_msg;
     if (request.params.has_value()) {
@@ -31,15 +31,16 @@ void SubscriptionManager::unsubscribe(const SubscriptionRequest& request) {
   if (!subscriptions.contains(request.event_channel)) return;
   
   if (subscriptions[request.event_channel] == 1) {
-    
-    json unsub_msg;
-    if (request.params.has_value()) {
-      unsub_msg = JsonBuilder::generateUnsubscribe(request.symbol, request.channel, request.id, request.params.value());
-    } else {
-      unsub_msg = JsonBuilder::generateUnsubscribe(request.symbol, request.channel, request.id);
-    }
+    if (request.https) {
+      json unsub_msg;
+      if (request.params.has_value()) {
+        unsub_msg = JsonBuilder::generateUnsubscribe(request.symbol, request.channel, request.id, request.params.value());
+      } else {
+        unsub_msg = JsonBuilder::generateUnsubscribe(request.symbol, request.channel, request.id);
+      }
 
-    ws->unsubscribe(unsub_msg);
+      ws->unsubscribe(unsub_msg);
+    }
     subscriptions.erase(request.event_channel);
   } else {
     subscriptions[request.event_channel]--;

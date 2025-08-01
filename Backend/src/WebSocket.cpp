@@ -71,13 +71,15 @@ void WebSocket::onResolve(beast::error_code ec, tcp::resolver::results_type resu
     return fail(ec, "resolve");
   }
   
-  beast::get_lowest_layer(m_ws).expires_after(std::chrono::seconds(30));
+  beast::get_lowest_layer(m_ws).expires_after(std::chrono::seconds(wait_time));
 
   beast::get_lowest_layer(m_ws).async_connect(
       results,
       beast::bind_front_handler(
         &WebSocket::onConnect, shared_from_this())
       );
+
+  std::cout << "resolved" << std::endl;
 }
 
 void WebSocket::onConnect(beast::error_code ec, tcp::resolver::results_type::endpoint_type ep) {
@@ -85,7 +87,7 @@ void WebSocket::onConnect(beast::error_code ec, tcp::resolver::results_type::end
     return fail(ec, "connect");
   }
 
-  beast::get_lowest_layer(m_ws).expires_after(std::chrono::seconds(30));
+  beast::get_lowest_layer(m_ws).expires_after(std::chrono::seconds(wait_time));
   
   if (!SSL_set_tlsext_host_name(m_ws.next_layer().native_handle(), m_host.c_str())) {
     ec = beast::error_code(static_cast<int>(::ERR_get_error()), net::error::get_ssl_category());
@@ -99,6 +101,8 @@ void WebSocket::onConnect(beast::error_code ec, tcp::resolver::results_type::end
       beast::bind_front_handler(
         &WebSocket::onSSLHandshake, shared_from_this())
       );
+
+  std::cout << "connect" << std::endl;
 }
 
 void WebSocket::onSSLHandshake(beast::error_code ec) {
@@ -123,6 +127,8 @@ void WebSocket::onSSLHandshake(beast::error_code ec) {
   m_ws.async_handshake(m_host, "/ws",
     beast::bind_front_handler(
     &WebSocket::onHandshake, shared_from_this()));
+
+  std::cout << "handshake" << std::endl;
 }
 
 void WebSocket::onHandshake(beast::error_code ec) {
@@ -130,6 +136,7 @@ void WebSocket::onHandshake(beast::error_code ec) {
     return fail(ec, "handshake");
   }
   
+  std::cout << "onHandsahke" << std::endl;
   cs.setState(State::CONNECTED);
   doRead();
 }

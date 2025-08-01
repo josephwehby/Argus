@@ -9,10 +9,6 @@ OrderBookManager::OrderBookManager(SubscriptionManager& sm_, HttpsClient& hc_, s
 }
 
 OrderBookManager::~OrderBookManager() {
-  if (process_thread.joinable()) {
-    process_thread.join();
-  }
-  
   sm.unsubscribe(update_request);
   sm.unsubscribe(snapshot_request);
 }
@@ -36,7 +32,8 @@ void OrderBookManager::init() {
         locked->updates.push(*book_update);
       }
     },
-    speed
+    speed,
+    false 
   };
   
   sm.subscribe(update_request);
@@ -44,7 +41,7 @@ void OrderBookManager::init() {
   snapshot_request = {
     symbol,
     channel,
-    event_channel_update,
+    event_channel_snapshot,
     id,
     [self](std::shared_ptr<IEvent> update){
       if (auto locked = self.lock()) {
@@ -52,7 +49,8 @@ void OrderBookManager::init() {
         locked->snapshots.push(*book_snapshot);
       }
     },
-    std::nullopt
+    std::nullopt,
+    true 
   };
 
   sm.subscribe(snapshot_request);
@@ -67,6 +65,10 @@ void OrderBookManager::shutdown() {
   BookSnapshot end;
   end.last_update = 0;
   snapshots.push(end);
+  
+  if (process_thread.joinable()) {
+    process_thread.join();
+  }
 }
 
 void OrderBookManager::processLoop() {
