@@ -41,6 +41,7 @@ void SubscriptionManager::unsubscribe(const SubscriptionRequest& request) {
 
       ws->unsubscribe(unsub_msg);
     }
+ 
     subscriptions.erase(request.event_channel);
   } else {
     subscriptions[request.event_channel]--;

@@ -3,7 +3,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_WINDOWS_SDK_VERSION 10.0.26100.0)
+
 add_definitions(-D_WIN32_WINNT=0x0B00)
+add_compile_definitions(NOMINMAX)
 
 project(app)
 
@@ -59,7 +61,7 @@ target_include_directories(App PRIVATE
   "${CMAKE_SOURCE_DIR}/Backend/libs/cpp-httplib/"
 )
 
-target_link_libraries(App PRIVATE glfw OpenGL::GL Boost::asio Boost::beast OpenSSL::SSL OpenSSL::Crypto nlohmann_json::nlohmann_json user32.lib gdi32.lib)
+target_link_libraries(App PRIVATE winmm glfw OpenGL::GL Boost::asio Boost::beast OpenSSL::SSL OpenSSL::Crypto nlohmann_json::nlohmann_json user32.lib gdi32.lib)
 
 if (MSVC) 
   target_compile_options(App PRIVATE "/bigobj")
@@ -68,6 +70,13 @@ endif()
 add_custom_command(
   TARGET App
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/GUI/fonts/JetBrainsMono-Regular.ttf" "${CMAKE_BINARY_DIR}/Debug"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/GUI/fonts/JetBrainsMono-Regular.ttf" $<TARGET_FILE_DIR:App>
+  COMMENT "Copying jet brains font to output directory"
+)
+
+add_custom_command(
+  TARGET App
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/cash_register.wav" $<TARGET_FILE_DIR:App>
   COMMENT "Copying jet brains font to output directory"
 )

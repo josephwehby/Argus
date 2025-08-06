@@ -1,6 +1,7 @@
 #include "Alerts.hpp"
 
-Alerts::Alerts(SubscriptionManager& sm_) : sm(sm_) { 
+Alerts::Alerts(SubscriptionManager& sm_) { 
+  am = std::make_shared<AlertsManager>(sm_);
   window_name = "Alerts ##" + std::to_string(window_id);
 }
 
@@ -50,8 +51,11 @@ void Alerts::draw() {
 
   ImGui::SetNextItemWidth(80.f);
   if (ImGui::Button("Add Alert")) {
-    // create new alert
+    Direction dir = (direction == "Above") ? Direction::ABOVE : Direction::BELOW;
+    Alert alert(current_symbol, price, dir, genID());
+    am->addAlert(alert);
   }
+
   ImGui::PopStyleVar();
 
   if (ImGui::BeginTable("alerts_table", 4, ImGuiTableFlags_SizingStretchSame)) {
@@ -60,18 +64,36 @@ void Alerts::draw() {
     ImGui::TableSetupColumn("Price");
     ImGui::TableSetupColumn("Status", ImGuiTableColumnFlags_WidthStretch);
     ImGui::TableHeadersRow();
+    
+    for (auto& [_, alert] : am->alerts) {
+      ImVec4 color = Colors::White_V4;
+      if (alert.triggered) color = Colors::Green_V4;
+      
+      if (alert.triggered && !alert.played) {
+        playWav("cash_register.wav"); 
+        alert.played = true;
+        am->removeAlert(alert.id);
+      }
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::TextColored(color, "%s", alert.symbol.c_str());
+      ImGui::TableNextColumn();
+      ImGui::TextColored(color, "%s", directions[static_cast<size_t>(alert.direction)].c_str());
+      ImGui::TableNextColumn();
+      ImGui::TextColored(color, "%f.2", alert.price);
+      ImGui::TableNextColumn();
 
-    ImGui::TableNextRow();
-    ImGui::TableNextColumn();
-    ImGui::Text("BTC");
-    ImGui::TableNextColumn();
-    ImGui::Text("Above");
-    ImGui::TableNextColumn();
-    ImGui::Text("100,000.89");
-    ImGui::TableNextColumn();
-    ImGui::Text("Pending");
+      std::string status = (alert.triggered == true) ? "Triggered" : "Pending";
+      ImGui::TextColored(color, "%s", status.c_str());
+    }
 
     ImGui::EndTable();
   } 
   ImGui::End();
+}
+
+uint64_t Alerts::genID() {
+  std::mt19937_64 mt{ std::random_device{}() };
+  std::uniform_int_distribution<int64_t> randomID{11111111, std::numeric_limits<int64_t>::max()};
+  return randomID(mt);
 }
