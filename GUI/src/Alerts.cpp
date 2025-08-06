@@ -58,22 +58,24 @@ void Alerts::draw() {
 
   ImGui::PopStyleVar();
 
-  if (ImGui::BeginTable("alerts_table", 4, ImGuiTableFlags_SizingStretchSame)) {
+  if (ImGui::BeginTable("alerts_table", 5, ImGuiTableFlags_SizingStretchSame)) {
     ImGui::TableSetupColumn("Symbol");
     ImGui::TableSetupColumn("Direction");
     ImGui::TableSetupColumn("Price");
-    ImGui::TableSetupColumn("Status", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableSetupColumn("Status");
+    ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch);
     ImGui::TableHeadersRow();
     
-    for (auto& [_, alert] : am->alerts) {
+    for (auto& [id, alert] : am->alerts) {
       ImVec4 color = Colors::White_V4;
       if (alert.triggered) color = Colors::Green_V4;
       
       if (alert.triggered && !alert.played) {
         playWav("cash_register.wav"); 
         alert.played = true;
-        am->removeAlert(alert.id);
+        am->removeSubscription(id);
       }
+
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
       ImGui::TextColored(color, "%s", alert.symbol.c_str());
@@ -82,14 +84,26 @@ void Alerts::draw() {
       ImGui::TableNextColumn();
       ImGui::TextColored(color, "%f.2", alert.price);
       ImGui::TableNextColumn();
-
+      
       std::string status = (alert.triggered == true) ? "Triggered" : "Pending";
       ImGui::TextColored(color, "%s", status.c_str());
+      ImGui::TableNextColumn();
+      
+      if (ImGui::Button(("Remove##" + std::to_string(id)).c_str())) {
+        alerts_to_remove.push_back(id);
+      }
     }
 
     ImGui::EndTable();
   } 
   ImGui::End();
+
+  for (int64_t id : alerts_to_remove) {
+    am->removeSubscription(id);
+    am->removeAlert(id);
+  }
+
+  alerts_to_remove.clear();
 }
 
 uint64_t Alerts::genID() {

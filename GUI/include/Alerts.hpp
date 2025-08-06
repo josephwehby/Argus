@@ -28,5 +28,6 @@ class Alerts : public Widget {
     double price = 0;
     std::string direction = "Above";
 
-  std::shared_ptr<AlertsManager> am;
+    std::shared_ptr<AlertsManager> am;
+    std::vector<int64_t> alerts_to_remove;
 };

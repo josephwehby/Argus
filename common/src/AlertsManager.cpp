@@ -43,7 +43,11 @@ void AlertsManager::addAlert(const Alert& alert) {
   sm.subscribe(request);
 }
 
-void AlertsManager::removeAlert(const int64_t id) {
-  sm.unsubscribe(requests[id]);
+void AlertsManager::removeSubscription(const int64_t id) {
+  if (requests.contains(id)) sm.unsubscribe(requests[id]);
   requests.erase(id);
+}
+
+void AlertsManager::removeAlert(const int64_t id) {
+  alerts.erase(id);
 }

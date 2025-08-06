@@ -15,6 +15,7 @@ class AlertsManager : public std::enable_shared_from_this<AlertsManager> {
     AlertsManager(SubscriptionManager&);
     ~AlertsManager();
     void addAlert(const Alert&);
+    void removeSubscription(const int64_t);
     void removeAlert(const int64_t);
 
     std::unordered_map<uint64_t, Alert> alerts; 
