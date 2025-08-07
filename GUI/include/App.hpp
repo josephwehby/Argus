@@ -27,39 +27,43 @@
 #include "Utils.hpp"
 
 class App {
-  public:
-    App();
-    ~App();
-    void update();
-    void run();
+public:
+  App();
+  ~App();
+  void update();
+  void run();
 
-    static ImFont* default_font;
-    static ImFont* large_font;
+  static ImFont* default_font;
+  static ImFont* large_font;
 
-  private:
-    void render();
-    void drawMenuBar();
-    void styleApp();
-    void initWebSocket();
+private:
+  void render();
+  void drawMenuBar();
+  void styleApp();
+  void initWebSocket();
 
-    bool connected = false;
-    
-    std::vector<std::shared_ptr<Widget>> widgets;
-    
-    std::shared_ptr<WebSocket> ws;
-    ConnectionState cs;
-    EventBus eb;
-    SubscriptionManager sm;
-    DataParser dp;
-    HttpsClient hc;
+  net::io_context ioc;
+  boost::system::error_code ec;
+  ssl::context ctx {ssl::context::tlsv12_client};
+  std::thread io_thread;
 
-    const char* glsl_version;
-    ImGuiIO* io;
-    GLFWwindow* window;
-    ImVec4 clear_color = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
+  bool connected = false;
 
-    net::io_context ioc;
-    boost::system::error_code ec;
-    ssl::context ctx {ssl::context::tlsv12_client};
-    std::thread io_thread;
+  EventBus eb;
+
+  HttpsClient hc;
+  std::shared_ptr<WebSocket> ws;
+
+  ConnectionState cs;
+  DataParser dp;
+
+  SubscriptionManager sm;
+
+  std::vector<std::shared_ptr<Widget>> widgets;
+
+  const char* glsl_version;
+  ImGuiIO* io;
+  GLFWwindow* window;
+  ImVec4 clear_color = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
+
 };

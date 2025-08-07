@@ -1,7 +1,6 @@
 #include "EventBus.hpp"
 
 EventBus::~EventBus() {
-  std::cout << "eb destructor ran" << std::endl;
 }
 
 void EventBus::subscribe(const std::string& channel, int64_t id, EventCallback callback) {
@@ -28,10 +27,10 @@ void EventBus::dispatchAll() {
   for (int i = 0; i < size; i++) {
     std::shared_ptr<IEvent> event;
     events.pop(event);
-    
+
     auto it = subscriptions.find(event->channel);
     if (it == subscriptions.end()) continue;
-    
+
     for (const auto&[_, callback]: it->second) {
       callback(event); 
     }

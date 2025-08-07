@@ -17,7 +17,7 @@ class Widget {
       window_id = randomID(mt); 
     }
 
-    int getWindowID() const { return window_id; }
+    int64_t getWindowID() const { return window_id; }
     bool isOpen() { return show; }
 
     virtual ~Widget() = default;

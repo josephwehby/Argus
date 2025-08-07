@@ -5,15 +5,12 @@ DataParser::DataParser(EventBus& eb_) : eb(eb_) {
 }
 
 DataParser::~DataParser() {
-  std::cout << "dp ran" << std::endl;
 }
 
 void DataParser::shutdown() {
-  std::cout << "shutting down" << std::endl;
   data.push(nullptr);
   if (process_thread.joinable()) {
     process_thread.join();
-    std::cout << "joined" << std::endl;
   }
 }
 
@@ -29,8 +26,6 @@ void DataParser::processLoop() {
     }
     parseData(next_item);
   }
-
-  std::cout << "broke the loop" << std::endl;
 }
 
 void DataParser::parseData(std::shared_ptr<json> item) {
@@ -59,7 +54,7 @@ void DataParser::parseData(std::shared_ptr<json> item) {
 }
 
 void DataParser::parseTicker(std::shared_ptr<json> item) {
-  
+
   std::string symbol = item->at("s");
   double best_bid = std::stod(std::string(item->at("b")));
   double best_ask = std::stod(std::string(item->at("a")));
@@ -75,9 +70,9 @@ void DataParser::parseTicker(std::shared_ptr<json> item) {
   double high = std::stod(std::string(item->at("h")));
   double low = std::stod(std::string(item->at("l")));
   double volume = std::stod(std::string(item->at("v")));
-  
+
   std::shared_ptr<Level1> ld = std::make_shared<Level1>(best_bid, best_ask, best_bid_size, best_ask_size, 
-      price_change, percent_change, last_price, high, low, volume);
+                                                        price_change, percent_change, last_price, high, low, volume);
   ld->channel = "LEVEL1:" + symbol;
 
   eb.publish(ld);
@@ -93,11 +88,11 @@ void DataParser::parseBookUpdate(std::shared_ptr<json> item) {
   for (const auto& bid : (*item)["b"]) {
     book_update->bids.emplace_back(std::stod(bid[0].get<std::string>()), std::stod(bid[1].get<std::string>()));
   }
-  
+
   for (const auto& ask: (*item)["a"]) {
     book_update->asks.emplace_back(std::stod(ask[0].get<std::string>()), std::stod(ask[1].get<std::string>()));
   }
-  
+
   book_update->channel = "BOOK_UPDATE:" + symbol;
   eb.publish(book_update);
 }
@@ -114,14 +109,14 @@ void DataParser::parseBookSnapshot(std::shared_ptr<json> item) {
   for (const auto& ask: (*item)["asks"]) {
     book_snapshot->asks.emplace(std::stod(ask[0].get<std::string>()), std::stod(ask[1].get<std::string>()));
   }
-  
+
   book_snapshot->channel = "BOOK_SNAPSHOT:" + symbol;
   eb.publish(book_snapshot);
 }
 
 void DataParser::parseOHLC(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
-  
+
   double open = std::stod(std::string(item->at("k")["o"])); 
   double close = std::stod(std::string(item->at("k")["c"])); 
   double high = std::stod(std::string(item->at("k")["h"])); 
@@ -130,7 +125,7 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
   double volume = std::stod(std::string(item->at("k")["v"])); 
   long long unix_time = item->at("k")["t"].get<long long>() / 1000;
   long long event_time = item->at("E").get<long long>();
-  
+
   std::shared_ptr<Candle> candle = std::make_shared<Candle>(open, high, low, close, buy_volume, volume, 1, unix_time, event_time);
   candle->channel = "CANDLE:" + symbol;
   eb.publish(candle);
@@ -139,7 +134,7 @@ void DataParser::parseOHLC(std::shared_ptr<json> item) {
 void DataParser::parseOHLCHistoric(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
   std::shared_ptr<HistoricalCandles> historical_candles = std::make_shared<HistoricalCandles>();
-  
+
   for (const auto& candle : item->at("c")) {
     long long unix_time = candle[0].get<long long>()/1000;
     double open = std::stod(candle[1].get<std::string>());
@@ -150,14 +145,14 @@ void DataParser::parseOHLCHistoric(std::shared_ptr<json> item) {
     double buy_volume = std::stod(candle[9].get<std::string>());
     historical_candles->candles.emplace_back(open, high, low, close, buy_volume, volume, 1, unix_time, 0);
   }
-  
+
   historical_candles->channel = "HISTORICAL_CANDLES:" + symbol;
   eb.publish(historical_candles);
 }
 
 void DataParser::parseTrade(std::shared_ptr<json> item) {
   std::string symbol = item->at("s");
-  
+
   TradeSide side = (item->at("m") == true) ? TradeSide::Sell: TradeSide::Buy;
   std::shared_ptr<Trade> trade = std::make_shared<Trade>(side, Utils::formatPriceFromString(item->at("p")), Utils::formatSizeFromString(item->at("q")), Utils::formatMilliTime(item->at("T"))); 
   trade->channel = "TRADE:" + symbol;

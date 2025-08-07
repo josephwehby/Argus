@@ -65,13 +65,13 @@ void Ticker::draw() {
   ImVec2 pos = ImGui::GetWindowPos();
   ImVec2 win_size = ImGui::GetContentRegionAvail();
 
-  float total_size = level1.best_bid_size + level1.best_ask_size;
+  float total_size = static_cast<float>(level1.best_bid_size + level1.best_ask_size);
   float bar_length = win_size.x;
-  float y_start = win_size.y * .01;
+  float y_start = win_size.y * .01f;
 
   float x1 = pos.x;
   float y1 = y_start + pos.y; 
-  float x2 = x1 + (level1.best_bid_size / total_size * bar_length);
+  float x2 = x1 + static_cast<float>(level1.best_bid_size / total_size * bar_length);
   float y2 = y1 + bar_height;
 
   draw_list->AddRectFilled(ImVec2(x1, y1), ImVec2(x2, y2), Colors::Green_Bar_U32);

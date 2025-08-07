@@ -3,7 +3,6 @@
 SubscriptionManager::SubscriptionManager(EventBus& eb_) : eb(eb_) { }
 
 SubscriptionManager::~SubscriptionManager() {
-  std::cout << "sm destructor ran" << std::endl;
 }
 
 void SubscriptionManager::setWebSocket(std::shared_ptr<WebSocket> ws_) { ws = ws_; }
@@ -18,7 +17,7 @@ void SubscriptionManager::subscribe(const SubscriptionRequest& request) {
     } else {
       sub_msg = JsonBuilder::generateSubscribe(request.symbol, request.channel, request.id);
     }
-    
+
     ws->subscribe(sub_msg);
   }
 
@@ -29,7 +28,7 @@ void SubscriptionManager::subscribe(const SubscriptionRequest& request) {
 void SubscriptionManager::unsubscribe(const SubscriptionRequest& request) {
 
   if (!subscriptions.contains(request.event_channel)) return;
-  
+
   if (subscriptions[request.event_channel] == 1) {
     if (request.https) {
       json unsub_msg;
@@ -41,7 +40,7 @@ void SubscriptionManager::unsubscribe(const SubscriptionRequest& request) {
 
       ws->unsubscribe(unsub_msg);
     }
- 
+
     subscriptions.erase(request.event_channel);
   } else {
     subscriptions[request.event_channel]--;

@@ -8,7 +8,6 @@ HttpsClient::~HttpsClient() {
   if (process_thread.joinable()) {
     process_thread.join();
   }
-  std::cout << "hc ran" << std::endl;
 }
 
 void HttpsClient::shutdown() {
@@ -26,7 +25,7 @@ void HttpsClient::processLoop() {
 
   while (run) {
     auto task = events.wait_and_pop();
-    
+
     switch (task->type) {
       case HttpsTaskType::HistoricalChart:
         getHistoricalChart(task);
@@ -44,7 +43,7 @@ void HttpsClient::processLoop() {
 }
 
 void HttpsClient::getHistoricalChart(std::shared_ptr<HttpsTask> task) {
-  
+
   std::string query = endpoint + "klines?symbol=" + task->symbol + "&interval=" + task->interval; 
   if (!task->start_time.empty()) {
     query += "&startTime=";
@@ -59,7 +58,7 @@ void HttpsClient::getHistoricalChart(std::shared_ptr<HttpsTask> task) {
   query += "&limit=" + task->limit;
 
   auto res = cli.Get(query);
-  
+
   if (res == nullptr) {
     std::cout << "nullptr" << std::endl;
     return;
@@ -94,7 +93,7 @@ void HttpsClient::getOrderBook(std::shared_ptr<HttpsTask> task) {
     std::cerr << "HTTPS Error: " << httplib::to_string(error) << std::endl;
     return;
   }
- 
+
   json response = json::parse(res->body);
   response["s"] = task->symbol;
   response["e"] = "orderbook-snapshot";

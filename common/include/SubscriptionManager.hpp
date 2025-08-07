@@ -11,16 +11,15 @@
 #include "SubscriptionRequest.hpp"
 
 class SubscriptionManager {
-  public:
-    SubscriptionManager() = default;
-    SubscriptionManager(EventBus&);
-    ~SubscriptionManager();
-    void setWebSocket(std::shared_ptr<WebSocket>);
-    void subscribe(const SubscriptionRequest&);
-    void unsubscribe(const SubscriptionRequest&);
-  private:
-    std::unordered_map<std::string, int> subscriptions;
-    
-    std::shared_ptr<WebSocket> ws;
-    EventBus& eb;
+public:
+  SubscriptionManager(EventBus&);
+  ~SubscriptionManager();
+  void setWebSocket(std::shared_ptr<WebSocket>);
+  void subscribe(const SubscriptionRequest&);
+  void unsubscribe(const SubscriptionRequest&);
+private:
+  std::unordered_map<std::string, int> subscriptions;
+
+  std::shared_ptr<WebSocket> ws;
+  EventBus& eb;
 };

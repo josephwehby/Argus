@@ -64,7 +64,7 @@ target_include_directories(App PRIVATE
 target_link_libraries(App PRIVATE winmm glfw OpenGL::GL Boost::asio Boost::beast OpenSSL::SSL OpenSSL::Crypto nlohmann_json::nlohmann_json user32.lib gdi32.lib)
 
 if (MSVC) 
-  target_compile_options(App PRIVATE "/bigobj")
+  target_compile_options(App PRIVATE /W4 /bigobj)
 endif()
 
 add_custom_command(

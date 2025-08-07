@@ -1,17 +1,1 @@
-- add price alerts
-    - need to build an alert manager
-        - we only need one event listener per symbol
-        - we need to only subscirbe if an event does not exist yet
-        - we also need to store all of the alerts we are wating for in an unordered map keyed on symbol
-        - each alert show have a price and if we want to know if the symvol is above or below and if the alert is still valid
-        - probably should track active and inactive alerts in seperate structures maybe
-    - need an alert widget 
-        - should show current alerts 
-        - user can add new alerts
-        - alerts that have occured maybe we make the color green or something and ones that have not are white?
-        - i think we should store all alerts while the app is open 
-        - users also need to be able to remove an alert
-        - i dont think we need to allow editing since user can remove and add but might look into it at the end
-        - need to interface with windows api to play sound which should not be too bad
-            - now this program is only for windows
-- add in compiler warnings
+- need to fix bug where program hands on startup

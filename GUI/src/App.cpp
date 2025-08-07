@@ -4,12 +4,12 @@ ImFont* App::default_font = nullptr;
 ImFont* App::large_font = nullptr;
 
 static void glfw_error_callback(int error, const char* description) {
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+  fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
 App::App() : cs(State::CONNECTING), sm(eb), dp(eb), hc(dp) {
   glfwSetErrorCallback(glfw_error_callback);
-  
+
   if (!glfwInit()) return;
 
   glsl_version = "#version 130";
@@ -17,7 +17,7 @@ App::App() : cs(State::CONNECTING), sm(eb), dp(eb), hc(dp) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
   window = glfwCreateWindow(1700, 1100, "Argus - Binance", nullptr, nullptr);
-  
+
   if (window == nullptr) return;
 
   glfwMakeContextCurrent(window);
@@ -33,7 +33,7 @@ App::App() : cs(State::CONNECTING), sm(eb), dp(eb), hc(dp) {
 
   App::default_font = io->Fonts->AddFontFromFileTTF("JetBrainsMono-Regular.ttf", 20);
   App::large_font = io->Fonts->AddFontFromFileTTF("JetBrainsMono-Regular.ttf", 40);
-  
+
   styleApp();
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -47,35 +47,28 @@ App::~App() {
   widgets.clear();
   hc.shutdown();
   dp.shutdown();
-  
-  // might rename this to shutdown for consistency 
+
   ws->close(); 
   ws->waitClose();
 
-  ws.reset();
   ioc.stop();
-  std::cout << "io stopped" << std::endl;
-  
+
   if (io_thread.joinable()) {
-    std::cout << "io joined" << std::endl;
     io_thread.join();
   }
-  //std::this_thread::sleep_for(std::chrono::seconds(2));
-  
-  
+
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImPlot::DestroyContext();
   ImGui::DestroyContext();
-  
+
   glfwDestroyWindow(window);
   glfwTerminate();
-  std::cout << "app ran" << std::endl;
 }
 
 void App::initWebSocket() {
   ctx.set_default_verify_paths();
-  
+
   if (ec) {
     std::cout << "Error " << ec << std::endl;
     return;
@@ -88,12 +81,12 @@ void App::initWebSocket() {
   });
 
   ws->connect();
-  std::cout << "connected" << std::endl;
+  //std::cout << "connected" << std::endl;
   return;
 }
 
 void App::update() {
-  
+
   drawMenuBar();
   ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
   for (auto it = widgets.begin(); it != widgets.end();) {
@@ -120,7 +113,7 @@ void App::run() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    
+
     eb.dispatchAll();
     update();
     render();
@@ -138,7 +131,7 @@ void App::render() {
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   glfwSwapBuffers(window);
-    
+
 }
 
 void App::styleApp() {
@@ -154,7 +147,7 @@ void App::styleApp() {
   style.Colors[ImGuiCol_FrameBg] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
   style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
   style.Colors[ImGuiCol_FrameBgActive] = ImVec4(40/255.f, 42/255.f, 54/255.f, 1.0f);
-  
+
   style.Colors[ImGuiCol_Button] = ImVec4(68/255.f, 71/255.f, 90/255.f, 1.0f);
   style.Colors[ImGuiCol_ButtonHovered] = ImVec4(98/255.f, 114/255.f, 164/255.f, 1.0f);
   style.Colors[ImGuiCol_ButtonActive]  = ImVec4(84/255.f, 94/255.f, 140/255.f, 1.0f);
@@ -165,7 +158,7 @@ void App::drawMenuBar() {
   State state = cs.getState();
 
   bool isDisabled = (state != State::CONNECTED) ? true : false;
-  
+
   ImGui::BeginDisabled(isDisabled);
 
   if (ImGui::BeginMainMenuBar()) {
@@ -206,7 +199,7 @@ void App::drawMenuBar() {
       if (ImGui::MenuItem("Alerts")) widgets.push_back(Utils::createWidget<Alerts>(sm));
       ImGui::EndMenu();
     }
-    
+
     std::string status = "";
     ImVec4 status_color;
 
@@ -226,7 +219,7 @@ void App::drawMenuBar() {
       default:
         break;
     }
-    
+
     ImVec2 pos = ImGui::GetCursorScreenPos();
     ImVec2 text_size = ImGui::CalcTextSize(status.c_str());
     ImVec2 screen_size = ImGui::GetContentRegionAvail();

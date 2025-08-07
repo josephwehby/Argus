@@ -3,7 +3,6 @@
 ConnectionState::ConnectionState(State initial_state) : state(initial_state) {}
 
 ConnectionState::~ConnectionState() {
-  std::cout << "cs ran" << std::endl;
 }
 
 State ConnectionState::getState() const {
