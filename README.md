@@ -6,7 +6,7 @@
 - Use Boost Beast websockets to connect to the Binance exchange
 - Argus is a dog in Greek Mythology with 100 eyes (cause you're watching all the crypto prices. very creative)
 
-![Main Screen](images/argus.png)
+![Demo](argus_demo.gif)
 
 # Compiling
 - This program is designed to run on windows
